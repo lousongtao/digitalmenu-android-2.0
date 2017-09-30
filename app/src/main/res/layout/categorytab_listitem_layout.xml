@@ -18,6 +18,7 @@
             android:background="@drawable/category1_bg"
             android:ellipsize="end"
             android:gravity="center_vertical|center_horizontal"
+            android:singleLine="true"
             android:textColor="@color/color_OrangeTheme_Category1Font"
             android:textSize="36sp" />
 

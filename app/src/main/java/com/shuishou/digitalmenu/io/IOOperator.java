@@ -96,8 +96,8 @@ public class IOOperator {
         if (dir.exists() && dir.isDirectory()){
             File[] files = dir.listFiles();
             if (files != null){
-                for (int i = 0; i < files.length; i++) {
-                    files[i].delete();
+                for (File file : files) {
+                    file.delete();
                 }
             }
         }

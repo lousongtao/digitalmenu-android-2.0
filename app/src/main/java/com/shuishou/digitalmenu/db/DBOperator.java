@@ -8,14 +8,14 @@ import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.ui.MainActivity;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2017/6/9.
  */
 
 public class DBOperator {
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
     private static LiteOrm liteOrm;
 
     public DBOperator(MainActivity mainActivity){
@@ -38,7 +38,7 @@ public class DBOperator {
         liteOrm.cascade().save(o);
     }
 
-    public void saveObjectsByCascade(List objects){
+    public void saveObjectsByCascade(ArrayList objects){
         liteOrm.cascade().save(objects);
     }
 
@@ -55,8 +55,8 @@ public class DBOperator {
     public void deleteObject(Object o){
         liteOrm.delete(o);
     }
-    public List<Category1> queryAllMenu(){
-        List<Category1> c1s = liteOrm.cascade().query(Category1.class);
+    public ArrayList<Category1> queryAllMenu(){
+        ArrayList<Category1> c1s = liteOrm.cascade().query(Category1.class);
         return c1s;
     }
 
@@ -65,11 +65,11 @@ public class DBOperator {
         return dish;
     }
 
-    public List<Dish> queryDishByParentId(int category2Id){
+    public ArrayList<Dish> queryDishByParentId(int category2Id){
         return liteOrm.query(new QueryBuilder<Dish>(Dish.class).where("category2Id = " + category2Id ));
     }
 
-    public List<Category2> queryCategory2ByParentId(int category1Id){
+    public ArrayList<Category2> queryCategory2ByParentId(int category1Id){
         return liteOrm.query(new QueryBuilder<Category2>(Category2.class).where("category1Id = " + category1Id ));
     }
 
@@ -83,7 +83,7 @@ public class DBOperator {
         liteOrm.deleteAll(Desk.class);
     }
 
-    public List<Desk> queryDesks(){
+    public ArrayList<Desk> queryDesks(){
         return liteOrm.query(Desk.class);
     }
 

@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.bean;
 
+import com.google.gson.annotations.SerializedName;
 import com.litesuits.orm.db.annotation.Column;
 import com.litesuits.orm.db.annotation.Mapping;
 import com.litesuits.orm.db.annotation.PrimaryKey;
@@ -9,13 +10,13 @@ import com.litesuits.orm.db.enums.Relation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Administrator on 2016/12/22.
  */
 @Table("category2")
 public class Category2 implements Serializable{
+    @SerializedName(value = "id", alternate={"objectid"})
     @PrimaryKey(value = AssignType.BY_MYSELF)
     private int id;
 
@@ -28,6 +29,7 @@ public class Category2 implements Serializable{
     @Column("sequence")
     private int sequence;
 
+    @SerializedName(value = "children", alternate = {"dishes"})
     @Mapping(Relation.OneToMany)
     private ArrayList<Dish> dishes;
 
@@ -92,7 +94,7 @@ public class Category2 implements Serializable{
         this.sequence = sequence;
     }
 
-    public List<Dish> getDishes() {
+    public ArrayList<Dish> getDishes() {
         return dishes;
     }
 

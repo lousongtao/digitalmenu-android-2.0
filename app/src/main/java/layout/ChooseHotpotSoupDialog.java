@@ -1,4 +1,4 @@
-package com.shuishou.digitalmenu.ui;
+package layout;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,9 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.Toast;
@@ -25,6 +23,7 @@ import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.http.HttpOperator;
+import com.shuishou.digitalmenu.ui.MainActivity;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
 import org.json.JSONArray;
@@ -33,13 +32,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.R.attr.theme;
-
 /**
  * Created by Administrator on 2017/7/21.
  */
 
-public class PostOrderDialog {
+public class ChooseHotpotSoupDialog {
     private EditText txtCode;
     private EditText txtCustomerAmount;
     private TableLayout deskAreaLayout;
@@ -69,7 +66,7 @@ public class PostOrderDialog {
         }
     };
 
-    public PostOrderDialog(@NonNull MainActivity mainActivity) {
+    public ChooseHotpotSoupDialog(@NonNull MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         initUI();
     }
@@ -86,7 +83,7 @@ public class PostOrderDialog {
 //        builder.setIcon(R.drawable.info);
         //here cannot use listener on the positive button because the dialog will dismiss no matter
         //the input value is valiable or not. I wish the dialog keep while input info is wrong.
-        builder.setPositiveButton("Confirm", null);
+        builder.setPositiveButton("Yes", null);
         builder.setNegativeButton("Cancel", null);
         builder.setView(view);
         dlg = builder.create();

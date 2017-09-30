@@ -8,17 +8,17 @@ import com.shuishou.digitalmenu.bean.Dish;
  * Created by Administrator on 2016/12/25.
  */
 
-public class ChoosedFood {
+public class ChoosedDish {
     private Dish dish;
     private int imageId;
     private Drawable image;
     private String additionalRequirements = "";
     private int amount = 1; //default value
 
-    public ChoosedFood() {
+    public ChoosedDish() {
     }
 
-    public ChoosedFood(Dish dish) {
+    public ChoosedDish(Dish dish) {
         this.dish = dish;
     }
 
@@ -59,7 +59,7 @@ public class ChoosedFood {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ChoosedFood that = (ChoosedFood) o;
+        ChoosedDish that = (ChoosedDish) o;
 
         return dish.getId() == that.getDish().getId();
     }

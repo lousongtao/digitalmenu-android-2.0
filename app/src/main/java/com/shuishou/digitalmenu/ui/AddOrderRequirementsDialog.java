@@ -1,36 +1,28 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.shuishou.digitalmenu.R;
-import com.shuishou.digitalmenu.bean.Desk;
-import com.shuishou.digitalmenu.http.HttpOperator;
-import com.shuishou.digitalmenu.uibean.ChoosedFood;
-
-import java.util.List;
+import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
 /**
  * Created by Administrator on 2017/7/21.
  */
 
-public class AddOrderRequirementsDialog {
+class AddOrderRequirementsDialog {
 
     private EditText txtCode;
 
-    private MainActivity mainActivity;
+    private final MainActivity mainActivity;
 
     private AlertDialog dlg;
 
-    private ChoosedFood choosedFood;
+    private ChoosedDish choosedFood;
 
     public AddOrderRequirementsDialog(@NonNull MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -64,13 +56,13 @@ public class AddOrderRequirementsDialog {
         });
     }
 
-    public void showDialog(ChoosedFood cf){
+    public void showDialog(ChoosedDish cf){
         choosedFood = cf;
         txtCode.setText(cf.getAdditionalRequirements());
         dlg.show();
     }
 
-    public void dismiss(){
+    private void dismiss(){
         dlg.dismiss();
     }
 }

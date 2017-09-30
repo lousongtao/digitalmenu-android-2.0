@@ -6,16 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import com.shuishou.digitalmenu.InstantValue;
-import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
-import com.shuishou.digitalmenu.io.IOOperator;
-import com.shuishou.digitalmenu.uibean.ChoosedFood;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2016/12/25.
@@ -23,23 +16,28 @@ import java.util.List;
 
 public class CategoryTabAdapter extends ArrayAdapter<Category1> {
     private int resourceId;
-    private List<Category1> category1List;
-    private ChangeLanguageTextView tvName;
+//    private ArrayList<Category1> category1List;
+//    private ChangeLanguageTextView tvName;
+    private MainActivity mainActivity;
 
-    public CategoryTabAdapter(Context context, int resource, List<Category1> objects){
-        super(context, resource, objects);
+    public CategoryTabAdapter(MainActivity mainActivity, int resource, ArrayList<Category1> objects){
+        super(mainActivity, resource, objects);
+        this.mainActivity = mainActivity;
         resourceId = resource;
-        category1List = objects;
+//        category1List = objects;
     }
 
     @NonNull
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Category1 c1 = getItem(position);
-        View view = LayoutInflater.from(getContext()).inflate(resourceId, null);
-        CategoryTabLayoutItem viewItem = (CategoryTabLayoutItem) view;
-        viewItem.init(getContext(), c1);
+        CategoryTabLayoutItem view;
+        if (convertView == null){
+            view = (CategoryTabLayoutItem)LayoutInflater.from(mainActivity).inflate(resourceId, null);
+            view.init(mainActivity, c1);
+        } else {
+            view = (CategoryTabLayoutItem)convertView;
+        }
         return view;
     }
-
 }

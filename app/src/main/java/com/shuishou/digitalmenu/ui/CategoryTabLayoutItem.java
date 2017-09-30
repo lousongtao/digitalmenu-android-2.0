@@ -1,46 +1,28 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.ActionBar;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
+import android.util.SparseArray;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-
-import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
-import com.shuishou.digitalmenu.bean.Dish;
-import com.shuishou.digitalmenu.io.IOOperator;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static android.content.ContentValues.TAG;
+import java.util.ArrayList;
 
 public class CategoryTabLayoutItem extends RelativeLayout {
-    private String logTag = "TestTime-TabLayoutItem";
+    private final String logTag = "TestTime-TabLayoutItem";
 
     private Boolean isAnimationRunning = false;
     private Boolean isOpened = false;
@@ -50,33 +32,32 @@ public class CategoryTabLayoutItem extends RelativeLayout {
     private Boolean closeByUser = true;
     private Category1 category1;
     private int lastChoosedCategory2Id;
-    private Map<Integer, View> mapCategory2Tabs = new HashMap<>();
+    private final SparseArray<View> mapCategory2Tabs = new SparseArray<>();
 
 
-    private OnClickListener category2ClickListener = new OnClickListener() {
+    private final OnClickListener category2ClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
             onClickCategory2Tab((ChangeLanguageTextView)v);
         }
     };
+    private MainActivity mainActivity;
     public CategoryTabLayoutItem(Context context) {
         super(context);
     }
 
     public CategoryTabLayoutItem(Context context, AttributeSet attrs) {
         super(context, attrs);
-//        init(context, attrs);
     }
 
     public CategoryTabLayoutItem(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-//        init(context, attrs);
     }
 
-    public void init(final Context context, Category1 c1) {
-        long time1 = System.currentTimeMillis();
+    public void init(final MainActivity mainActivity, Category1 c1) {
+        this.mainActivity = mainActivity;
         category1 = c1;
-        byte language = MainActivity.getInstance().getLanguage();
+        byte language = mainActivity.getLanguage();
         headerLayout = (FrameLayout) findViewById(R.id.view_header_category1);
         contentLayout = (LinearLayout) findViewById(R.id.view_content_category2);
         if (isInEditMode())
@@ -91,7 +72,7 @@ public class CategoryTabLayoutItem extends RelativeLayout {
         setTag(CategoryTabLayoutItem.class.getName());
         if (c1.getCategory2s() != null){
             for (int i = 0; i< c1.getCategory2s().size(); i++){
-                LinearLayout c2View = (LinearLayout) View.inflate(context, R.layout.category2tab_listitem_layout, null);
+                LinearLayout c2View = (LinearLayout) View.inflate(mainActivity, R.layout.category2tab_listitem_layout, null);
                 final ChangeLanguageTextView c2TextView = (ChangeLanguageTextView)c2View.findViewById(R.id.category2_textview);
                 final Category2 c2 = c1.getCategory2s().get(i);
                 c2TextView.setTxtChinese(c2.getChineseName());
@@ -101,23 +82,9 @@ public class CategoryTabLayoutItem extends RelativeLayout {
                 c2TextView.setTag(c2.getId());
                 contentLayout.addView(c2View);
                 mapCategory2Tabs.put(c2.getId(), c2View);
-//                DishDisplayFragment frag = buildDishDisplayFragment(context, c2);
-//                MainActivity.getInstance().getMapDishDisplayFragments().put(c2.getId(), frag);
             }
         }
         contentLayout.setVisibility(GONE);
-
-        long time2 = System.currentTimeMillis();
-        Log.d(logTag, "TabLayoutItem "+ c1.getChineseName()+" init time in milli seconds " + (time2 - time1));
-    }
-
-    private DishDisplayFragment buildDishDisplayFragment(Context context, Category2 c2){
-        DishDisplayFragment frag = new DishDisplayFragment();
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("category2", c2);
-        frag.setArguments(bundle);
-
-        return frag;
     }
 
     private void onClickCategory2Tab(ChangeLanguageTextView v){
@@ -127,7 +94,6 @@ public class CategoryTabLayoutItem extends RelativeLayout {
     }
 
     private void chooseCategory2TabByTag(int category2Id){
-        long time1 = System.currentTimeMillis();
         if (lastChoosedCategory2Id > 0){
             View oldTab = mapCategory2Tabs.get(lastChoosedCategory2Id);
             ImageView arrow = (ImageView)oldTab.findViewById(R.id.imgChoosedArrow);
@@ -138,18 +104,11 @@ public class CategoryTabLayoutItem extends RelativeLayout {
         arrow.setVisibility(View.VISIBLE);
         lastChoosedCategory2Id = category2Id;
 
-        DishDisplayFragment frag = MainActivity.getInstance().getMapDishDisplayFragments().get(category2Id);
-        FragmentManager fragMgr = MainActivity.getInstance().getSupportFragmentManager();
+        DishDisplayFragment frag = mainActivity.getMapDishDisplayFragments().get(category2Id);
+        FragmentManager fragMgr = mainActivity.getSupportFragmentManager();
         FragmentTransaction trans = fragMgr.beginTransaction();
         trans.replace(R.id.dishdisplayarea_layout, frag);
         trans.commit();
-
-        long time2 = System.currentTimeMillis();
-        Log.d(logTag, "TabLayoutItem chooseCategory2TabByTag " + category2Id + " time in milli seconds " + (time2 - time1));
-    }
-
-    public void clearLastChoosedCategory2Id(){
-        lastChoosedCategory2Id = 0;
     }
 
     private void expand(final View v) {
@@ -177,7 +136,7 @@ public class CategoryTabLayoutItem extends RelativeLayout {
         if (lastChoosedCategory2Id != 0){
             chooseCategory2TabByTag(lastChoosedCategory2Id);
         } else {
-            List<Category2> c2s = category1.getCategory2s();
+            ArrayList<Category2> c2s = category1.getCategory2s();
             if (c2s != null && !c2s.isEmpty()){
 
 
@@ -270,6 +229,7 @@ public class CategoryTabLayoutItem extends RelativeLayout {
                 }
             }, duration);
         }
+
         closeByUser = false;
     }
 

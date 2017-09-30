@@ -1,18 +1,24 @@
 package com.shuishou.digitalmenu.http;
 
 import android.app.ProgressDialog;
+import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.HttpResult;
+import com.shuishou.digitalmenu.bean.Indent;
 import com.shuishou.digitalmenu.bean.MenuVersion;
+import com.shuishou.digitalmenu.bean.MenuVersionInfo;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.ui.MainActivity;
 import com.yanzhenjie.nohttp.Headers;
@@ -21,6 +27,7 @@ import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.download.DownloadListener;
 import com.yanzhenjie.nohttp.download.DownloadQueue;
 import com.yanzhenjie.nohttp.download.DownloadRequest;
+import com.yanzhenjie.nohttp.error.TimeoutError;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
@@ -35,7 +42,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,18 +50,20 @@ import java.util.Set;
 
 public class HttpOperator {
 
-    private ProgressDialog pd;
+    private String logTag = "HttpOperation";
     //record the picture files need to be download, after all finish, then rebuild the UI
     private Hashtable<String, Boolean> flagFinishLoadDishPictures = new Hashtable<String, Boolean>();
 
     private MainActivity mainActivity;
-    private List<String> listDishPictures = new ArrayList<String>();
+    private ArrayList<String> listDishPictures = new ArrayList<>();
     private static final int WHAT_VALUE_QUERYMENU = 1;
     private static final int WHAT_VALUE_CONFIRMCODE = 2;
-    private static final int WHAT_VALUE_MAKEORDER = 3;
+//    private static final int WHAT_VALUE_MAKEORDER = 3;
     private static final int WHAT_VALUE_QUERYDESK = 4;
     private static final int WHAT_VALUE_QUERYMENUVERSION = 5;
     private static final int WHAT_VALUE_DOWNLOADIMAGE = 10;
+
+    private Gson gson = new Gson();
 //    private StoreOrderData storeOrderData;
 //    private class StoreOrderData{
 //        String orders;
@@ -82,9 +90,9 @@ public class HttpOperator {
 //                case WHAT_VALUE_CONFIRMCODE:
 //                    doResponseConfirmCode4RefreshData(response);
 //                    break;
-                case WHAT_VALUE_MAKEORDER :
-                    doResponseMakeOrder(response);
-                    break;
+//                case WHAT_VALUE_MAKEORDER :
+//                    doResponseMakeOrder(response);
+//                    break;
                 case WHAT_VALUE_QUERYDESK :
                     doResponseQueryDesk(response);
                     break;
@@ -106,9 +114,9 @@ public class HttpOperator {
 //                case WHAT_VALUE_CONFIRMCODE:
 //                    msg = "The input code is wrong.";
 //                    break;
-                case WHAT_VALUE_MAKEORDER :
-                    msg = "Failed to make order. Please try again!";
-                    break;
+//                case WHAT_VALUE_MAKEORDER :
+//                    msg = "Failed to make order. Please try again!";
+//                    break;
                 case WHAT_VALUE_QUERYDESK :
                     msg = "Failed to load Desk data. Please restart app!";
                     break;
@@ -167,65 +175,66 @@ public class HttpOperator {
     }
 
     private void doResponseQueryMenu(Response<JSONObject> response){
-        try {
-            List<Category1> c1s = analyseJsonForMenu(response.get());
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryMenu: " + response.getException().getMessage() );
+            sendErrorMessageToToast("Http:doResponseQueryMenu: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<ArrayList<Category1>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<Category1>>>(){}.getType());
+        if (result.success){
+            ArrayList<Category1> c1s = result.data;
+            sortAllMenu(c1s);
             mainActivity.setMenu(c1s);
             mainActivity.persistMenu();
             loadDishPictureFromServer();
-            //mainActivity.buildMenu();
-        } catch (JSONException e) {
-            onFailedLoadMenu();
-            e.printStackTrace();
+//            mainActivity.buildMenu();
         }
     }
 
     private void doResponseQueryDesk(Response<JSONObject> response){
-        JSONObject o = response.get();
-        try {
-            if (o.getBoolean("success")){
-                JSONArray jsonDesks = o.getJSONArray("desks");
-                if (jsonDesks != null && jsonDesks.length() > 0){
-                    List<Desk> desks = new ArrayList<Desk>(jsonDesks.length());
-                    for (int i = 0; i < jsonDesks.length(); i++) {
-                        JSONObject jsonDesk = jsonDesks.getJSONObject(i);
-                        Desk desk = new Desk(jsonDesk.getInt("id"), jsonDesk.getString("name"));
-                        desks.add(desk);
-                    }
-                    mainActivity.setDesk(desks);
-                    mainActivity.persistDesk();
-                    mainActivity.getPostOrderDialog().initDeskData(desks);
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryDesk: " + response.getException().getMessage() );
+            sendErrorMessageToToast("Http:doResponseQueryDesk: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<ArrayList<Desk>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<Desk>>>(){}.getType());
+        if (result.success){
+            ArrayList<Desk> desks = result.data;
+            Collections.sort(desks, new Comparator<Desk>() {
+                @Override
+                public int compare(Desk o1, Desk o2) {
+                    return o1.getId() - o2.getId();
                 }
-            } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setIcon(R.drawable.error)
-                        .setTitle("WRONG")
-                        .setMessage("Failed to load Desk data. Please restart app!")
-                        .setNegativeButton("OK", null)
-                        .create().show();
-            }
-        } catch (JSONException e) {
-            Log.e("doResponseQueryDesk","failed to parse json object for query desk");
-            e.printStackTrace();
+            });
+            mainActivity.setDesk(result.data);
+            mainActivity.persistDesk();
+            mainActivity.getPostOrderDialog().initDeskData(result.data);
+        } else {
+            new AlertDialog.Builder(mainActivity)
+                    .setIcon(R.drawable.error)
+                    .setTitle("WRONG")
+                    .setMessage("Failed to load Desk data. Please restart app!")
+                    .setNegativeButton("OK", null)
+                    .create().show();
         }
     }
 
     private void doResponseQueryMenuVersion(Response<JSONObject> response){
-        JSONObject o = response.get();
-        try {
-            if (o.getBoolean("success")){
-                int version = o.getInt("value");
-                mainActivity.getDbOperator().saveObjectByCascade(new MenuVersion(1, version));
-            } else {
-                new AlertDialog.Builder(mainActivity)
-                        .setIcon(R.drawable.error)
-                        .setTitle("WRONG")
-                        .setMessage("Failed to load Menu version data. Please redo synchronization action!")
-                        .setNegativeButton("OK", null)
-                        .create().show();
-            }
-        } catch (JSONException e) {
-            Log.e("QueryMenuVersion","failed to parse json object for query MenuVersion");
-            e.printStackTrace();
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryMenuVersion: " + response.getException().getMessage() );
+            sendErrorMessageToToast("Http:doResponseQueryMenuVersion: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<Integer> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
+        if (result.success){
+            mainActivity.getDbOperator().saveObjectByCascade(new MenuVersion(1, result.data));
+        } else {
+            new AlertDialog.Builder(mainActivity)
+                    .setIcon(R.drawable.error)
+                    .setTitle("WRONG")
+                    .setMessage("Failed to load Menu version data. Please redo synchronization action!")
+                    .setNegativeButton("OK", null)
+                    .create().show();
         }
     }
 
@@ -247,88 +256,50 @@ public class HttpOperator {
         requestQueue.add(WHAT_VALUE_QUERYMENUVERSION, mvRequest, responseListener);
     }
 
-    public boolean checkConfirmCodeSync(String code){
+    public String checkConfirmCodeSync(String code){
         Request<JSONObject> codeRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/checkconfirmcode", RequestMethod.POST);
         codeRequest.add("code", code);
         Response<JSONObject> response = NoHttp.startRequestSync(codeRequest);
-        try{
-            if (response.get() == null) {
-                Log.e("HttpError", "Error occur while synchronize check confirm code. response.get() is null.");
-                return false;
-            }
-            boolean success = response.get().getBoolean("success");
-            return success;
-        } catch (JSONException e) {
-            Log.e("JSONException", e.getMessage(), e);
+        if (response.getException() != null){
+            return response.getException().getMessage();
         }
-        return false;
+        if (response.get() == null) {
+            Log.e(logTag, "Error occur while synchronize check confirm code. response.get() is null.");
+            return "Error occur while synchronize check confirm code. response.get() is null";
+        }
+        HttpResult<Boolean> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Boolean>>(){}.getType());
+        if (result.data)
+            return InstantValue.RESULT_SUCCESS;
+        else
+            return "Confirm code is wrong!";
     }
 
-    @Nullable
-    private List<Category1> analyseJsonForMenu(JSONObject o) throws JSONException {
-        if (o.getBoolean("success")){
-            listDishPictures.clear();
-            JSONArray jsonCategory1s = o.getJSONArray("children");
-            if (jsonCategory1s != null && jsonCategory1s.length() > 0){
-                List<Category1> listC1 = new ArrayList<Category1>(jsonCategory1s.length());
-                for (int i = 0; i < jsonCategory1s.length(); i++) {
-                    JSONObject oC1 = jsonCategory1s.getJSONObject(i);
-                    Category1 c1 = new Category1(oC1.getInt("objectid"),
-                            oC1.getString("chineseName"),
-                            oC1.getString("englishName"),
-                            oC1.getInt("sequence"));
-                    listC1.add(c1);
-                    if (oC1.getJSONArray("children") != null){
-                        JSONArray jsonCategory2s = oC1.getJSONArray("children");
-                        for (int j = 0; j < jsonCategory2s.length(); j++) {
-                            JSONObject oC2 = (JSONObject) jsonCategory2s.get(j);
-                            Category2 c2 = new Category2(oC2.getInt("objectid"),
-                                    oC2.getString("chineseName"),
-                                    oC2.getString("englishName"),
-                                    oC2.getInt("sequence"),
-                                    c1);
-                            c1.addCategory2(c2);
-                            if (oC2.getJSONArray("children") != null){
-                                JSONArray jsonDishes = oC2.getJSONArray("children");
-                                for (int k = 0; k < jsonDishes.length(); k++) {
-                                    JSONObject oDish = (JSONObject) jsonDishes.get(k);
-                                    Dish dish = new Dish();
-
-                                    String pictureName = oDish.getString("pictureName");
-                                    if (pictureName != null && !pictureName.equals("null")){
-                                        listDishPictures.add(pictureName);
-                                        dish.setPictureName(pictureName);
-                                    }
-
-                                    dish.setId(oDish.getInt("objectid"));
-                                    dish.setChineseName(oDish.getString("chineseName"));
-                                    dish.setEnglishName(oDish.getString("englishName"));
-                                    dish.setSequence(oDish.getInt("sequence"));
-                                    dish.setPrice(oDish.getDouble("price"));
-                                    dish.setSoldOut(oDish.getBoolean("isSoldOut"));
-                                    dish.setNew(oDish.getBoolean("isNew"));
-                                    dish.setSpecial(oDish.getBoolean("isSpecial"));
-                                    dish.setSoldOut(oDish.getBoolean("isSoldOut"));
-                                    dish.setHotLevel(oDish.getInt("hotLevel"));
-                                    dish.setCategory2(c2);
-                                    c2.addDish(dish);
-                                }
-                            }
-                        }
-                    }
-                }
-                sortAllMenu(listC1);
-                return listC1;
-            }
-            return null;
+    /**
+     * check the desk if available for making order.
+     * @param deskName
+     * @return "AVAILABLE": order is available; "OCCUPIED": there is an order already on this desk; other result for exception;
+     */
+    public String checkDeskStatus(String deskName){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/queryindent", RequestMethod.GET);
+        request.add("deskname", deskName);
+        request.add("status", "Unpaid");
+        Response<JSONObject> response = NoHttp.startRequestSync(request);
+        if (response.getException() != null){
+            return response.getException().getMessage();
+        }
+        if (response.get() == null) {
+            Log.e(logTag, "Error occur while check desk available for making order. response.get() is null.");
+            return "Error occur while check desk available for making order. response.get() is null";
+        }
+        HttpResult<ArrayList<Indent>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<Indent>>>(){}.getType());
+        if (result.data == null || result.data.isEmpty()){
+            return InstantValue.CHECKDESK4MAKEORDER_AVAILABLE;
         } else {
-            //TODO: do what if return false from server
-            return null;
+            return InstantValue.CHECKDESK4MAKEORDER_OCCUPIED;
         }
     }
-
     //sort by sequence
-    private void sortAllMenu(List<Category1> c1s){
+    private void sortAllMenu(ArrayList<Category1> c1s){
         if (c1s != null){
             Collections.sort(c1s, new Comparator<Category1>() {
                 @Override
@@ -365,6 +336,15 @@ public class HttpOperator {
 
     private void loadDishPictureFromServer(){
         flagFinishLoadDishPictures.clear();
+        listDishPictures.clear();
+        for (Category1 c1: mainActivity.getMenu()) {
+            for(Category2 c2 : c1.getCategory2s()){
+                for(Dish dish : c2.getDishes()){
+                    listDishPictures.add(dish.getPictureName());
+
+                }
+            }
+        }
         DownloadQueue queue = NoHttp.newDownloadQueue();
         for (String filename : listDishPictures) {
             flagFinishLoadDishPictures.put(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + filename, false);
@@ -375,24 +355,22 @@ public class HttpOperator {
             DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
             queue.add(WHAT_VALUE_DOWNLOADIMAGE, requestbig, downloadDishListener);
             queue.add(WHAT_VALUE_DOWNLOADIMAGE, requestsmall, downloadDishListener);
+
         }
     }
 
-    private void doResponseMakeOrder(Response<JSONObject> response){
-        JSONObject result = response.get();
-        try {
-            boolean b = Boolean.valueOf(result.get("success").toString());
-            if (b){
-                int orderSequence = Integer.parseInt(result.get("sequence").toString());
-                mainActivity.onFinishMakeOrder(orderSequence);
-            } else {
-                mainActivity.popupWarnDialog(R.drawable.error, "WRONG", "Something wrong happened while making order! \n\nError message : " + result.get("result"));
-            }
-        } catch (JSONException e) {
-            Log.e("HttpOperator", "JSON exception in doResponseMakeOrder.");
-            e.printStackTrace();
-        }
-    }
+//    private void doResponseMakeOrder(Response<JSONObject> response){
+//        if (response.getException() != null){
+//            Log.e(logTag, "doResponseQueryMakeOrder: " + response.getException().getMessage() );
+//            return;
+//        }
+//        HttpResult<Integer> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
+//        if (result.success){
+//            mainActivity.onFinishMakeOrder(result.data);
+//        } else {
+//            mainActivity.popupWarnDialog(R.drawable.error, "WRONG", "Something wrong happened while making order! \n\nError message : " + result.result);
+//        }
+//    }
 
 
 //    private void doResponseConfirmCode4RefreshData(Response<JSONObject> response){
@@ -415,13 +393,49 @@ public class HttpOperator {
      * @param orders
      * @param deskid
      */
-    public void makeOrder(String code, String orders, int deskid, int customerAmount){
-        Request<JSONObject> makeOrderRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/makeindent", RequestMethod.POST);
-        makeOrderRequest.add("confirmCode", code);
-        makeOrderRequest.add("indents", orders);
-        makeOrderRequest.add("deskid", deskid);
-        makeOrderRequest.add("customerAmount", customerAmount);
-        requestQueue.add(WHAT_VALUE_MAKEORDER, makeOrderRequest, responseListener);
+    public HttpResult<Integer> makeOrder(String code, String orders, int deskid, int customerAmount){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/makeindent", RequestMethod.POST);
+        request.add("confirmCode", code);
+        request.add("indents", orders);
+        request.add("deskid", deskid);
+        request.add("customerAmount", customerAmount);
+        Response<JSONObject> response = NoHttp.startRequestSync(request);
+
+        if (response.getException() != null){
+            HttpResult<Integer> result = new HttpResult<>();
+            result.result = response.getException().getMessage();
+            return result;
+        }
+        if (response.get() == null) {
+            Log.e(logTag, "Error occur while make order. response.get() is null.");
+            HttpResult<Integer> result = new HttpResult<>();
+            result.result = "Error occur while make order. response.get() is null";
+            return result;
+        }
+        HttpResult<Integer> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
+        return result;
+    }
+
+    public HttpResult<Integer> addDishToOrder(int deskid, String orders){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/adddishtoindent", RequestMethod.POST);
+        request.add("indents", orders);
+        request.add("deskid", deskid);
+
+        Response<JSONObject> response = NoHttp.startRequestSync(request);
+        if (response.getException() != null){
+            HttpResult<Integer> result = new HttpResult<>();
+            result.result = response.getException().getMessage();
+            return result;
+        }
+        if (response.get() == null) {
+            Log.e(logTag, "Error occur while add dish to order. response.get() is null.");
+            HttpResult<Integer> result = new HttpResult<>();
+            result.result = "Error occur while add dish to order. response.get() is null";
+            return result;
+
+        }
+        HttpResult<Integer> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
+        return result;
     }
 
     /**
@@ -429,69 +443,66 @@ public class HttpOperator {
      * @param localVersion
      * @return if same return null, otherwise return the List of Changed DishId
      */
-    public List<Integer> chechMenuVersion(int localVersion){
+    public ArrayList<Integer> chechMenuVersion(int localVersion){
         Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/checkmenuversion", RequestMethod.POST);
         request.add("versionId", localVersion);
         Response<JSONObject> response = NoHttp.startRequestSync(request);
-        try{
-            if (response.get() == null) {
-                Log.e("HttpError", "Error occur while synchronize menu. response.get() is null.");
+        if (response.getException() != null){
+            Log.e(logTag, "chechMenuVersion: There are Exception to checkmenuversion" );//TODO:
+            sendErrorMessageToToast("Http:chechMenuVersion: " + response.getException().getMessage());
+            return null;
+        }
+        HttpResult<ArrayList<MenuVersionInfo>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<MenuVersionInfo>>>(){}.getType());
+        if (result.success){
+            if (result.data == null)
                 return null;
+            DBOperator dbOpr = mainActivity.getDbOperator();
+            //collect all change into a set to remove the duplicate dishid
+            Set<Integer> dishIdSet = new HashSet<>();
+            int newVersion = 0;
+            for (int i = 0; i < result.data.size(); i++) {
+                dishIdSet.add(result.data.get(i).dishId);
+                if (result.data.get(i).id > newVersion)
+                    newVersion = result.data.get(i).id;
             }
-            boolean success = response.get().getBoolean("success");
-            if (success){
-                if ("null".equals(response.get().getString("infos")))
-                    return null;
-                JSONArray infos = response.get().getJSONArray("infos");
-                if (infos == null || infos.length() == 0) {
-                    return null; // if no change, return null
-                } else {
-                    DBOperator dbOpr = mainActivity.getDbOperator();
-                    //collect all change into a set to remove the duplicate dishid
-                    Set<Integer> dishIdSet = new HashSet<Integer>();
-                    int newVersion = 0;
-                    for (int i = 0; i < infos.length(); i++) {
-                        JSONObject info = (JSONObject) infos.get(i);
-                        dishIdSet.add(info.getInt("dishId"));
-                        if (info.getInt("id") > newVersion)
-                            newVersion = info.getInt("id");
-                    }
-                    //reload info about dishes in dishIdSet
-                    List<Integer> dishIdList = new ArrayList<Integer>();
-                    dishIdList.addAll(dishIdSet);
-                    for (int i = 0; i < dishIdList.size(); i++) {
-                        Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyid", RequestMethod.POST);
-                        reqDish.add("dishId", dishIdList.get(i));
-                        Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
-                        if (respDish.get().getBoolean("success")){
-                            //only do SOLDOUT property here
-                            if (respDish.get().getBoolean("success")){
-                                JSONObject joDishInfo = respDish.get().getJSONArray("dishes").getJSONObject(0);
-                                Dish dish = dbOpr.queryDishById(dishIdList.get(i));
-                                if (dish != null){
-                                    dish.setSoldOut(joDishInfo.getBoolean("isSoldOut"));
-                                    dbOpr.updateObject(dish);
-                                }
-                            }
-                        } else {
-                            Log.e("HttpError", "get a fail response while call menu/querydishbyid for dishid = "+ dishIdList.get(i));
-                        }
-                    }
-                    //update menu version.
-                    dbOpr.deleteAllData(MenuVersion.class);
-                    MenuVersion mv = new MenuVersion(1, newVersion);
-                    dbOpr.saveObjectByCascade(mv);
-
-                    return dishIdList;
+            //reload info about dishes in dishIdSet
+            ArrayList<Integer> dishIdList = new ArrayList<Integer>();
+            dishIdList.addAll(dishIdSet);
+            for (int i = 0; i < dishIdList.size(); i++) {
+                Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyid", RequestMethod.POST);
+                reqDish.add("dishId", dishIdList.get(i));
+                Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
+                if (respDish.getException() != null){
+                    Log.e(logTag, "get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
+                    sendErrorMessageToToast("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
                 }
-            } else {
-                Log.e("HttpError", "Check Menu Version Error");
+                HttpResult<ArrayList<Dish>> resultDish = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Dish>>>(){}.getType());
+                if (resultDish.success){
+                    //TODO: only do SOLDOUT property at first stage
+                    Dish dish = resultDish.data.get(0);
+                    Dish dbDish = dbOpr.queryDishById(dish.getId());
+                    dbDish.setSoldOut(dish.isSoldOut());
+                    dbOpr.updateObject(dbDish);
+                }
             }
-        } catch (JSONException e) {
-            Log.e("JSONException", e.getMessage(), e);
+            //update menu version.
+            dbOpr.deleteAllData(MenuVersion.class);
+            MenuVersion mv = new MenuVersion(1, newVersion);
+            dbOpr.saveObjectByCascade(mv);
+
+            return dishIdList;
+        } else {
+            Log.e(logTag, "get false from server while Check Menu Version");
+            sendErrorMessageToToast("get false from server while Check Menu Version");
         }
         return null;
     }
 
+    private void sendErrorMessageToToast(String sMsg){
+        Message message = new Message();
+        message.what = MainActivity.TOASTHANDLERWHAT_ERRORMESSAGE;
+        message.obj = sMsg;
+        mainActivity.getToastHandler().sendMessage(message);
+    }
 
 }

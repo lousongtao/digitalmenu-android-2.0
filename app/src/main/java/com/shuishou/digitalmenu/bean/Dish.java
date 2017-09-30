@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.bean;
 
+import com.google.gson.annotations.SerializedName;
 import com.litesuits.orm.db.annotation.Column;
 import com.litesuits.orm.db.annotation.Mapping;
 import com.litesuits.orm.db.annotation.PrimaryKey;
@@ -15,6 +16,7 @@ import java.io.Serializable;
 
 @Table("dish")
 public class Dish implements Serializable{
+    @SerializedName(value = "id", alternate={"objectid"})
     @PrimaryKey(value = AssignType.BY_MYSELF)
     private int id;
 
@@ -49,6 +51,9 @@ public class Dish implements Serializable{
     @Column("hotLevel")
     private int hotLevel;
 
+    @Column("abbreviation")
+    private String abbreviation;
+
     public Dish(){
 
     }
@@ -62,6 +67,14 @@ public class Dish implements Serializable{
 //        this.pictureName = pictureName;
 //        this.category2 = category2;
 //    }
+
+    public String getAbbreviation() {
+        return abbreviation;
+    }
+
+    public void setAbbreviation(String abbreviation) {
+        this.abbreviation = abbreviation;
+    }
 
     public int getHotLevel() {
         return hotLevel;

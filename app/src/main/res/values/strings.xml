@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DigitalMenu</string>
+    <string name="app_name">Hao Szechuan</string>
     <string name="title_activity_test_tab">TestTabActivity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
@@ -13,4 +13,8 @@
     <string name="choosed_food_item_cn">已选 : </string>
     <string name="choosed_food_price_cn">价格 : </string>
     <string name="choosed_food_label_cn">订单</string>
+    <string name="drawmenu_serverurl">SET SERVER URL</string>
+    <string name="drawmenu_refreshdata">REFRESH DATA</string>
+    <string name="choosehotpotsoup_dialogtitle">Choose Soup</string>
+    <string name="choosehotpotsoup_dialogmessage"></string>
 </resources>

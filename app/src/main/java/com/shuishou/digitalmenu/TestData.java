@@ -11,9 +11,9 @@ import java.util.List;
  * Created by Administrator on 2016/12/22.
  */
 
-public class TestData {
+class TestData {
 
-    public static List<Category1> makeCategory1() {
+    private static List<Category1> makeCategory1() {
         int c1id = 0;
         int c2id = 0;
         int dishid = 0;
