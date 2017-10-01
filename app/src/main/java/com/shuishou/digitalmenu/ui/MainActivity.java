@@ -332,6 +332,7 @@ public class MainActivity extends AppCompatActivity{
     public void onFinishMakeOrder(String title, String message){
         //clear data
         choosedFoodList.clear();
+        choosedFoodAdapter.notifyDataSetChanged();
 //        adapter.clear();
         tvChoosedItems.setText("0");
         tvChoosedPrice.setText("$0");
