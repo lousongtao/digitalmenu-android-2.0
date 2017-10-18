@@ -24,6 +24,11 @@ public final class InstantValue {
     public static final int DESKWIDTH_IN_POSTORDERDIALOG = 70;
     public static final int DESKHEIGHT_IN_POSTORDERDIALOG = 70;
 
+    public static final byte DISH_CHOOSEMODE_DEFAULT = 1;
+    public static final byte DISH_CHOOSEMODE_SUBITEM = 2;
+    public static final byte DISH_CHOOSEMODE_POPINFOCHOOSE = 3;
+    public static final byte DISH_CHOOSEMODE_POPINFOQUIT = 4;
+
     public static final String FORMAT_DOUBLE_2DECIMAL = "%.2f";
 
     public static String URL_TOMCAT = null;
@@ -33,5 +38,5 @@ public final class InstantValue {
     public static final String LOCAL_CATALOG_DISH_PICTURE_SMALL = "/data/data/com.shuishou.digitalmenu/dishimage_small/";
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
-
+    public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
 }

@@ -1,15 +1,11 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.content.DialogInterface;
-import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TabHost;
 import android.widget.Toast;
 
 import com.shuishou.digitalmenu.InstantValue;
@@ -42,7 +38,7 @@ class SaveServerURLDialog {
         loadServerURL();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-        builder.setTitle("Confier Server URL")
+        builder.setTitle("Configure Server URL")
                 .setIcon(R.drawable.info)
                 .setPositiveButton("Save", null)
                 .setNegativeButton("Cancel", null)

@@ -6,6 +6,8 @@ import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.DishChoosePopinfo;
+import com.shuishou.digitalmenu.bean.DishChooseSubitem;
 import com.shuishou.digitalmenu.ui.MainActivity;
 
 import java.util.ArrayList;
@@ -15,11 +17,11 @@ import java.util.ArrayList;
  */
 
 public class DBOperator {
-    private final MainActivity mainActivity;
+//    private final MainActivity mainActivity;
     private static LiteOrm liteOrm;
 
     public DBOperator(MainActivity mainActivity){
-        this.mainActivity = mainActivity;
+//        this.mainActivity = mainActivity;
         if (liteOrm == null){
             liteOrm = LiteOrm.newCascadeInstance(mainActivity, "digitalmenu.db");
         }
@@ -74,6 +76,8 @@ public class DBOperator {
     }
 
     public void clearMenu(){
+        liteOrm.deleteAll(DishChoosePopinfo.class);
+        liteOrm.deleteAll(DishChooseSubitem.class);
         liteOrm.deleteAll(Dish.class);
         liteOrm.deleteAll(Category2.class);
         liteOrm.deleteAll(Category1.class);

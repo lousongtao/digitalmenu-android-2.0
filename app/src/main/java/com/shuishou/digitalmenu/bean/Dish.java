@@ -7,8 +7,10 @@ import com.litesuits.orm.db.annotation.PrimaryKey;
 import com.litesuits.orm.db.annotation.Table;
 import com.litesuits.orm.db.enums.AssignType;
 import com.litesuits.orm.db.enums.Relation;
+import com.shuishou.digitalmenu.InstantValue;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2016/12/22.
@@ -53,6 +55,22 @@ public class Dish implements Serializable{
 
     @Column("abbreviation")
     private String abbreviation;
+
+    @Column("choose_mode")
+    private int chooseMode = InstantValue.DISH_CHOOSEMODE_DEFAULT;
+
+    @Mapping(Relation.OneToOne)
+    private DishChoosePopinfo choosePopInfo;
+
+    @Mapping(Relation.OneToMany)
+    private ArrayList<DishChooseSubitem> chooseSubItems = new ArrayList<>();
+
+    @Column("subitem_amount")
+    private int subitemAmount = 0;
+
+    @Column("automerge_whilechoose")
+    private boolean autoMergeWhileChoose = true;
+
 
     public Dish(){
 
@@ -164,10 +182,51 @@ public class Dish implements Serializable{
         this.category2 = category2;
     }
 
+    public int getChooseMode() {
+        return chooseMode;
+    }
+
+    public void setChooseMode(int chooseMode) {
+        this.chooseMode = chooseMode;
+    }
+
+    public DishChoosePopinfo getChoosePopInfo() {
+        return choosePopInfo;
+    }
+
+    public void setChoosePopInfo(DishChoosePopinfo choosePopInfo) {
+        this.choosePopInfo = choosePopInfo;
+    }
+
+    public ArrayList<DishChooseSubitem> getChooseSubItems() {
+        return chooseSubItems;
+    }
+
+    public void setChooseSubItems(ArrayList<DishChooseSubitem> chooseSubItems) {
+        this.chooseSubItems = chooseSubItems;
+    }
+
+    public int getSubitemAmount() {
+        return subitemAmount;
+    }
+
+    public void setSubitemAmount(int subitemAmount) {
+        this.subitemAmount = subitemAmount;
+    }
+
+    public boolean isAutoMergeWhileChoose() {
+        return autoMergeWhileChoose;
+    }
+
+    public void setAutoMergeWhileChoose(boolean autoMergeWhileChoose) {
+        this.autoMergeWhileChoose = autoMergeWhileChoose;
+    }
+
     @Override
     public String toString() {
         return "Dish [chineseName=" + chineseName + ", englishName=" + englishName + "]";
     }
+
 
     @Override
     public int hashCode() {

@@ -2,6 +2,7 @@ package com.shuishou.digitalmenu.uibean;
 
 import android.graphics.drawable.Drawable;
 
+import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.bean.Dish;
 
 /**
@@ -12,7 +13,7 @@ public class ChoosedDish {
     private Dish dish;
     private int imageId;
     private Drawable image;
-    private String additionalRequirements = "";
+    private String additionalRequirements = InstantValue.NULLSTRING;
     private int amount = 1; //default value
 
     public ChoosedDish() {

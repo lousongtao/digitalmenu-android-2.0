@@ -114,8 +114,8 @@ public class QuickSearchDialog {
         String code = txtSearchCode.getText().toString();
         ArrayList<Dish> results = new ArrayList<>();
         for(Dish d : allDishes){
-            if (d.getEnglishName().toLowerCase().indexOf(code.toLowerCase()) >= 0
-                    || (d.getAbbreviation() != null && d.getAbbreviation().toLowerCase().indexOf(code.toLowerCase()) >= 0)){
+            if (d.getEnglishName().toLowerCase().contains(code.toLowerCase())
+                    || (d.getAbbreviation() != null && d.getAbbreviation().toLowerCase().contains(code.toLowerCase()))){
                 results.add(d);
             }
         }

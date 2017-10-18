@@ -1,22 +1,17 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TabHost;
 import android.widget.Toast;
 
-import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
-import com.shuishou.digitalmenu.io.IOOperator;
+import com.shuishou.digitalmenu.utils.CommonTool;
 
 /**
  * Created by Administrator on 2017/7/21.
@@ -42,7 +37,7 @@ class RefreshDataDialog {
         txtConfirmCode = (EditText) view.findViewById(R.id.txtConfirmCode);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-        builder.setTitle("Maintain")
+        builder.setTitle("Refresh Data")
                 .setIcon(R.drawable.info)
                 .setPositiveButton("Refresh", null)
                 .setNegativeButton("Cancel", null)
@@ -90,16 +85,11 @@ class RefreshDataDialog {
         new Thread(){
             @Override
             public void run() {
-
-                String result = mainActivity.getHttpOperator().checkConfirmCodeSync(code);
-                if (InstantValue.RESULT_SUCCESS.equals(result)){
+                if (mainActivity.getConfirmCode().equals(code)){
                     mainActivity.onRefreshData();
                     dlg.dismiss();
                 } else {
-                    Message msg = new Message();
-                    msg.what = MESSAGEWHAT_HTTPERROR;
-                    msg.obj = result;
-                    msgHandler.sendMessage(msg);
+                    msgHandler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_HTTPERROR, "confirm code is wrong"));
                 }
             }
         }.start();

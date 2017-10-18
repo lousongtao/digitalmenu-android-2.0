@@ -14,7 +14,7 @@ import com.shuishou.digitalmenu.bean.Category2;
  */
 
 public class DishDisplayFragment extends Fragment {
-    private Category2 category2;
+//    private Category2 category2;
     private TableLayout contentLayout;
     private View view;
     private String logTag = "TestTime-DishFragment";
@@ -28,7 +28,7 @@ public class DishDisplayFragment extends Fragment {
     @Override
     public void setArguments(Bundle args) {
         super.setArguments(args);
-        category2 = (Category2) args.get("category2");
+//        category2 = (Category2) args.get("category2");
     }
 
     public TableLayout getContentLayout() {

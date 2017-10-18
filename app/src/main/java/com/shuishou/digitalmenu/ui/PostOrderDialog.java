@@ -13,9 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.Toast;
@@ -26,6 +24,7 @@ import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
+import com.shuishou.digitalmenu.utils.CommonTool;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +32,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.R.attr.theme;
 
 /**
  * Created by Administrator on 2017/7/21.
@@ -124,13 +122,13 @@ public class PostOrderDialog {
                 Toast.makeText(mainActivity, msg.obj.toString(), Toast.LENGTH_SHORT).show();
                 break;
             case MESSAGEWHAT_ERRORDIALOG:
-                mainActivity.popupWarnDialog(R.drawable.error, "WRONG", msg.obj.toString());
+                CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", msg.obj.toString());
                 break;
             case MESSAGEWHAT_MAKEORDERSUCCESS:
-                mainActivity.onFinishMakeOrder("SUCCESS", "Finish make order! Order Sequence : " + msg.arg1);
+                mainActivity.onFinishMakeOrder("SUCCESS", "Finish make order! Order Sequence : " + msg.obj);
                 break;
             case MESSAGEWHAT_ASKTOADDDISHINORDER:
-                addDishToOrderWithAsk(msg.arg1);
+                addDishToOrderWithAsk(Integer.parseInt(msg.obj.toString()));
                 break;
             case MESSAGEWHAT_ADDDISHSUCCESS:
                 mainActivity.onFinishMakeOrder("SUCCESS", "Add dish successfully");
@@ -163,27 +161,17 @@ public class PostOrderDialog {
         new Thread(){
             @Override
             public void run() {
-                String result = httpOperator.checkConfirmCodeSync(txtCode.getText().toString());
-                if (InstantValue.RESULT_SUCCESS.equals(result)){
+                if (mainActivity.getConfirmCode().equals(txtCode.getText().toString())){
                     String deskstatus = httpOperator.checkDeskStatus(choosedDesk.getName());
                     if (InstantValue.CHECKDESK4MAKEORDER_OCCUPIED.equals(deskstatus)){
-                        Message msg = new Message();
-                        msg.what = MESSAGEWHAT_ASKTOADDDISHINORDER;
-                        msg.arg1 = choosedDesk.getId();
-                        handler.sendMessage(msg);
+                        handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ASKTOADDDISHINORDER, choosedDesk.getId()));
                     } else if (InstantValue.CHECKDESK4MAKEORDER_AVAILABLE.equals(deskstatus)){
                         makeNewOrder(choosedDesk.getId());
                     } else {
-                        Message msg = new Message();
-                        msg.what = MESSAGEWHAT_ERRORDIALOG;
-                        msg.obj = deskstatus;
-                        handler.sendMessage(msg);
+                        handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG, deskstatus));
                     }
                 } else {
-                    Message msg = new Message();
-                    msg.what = MESSAGEWHAT_ERRORDIALOG;
-                    msg.obj = result;
-                    handler.sendMessage(msg);
+                    handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG, "confirm code is wrong"));
                 }
             }
         }.start();
@@ -195,10 +183,8 @@ public class PostOrderDialog {
         try {
             os = generateOrderJson();
         } catch (JSONException e) {
-            Message msg = new Message();
-            msg.what = MESSAGEWHAT_ERRORDIALOG;
-            msg.obj = "There are error to build JSON Object, please restart APP!";
-            handler.sendMessage(msg);
+            handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
+                    "There are error to build JSON Object, please restart APP!"));
             return;
         }
 
@@ -206,15 +192,10 @@ public class PostOrderDialog {
             HttpResult<Integer> result = httpOperator.makeOrder(txtCode.getText().toString(), os.toString(), deskid,
                     Integer.parseInt(txtCustomerAmount.getText().toString()));
             if (result.success){
-                Message msg = new Message();
-                msg.what = MESSAGEWHAT_MAKEORDERSUCCESS;
-                msg.arg1 = result.data;
-                handler.sendMessage(msg);
+                handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_MAKEORDERSUCCESS, result.data));
             } else {
-                Message msg = new Message();
-                msg.what = MESSAGEWHAT_ERRORDIALOG;
-                msg.obj = "Something wrong happened while making order! \n\nError message : " + result.result;
-                handler.sendMessage(msg);
+                handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
+                        "Something wrong happened while making order! \n\nError message : " + result.result));
             }
         }
     }
@@ -242,14 +223,10 @@ public class PostOrderDialog {
                                 public void run() {
                                     HttpResult<Integer> result = httpOperator.addDishToOrder(deskid,oss);
                                     if (result.success){
-                                        Message msg = new Message();
-                                        msg.what = MESSAGEWHAT_ADDDISHSUCCESS;
-                                        handler.sendMessage(msg);
+                                        handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ADDDISHSUCCESS));
                                     } else {
-                                        Message msg = new Message();
-                                        msg.what = MESSAGEWHAT_ERRORDIALOG;
-                                        msg.obj = "Something wrong happened while add dishes! \n\nError message : " + result.result;
-                                        handler.sendMessage(msg);
+                                        handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
+                                                "Something wrong happened while add dishes! \n\nError message : " + result.result));
                                     }
                                 }
                             }.start();

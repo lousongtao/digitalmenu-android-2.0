@@ -1,9 +1,5 @@
 package com.shuishou.digitalmenu.http;
 
-import android.app.ProgressDialog;
-import android.os.Message;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
@@ -21,27 +17,24 @@ import com.shuishou.digitalmenu.bean.MenuVersion;
 import com.shuishou.digitalmenu.bean.MenuVersionInfo;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.ui.MainActivity;
-import com.yanzhenjie.nohttp.Headers;
+import com.shuishou.digitalmenu.utils.CommonTool;
+import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
-import com.yanzhenjie.nohttp.download.DownloadListener;
 import com.yanzhenjie.nohttp.download.DownloadQueue;
 import com.yanzhenjie.nohttp.download.DownloadRequest;
-import com.yanzhenjie.nohttp.error.TimeoutError;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
 import com.yanzhenjie.nohttp.rest.Request;
 import com.yanzhenjie.nohttp.rest.RequestQueue;
 import com.yanzhenjie.nohttp.rest.Response;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 
 /**
@@ -51,16 +44,16 @@ import java.util.Set;
 public class HttpOperator {
 
     private String logTag = "HttpOperation";
-    //record the picture files need to be download, after all finish, then rebuild the UI
-    private Hashtable<String, Boolean> flagFinishLoadDishPictures = new Hashtable<String, Boolean>();
+
 
     private MainActivity mainActivity;
-    private ArrayList<String> listDishPictures = new ArrayList<>();
+//    private ArrayList<String> listDishPictures = new ArrayList<>();
     private static final int WHAT_VALUE_QUERYMENU = 1;
     private static final int WHAT_VALUE_CONFIRMCODE = 2;
-//    private static final int WHAT_VALUE_MAKEORDER = 3;
+    private static final int WHAT_VALUE_UPLOADERRORLOG= 3;
     private static final int WHAT_VALUE_QUERYDESK = 4;
     private static final int WHAT_VALUE_QUERYMENUVERSION = 5;
+    private static final int WHAT_VALUE_QUERYCONFIRMCODE = 6;
     private static final int WHAT_VALUE_DOWNLOADIMAGE = 10;
 
     private Gson gson = new Gson();
@@ -87,6 +80,9 @@ public class HttpOperator {
                 case WHAT_VALUE_QUERYMENU :
                     doResponseQueryMenu(response);
                     break;
+                case WHAT_VALUE_QUERYCONFIRMCODE:
+                    doResponseQueryConfirmCode(response);
+                    break;
 //                case WHAT_VALUE_CONFIRMCODE:
 //                    doResponseConfirmCode4RefreshData(response);
 //                    break;
@@ -106,10 +102,13 @@ public class HttpOperator {
         @Override
         public void onFailed(int what, Response<JSONObject> response) {
             Log.e("Http failed", "what = "+ what + "\nresponse = "+ response.get());
-            String msg = "";
+            String msg = InstantValue.NULLSTRING;
             switch (what){
                 case WHAT_VALUE_QUERYMENU :
                     msg = "Failed to load Menu data. Please restart app!";
+                    break;
+                case WHAT_VALUE_QUERYCONFIRMCODE:
+                    msg = "Failed to load Confirm Code. Please restart app!";
                     break;
 //                case WHAT_VALUE_CONFIRMCODE:
 //                    msg = "The input code is wrong.";
@@ -134,40 +133,6 @@ public class HttpOperator {
         }
     };
 
-    private DownloadListener downloadDishListener = new DownloadListener() {
-        @Override
-        public void onDownloadError(int what, Exception exception) {
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.error)
-                    .setTitle("WRONG")
-                    .setMessage("Failed to load dish image. Please restart app!")
-                    .setNegativeButton("OK", null)
-                    .create().show();
-        }
-
-        @Override
-        public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {
-        }
-
-        @Override
-        public void onProgress(int what, int progress, long fileCount, long speed) {
-
-        }
-
-        @Override
-        public void onFinish(int what, String filePath) {
-            flagFinishLoadDishPictures.put(filePath, true);
-            if (!flagFinishLoadDishPictures.containsValue(false)){
-                mainActivity.buildMenu();
-            }
-        }
-
-        @Override
-        public void onCancel(int what) {
-
-        }
-    };
-
     private RequestQueue requestQueue = NoHttp.newRequestQueue();
 
     public HttpOperator(MainActivity mainActivity){
@@ -187,10 +152,24 @@ public class HttpOperator {
             mainActivity.setMenu(c1s);
             mainActivity.persistMenu();
             loadDishPictureFromServer();
-//            mainActivity.buildMenu();
+        }else {
+            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
         }
     }
 
+    private void doResponseQueryConfirmCode(Response<JSONObject> response){
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryMenu: " + response.getException().getMessage() );
+            sendErrorMessageToToast("Http:doResponseQueryMenu: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<String> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<String>>(){}.getType());
+        if (result.success){
+            mainActivity.setConfirmCode(result.data);
+        } else {
+            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
+        }
+    }
     private void doResponseQueryDesk(Response<JSONObject> response){
         if (response.getException() != null){
             Log.e(logTag, "doResponseQueryDesk: " + response.getException().getMessage() );
@@ -210,6 +189,7 @@ public class HttpOperator {
             mainActivity.persistDesk();
             mainActivity.getPostOrderDialog().initDeskData(result.data);
         } else {
+            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
             new AlertDialog.Builder(mainActivity)
                     .setIcon(R.drawable.error)
                     .setTitle("WRONG")
@@ -229,6 +209,7 @@ public class HttpOperator {
         if (result.success){
             mainActivity.getDbOperator().saveObjectByCascade(new MenuVersion(1, result.data));
         } else {
+            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
             new AlertDialog.Builder(mainActivity)
                     .setIcon(R.drawable.error)
                     .setTitle("WRONG")
@@ -240,12 +221,24 @@ public class HttpOperator {
 
     //load desk
     public void loadDeskData(){
+        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
+                "start loading table data ..."));
         Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/getdesks");
         requestQueue.add(WHAT_VALUE_QUERYDESK, deskRequest, responseListener);
     }
 
-    //load desk
+    //load flavor
+    public void loadFlavorData(){
+//        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
+//                "start loading flavor data ..."));
+//        Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/getdesks");
+//        requestQueue.add(WHAT_VALUE_QUERYDESK, deskRequest, responseListener);
+    }
+
+    //load menu
     public void loadMenuData(){
+        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
+                "start loading menu data ..."));
         Request<JSONObject> menuRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querymenu");
         requestQueue.add(WHAT_VALUE_QUERYMENU, menuRequest, responseListener);
     }
@@ -256,23 +249,27 @@ public class HttpOperator {
         requestQueue.add(WHAT_VALUE_QUERYMENUVERSION, mvRequest, responseListener);
     }
 
-    public String checkConfirmCodeSync(String code){
-        Request<JSONObject> codeRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/checkconfirmcode", RequestMethod.POST);
-        codeRequest.add("code", code);
-        Response<JSONObject> response = NoHttp.startRequestSync(codeRequest);
-        if (response.getException() != null){
-            return response.getException().getMessage();
-        }
-        if (response.get() == null) {
-            Log.e(logTag, "Error occur while synchronize check confirm code. response.get() is null.");
-            return "Error occur while synchronize check confirm code. response.get() is null";
-        }
-        HttpResult<Boolean> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Boolean>>(){}.getType());
-        if (result.data)
-            return InstantValue.RESULT_SUCCESS;
-        else
-            return "Confirm code is wrong!";
+    public void queryConfirmCode(){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/getconfirmcode", RequestMethod.GET);
+        requestQueue.add(WHAT_VALUE_QUERYCONFIRMCODE, request, responseListener);
     }
+//    public String checkConfirmCodeSync(String code){
+//        Request<JSONObject> codeRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/checkconfirmcode", RequestMethod.POST);
+//        codeRequest.add("code", code);
+//        Response<JSONObject> response = NoHttp.startRequestSync(codeRequest);
+//        if (response.getException() != null){
+//            return response.getException().getMessage();
+//        }
+//        if (response.get() == null) {
+//            Log.e(logTag, "Error occur while synchronize check confirm code. response.get() is null.");
+//            return "Error occur while synchronize check confirm code. response.get() is null";
+//        }
+//        HttpResult<Boolean> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Boolean>>(){}.getType());
+//        if (result.data)
+//            return InstantValue.RESULT_SUCCESS;
+//        else
+//            return "Confirm code is wrong!";
+//    }
 
     /**
      * check the desk if available for making order.
@@ -334,30 +331,6 @@ public class HttpOperator {
         //TODO: require restart app
     }
 
-    private void loadDishPictureFromServer(){
-        flagFinishLoadDishPictures.clear();
-        listDishPictures.clear();
-        for (Category1 c1: mainActivity.getMenu()) {
-            for(Category2 c2 : c1.getCategory2s()){
-                for(Dish dish : c2.getDishes()){
-                    listDishPictures.add(dish.getPictureName());
-
-                }
-            }
-        }
-        DownloadQueue queue = NoHttp.newDownloadQueue();
-        for (String filename : listDishPictures) {
-            flagFinishLoadDishPictures.put(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + filename, false);
-            flagFinishLoadDishPictures.put(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + filename, false);
-            String urlbig = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+"/"+ filename;
-            String urlsmall = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+"/"+ filename;
-            DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
-            DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
-            queue.add(WHAT_VALUE_DOWNLOADIMAGE, requestbig, downloadDishListener);
-            queue.add(WHAT_VALUE_DOWNLOADIMAGE, requestsmall, downloadDishListener);
-
-        }
-    }
 
 //    private void doResponseMakeOrder(Response<JSONObject> response){
 //        if (response.getException() != null){
@@ -499,10 +472,56 @@ public class HttpOperator {
     }
 
     private void sendErrorMessageToToast(String sMsg){
-        Message message = new Message();
-        message.what = MainActivity.TOASTHANDLERWHAT_ERRORMESSAGE;
-        message.obj = sMsg;
-        mainActivity.getToastHandler().sendMessage(message);
+        mainActivity.getToastHandler().sendMessage(CommonTool.buildMessage(MainActivity.TOASTHANDLERWHAT_ERRORMESSAGE,sMsg));
     }
+
+    public void uploadErrorLog(File file, String machineCode){
+        int key = 0;// the key of filelist;
+        UploadErrorLogListener listener = new UploadErrorLogListener(mainActivity);
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/uploaderrorlog", RequestMethod.POST);
+        FileBinary bin1 = new FileBinary(file);
+        request.add("logfile", bin1);
+        request.add("machineCode", machineCode);
+        listener.addFiletoList(key, file.getAbsolutePath());
+        requestQueue.add(key, request, listener);
+//        for(File file : files){
+//            Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/uploaderrorlog", RequestMethod.POST);
+//            FileBinary bin1 = new FileBinary(file);
+//            request.add("logfile", bin1);
+//            request.add("machineCode", machineCode);
+//            key++;
+//            listener.addFiletoList(key, file.getAbsolutePath());
+//            requestQueue.add(key, request, listener);
+//        }
+//        listener.setTotalFileAmount(key);
+    }
+
+    private void loadDishPictureFromServer(){
+        DownloadDishImageListener listener = new DownloadDishImageListener(mainActivity);
+        DownloadQueue queue = NoHttp.newDownloadQueue();
+        int key = 0;// the key of filelist;
+        for (Category1 c1: mainActivity.getMenu()) {
+            for(Category2 c2 : c1.getCategory2s()){
+                for(Dish dish : c2.getDishes()){
+                    String filename = dish.getPictureName();
+                    if (filename != null){
+                        key++;
+                        listener.addFiletoList(key, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + filename);
+                        String urlbig = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+"/"+ filename;
+                        DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
+                        queue.add(key, requestbig, listener);
+
+                        key++;
+                        listener.addFiletoList(key, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + filename);
+                        String urlsmall = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+"/"+ filename;
+                        DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
+                        queue.add(key, requestsmall, listener);
+                    }
+                }
+            }
+        }
+        listener.setTotalFileAmount(key);
+    }
+
 
 }

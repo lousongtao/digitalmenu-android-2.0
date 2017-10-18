@@ -64,7 +64,7 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
     public void onBindViewHolder(ViewHolder holder, int position) {
         final int pos = position;
         ChoosedDish cf = choosedFoods.get(position);
-        holder.tvAmount.setText(cf.getAmount()+"");
+        holder.tvAmount.setText(cf.getAmount()+InstantValue.NULLSTRING);
 
         holder.tvAddtionalRequirements.setText(cf.getAdditionalRequirements());
         holder.foodImage.setBackground(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cf.getDish().getPictureName()));

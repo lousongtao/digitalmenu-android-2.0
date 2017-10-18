@@ -2,7 +2,6 @@ package com.shuishou.digitalmenu.ui;
 
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,20 +10,16 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.RadioButton;
@@ -40,25 +35,23 @@ import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.DishChoosePopinfo;
+import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.MenuVersion;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.http.HttpOperator;
-import com.shuishou.digitalmenu.io.CustomizedExceptionHandler;
 import com.shuishou.digitalmenu.io.IOOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
+import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.Logger;
 import com.yanzhenjie.nohttp.NoHttp;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * Created by Administrator on 2017/6/4.
- */
-
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     public final static byte LANGUAGE_ENGLISH = 1;
     public final static byte LANGUAGE_CHINESE = 2;
 
@@ -68,20 +61,18 @@ public class MainActivity extends AppCompatActivity{
     private TextView tvChoosedItems;
     private TextView tvChoosedPrice;
     private TextView tvOrdersLabel;
-    private FrameLayout displayFragmentsLayout;
 
     private ArrayList<Desk> desks;
     private RecyclerChoosedFoodAdapter choosedFoodAdapter;
     private ArrayList<ChoosedDish> choosedFoodList= new ArrayList<>();
     private ArrayList<Category1> category1s = new ArrayList<>(); // = TestData.makeCategory1();
-
+    private String confirmCode;
     private HttpOperator httpOperator;
     private DBOperator dbOperator;
 
     private PostOrderDialog dlgPostOrder;
 
-    private int refreshMenuPeroid = 60 * 1000;
-
+    public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU = 1;
     private Handler refreshMenuHandler;
     private Timer refreshMenuTimer;
 
@@ -90,13 +81,29 @@ public class MainActivity extends AppCompatActivity{
     private SparseArray<DishDisplayFragment> mapDishDisplayFragments = new SparseArray<>();
     private SparseArray<DishCellComponent> mapFoodCellComponents = new SparseArray<>();
 
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA = 3;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH = 2;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS = 1;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG = 0;
     private ProgressDialog progressDlg;
     private Handler progressDlgHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == 0) {
+            if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG) {
                 if (progressDlg != null)
                     progressDlg.dismiss();
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS){
+                if (progressDlg != null){
+                    progressDlg.setMessage(msg.obj != null ? msg.obj.toString() : InstantValue.NULLSTRING);
+                }
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH){
+                if (progressDlg != null){
+                    progressDlg.setMessage(msg.obj != null ? msg.obj.toString() : InstantValue.NULLSTRING);
+                }
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA){
+                if (progressDlg != null){
+                    progressDlg.setMessage(msg.obj != null ? msg.obj.toString() : InstantValue.NULLSTRING);
+                }
             }
         }
     };
@@ -105,7 +112,7 @@ public class MainActivity extends AppCompatActivity{
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == TOASTHANDLERWHAT_ERRORMESSAGE){
-                Toast.makeText(MainActivity.this, msg.obj.toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,msg.obj != null ? msg.obj.toString() : InstantValue.NULLSTRING, Toast.LENGTH_LONG).show();
             }
         }
     };
@@ -116,11 +123,13 @@ public class MainActivity extends AppCompatActivity{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //TODO: test
+//        String s = null;
+//        if (s.equals("")){
+//
+//        }
+
         setContentView(R.layout.activity_main);
-        // Sets the default uncaught exception handler. This handler is invoked
-        // in case any Thread dies due to an unhandled exception.
-        Thread.setDefaultUncaughtExceptionHandler(new CustomizedExceptionHandler(InstantValue.LOCAL_CATALOG_ERRORLOG));
-//        instance = this;
         RecyclerView lvChoosedFood = (RecyclerView) findViewById(R.id.list_choosedfood);
         choosedFoodAdapter = new RecyclerChoosedFoodAdapter(this, R.layout.choosedfood_item, choosedFoodList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -134,50 +143,24 @@ public class MainActivity extends AppCompatActivity{
         tvOrdersLabel = (TextView) findViewById(R.id.tvChoosedFoodLabel);
         TextView tvRefreshData = (TextView)findViewById(R.id.drawermenu_refreshdata);
         TextView tvServerURL = (TextView)findViewById(R.id.drawermenu_serverurl);
+        TextView tvUploadErrorLog = (TextView)findViewById(R.id.drawermenu_uploaderrorlog);
         listViewCategorys = (CategoryTabListView) findViewById(R.id.categorytab_listview);
-        displayFragmentsLayout = (FrameLayout) findViewById(R.id.dishdisplayarea_layout);
+//        displayFragmentsLayout = (FrameLayout) findViewById(R.id.dishdisplayarea_layout);
         ImageButton btnLookfor = (ImageButton)findViewById(R.id.btnLookforDish);
-        btnLookfor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QuickSearchDialog dlg = new QuickSearchDialog(MainActivity.this);
-                dlg.showDialog();
-            }
-        });
-        tvRefreshData.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RefreshDataDialog dlg = new RefreshDataDialog(MainActivity.this);
-                dlg.showDialog();
-            }
-        });
-
-        tvServerURL.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SaveServerURLDialog dlg = new SaveServerURLDialog(MainActivity.this);
-                dlg.showDialog();
-            }
-        });
-        rbChinese.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onChangeLanguage(LANGUAGE_CHINESE);
-            }
-        });
-
-        rbEnglish.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onChangeLanguage(LANGUAGE_ENGLISH);
-            }
-        });
-        btnOrder.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onStartOrder();
-            }
-        });
+        tvUploadErrorLog.setTag("uploaderrorlog");
+        btnLookfor.setTag("lookfor");
+        tvRefreshData.setTag("refreshdata");
+        tvServerURL.setTag("serverurl");
+        rbChinese.setTag("rbchinese");
+        rbEnglish.setTag("rbenglish");
+        btnOrder.setTag("btnorder");
+        tvUploadErrorLog.setOnClickListener(this);
+        btnLookfor.setOnClickListener(this);
+        tvRefreshData.setOnClickListener(this);
+        tvServerURL.setOnClickListener(this);
+        rbChinese.setOnClickListener(this);
+        rbEnglish.setOnClickListener(this);
+        btnOrder.setOnClickListener(this);
 
         //init tool class, NoHttp
         NoHttp.initialize(this);
@@ -188,10 +171,10 @@ public class MainActivity extends AppCompatActivity{
         httpOperator = new HttpOperator(this);
         dbOperator = new DBOperator(this);
 
+        httpOperator.queryConfirmCode();
+
         //read local database to memory
         desks = dbOperator.queryDesks();
-        category1s = dbOperator.queryAllMenu();
-
 
         dlgPostOrder = new PostOrderDialog(this);
 
@@ -273,7 +256,7 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == 1){
+                if (msg.what == REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU){
                     ArrayList<Integer> dishIdList = (ArrayList<Integer>) msg.obj;
                     //loop to find Dish Object depending on the id, reload the data from database
                     for(Integer dishId : dishIdList){
@@ -285,7 +268,7 @@ public class MainActivity extends AppCompatActivity{
                                     String errormsg = "Dish " + dish.getEnglishName() + " is Sold Out already, please remove it from your selection.";
                                     if (getLanguage() == LANGUAGE_CHINESE)
                                         errormsg = "您选择的 " + dish.getChineseName() + " 已经售完, 请从列表中将其去除.";
-                                    popupWarnDialog(R.drawable.error, "Warning", errormsg);
+                                    CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
                                 }
                             }
                         }
@@ -295,6 +278,7 @@ public class MainActivity extends AppCompatActivity{
         };
         //start timer
         refreshMenuTimer = new Timer();
+        int refreshMenuPeroid = 60 * 1000;
         refreshMenuTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -308,10 +292,7 @@ public class MainActivity extends AppCompatActivity{
 
                 ArrayList<Integer> dishIdList = httpOperator.chechMenuVersion(localVersion);
                 if (dishIdList != null && !dishIdList.isEmpty()){
-                    Message msg = new Message();
-                    msg.what = 1;
-                    msg.obj = dishIdList;
-                    refreshMenuHandler.sendMessage(msg);
+                    refreshMenuHandler.sendMessage(CommonTool.buildMessage(REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU, dishIdList));
                 }
             }
         }, 1, refreshMenuPeroid
@@ -351,6 +332,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     public void buildMenu(){
+        category1s = dbOperator.queryAllMenu();
         initialFoodCellComponents();
 
         CategoryTabAdapter categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
@@ -363,9 +345,11 @@ public class MainActivity extends AppCompatActivity{
         });
 
         onChangeLanguage(getLanguage());
-        Message msg = new Message();
-        msg.what = 0;
-        progressDlgHandler.sendMessage(msg);
+        progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
+    }
+
+    public Handler getProgressDlgHandler(){
+        return progressDlgHandler;
     }
 
     public void startProgressDialog(String title, String message){
@@ -396,42 +380,90 @@ public class MainActivity extends AppCompatActivity{
      * such as the hot pot soup, we need the customer choose a favor before adding into choosed list,
      * this is a compulsive operation/requirements.
      *
-     * Thus we check the dish's property to decide if we need to pop a dialog to obligate user do something,
-     * just now, we just do special for hot pot soup. In future, maybe there will be same problem with other dishes
+     * Thus we check the dish's CHOOSEMODE property to decide if we need to do other operation before adding into list
+     * the different conditions are:
      *
-     * 1. the dish does not need to do special, then add it into choosed list directly
+     * 1. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_DEFAULT, the dish does not need to do special, then add it into choosed list directly
      *
-     * 2. the dish needs some special, popup a dialog and do the operation of adding into lish while user click
-     * the dialog's CONFIRM button
+     * 2. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_SUBITEM, the dish needs to choose some items before adding,
+     *      popup a dialog and to list the opinions to comstomer, if the customer gives up to choose subitems, then cancel the adding operation;
+     *      ONLY adding into list after customer click the dialog's CONFIRM button(do some validatation if needed)
+     *
+     * 3. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_POPINFOCHOOSE, popup a message to tell some information before adding the list
+     *
+     * 4. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_POPINFOQUIT, popup a message, and then quit the operation(no adding this dish to the list)
      *
      * Created by Jerry on 2017/9/29.
      */
-    public void onDishChoosed(Dish dish) {
+    public void onDishChoosed(final Dish dish) {
         if (dish.isSoldOut()){
             Toast.makeText(MainActivity.this, "This dish is sold out now.", Toast.LENGTH_LONG).show();
             return;
         }
-        if (dish.getCategory2().getEnglishName().toLowerCase().equals("soup")
-                && dish.getCategory2().getCategory1().getEnglishName().toLowerCase().equals("hot pot")){
-            ChooseHotpotSoupDialog dlg = new ChooseHotpotSoupDialog(this, dish);
-            dlg.showDialog();
-        } else {
+        if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_DEFAULT){
             addDishInChoosedList(dish, null);
+        } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_SUBITEM){
+            ChooseDishSubitemDialog dlg = new ChooseDishSubitemDialog(this, dish);
+            dlg.showDialog();
+        } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOCHOOSE){
+            String msg = getLanguage() == LANGUAGE_CHINESE? dish.getChoosePopInfo().getPopInfoCN() : dish.getChoosePopInfo().getPopInfoEN();
+            new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.info)
+                    .setTitle("Infomation")
+                    .setMessage(msg)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            addDishInChoosedList(dish, null);
+                        }
+                    })
+                    .create().show();
+        } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOQUIT){
+            String msg = getLanguage() == LANGUAGE_CHINESE? dish.getChoosePopInfo().getPopInfoCN() : dish.getChoosePopInfo().getPopInfoEN();
+            new AlertDialog.Builder(this)
+                    .setIcon(R.drawable.info)
+                    .setTitle("Infomation")
+                    .setMessage(msg)
+                    .setNegativeButton("OK", null)
+                    .create().show();
         }
-
     }
 
+    /**
+     * add dish into choosed list
+     * 1. dish.automerge = true(default value),
+     *      add this dish to the choosed list. If the dish already exists, merge them into one item, just make amount plus one;
+     *      show PLUS & MINUS buttons in the choosed list, customer can add/reduce the dish's amount;
+     *      recalculate all choosed list price;
+     *      refresh the dish's choosed amount and show it using a small icon.
+     *
+     * 2. dish.automerge = false;
+     *      add a new item into list no matter whether the same dish exist or not. the amount always keep ONE;
+     *      show PLUS & MINUS buttons in the choosed list, customer can add/reduce the dish's amount;
+     *      recalculate all choosed list price;
+     *      refresh the dish's choosed amount and show it using a small icon
+     *
+     * otherwise, add a new item into list no matter whether the same dish exist or not.
+     * @param dish
+     * @param requirements
+     */
     public void addDishInChoosedList(Dish dish, String requirements) {
         ChoosedDish choosedFood = null;
-        //first check if the dish is exist in the list already
-        for (ChoosedDish cf : choosedFoodList) {
-            if (cf.getDish().getId() == dish.getId()) {
-                choosedFood = cf;
-                break;
+        if (dish.isAutoMergeWhileChoose()){
+            //first check if the dish is exist in the list already
+            for (ChoosedDish cf : choosedFoodList) {
+                if (cf.getDish().getId() == dish.getId()) {
+                    choosedFood = cf;
+                    break;
+                }
             }
-        }
-        if (choosedFood != null) {
-            choosedFood.setAmount(choosedFood.getAmount() + 1);
+            if (choosedFood != null) {
+                choosedFood.setAmount(choosedFood.getAmount() + 1);
+            } else {
+                choosedFood = new ChoosedDish(dish);
+                choosedFoodList.add(choosedFood);
+            }
+
         } else {
             choosedFood = new ChoosedDish(dish);
             choosedFoodList.add(choosedFood);
@@ -440,10 +472,18 @@ public class MainActivity extends AppCompatActivity{
             choosedFood.setAdditionalRequirements(requirements);
         }
         choosedFoodAdapter.notifyDataSetChanged();
-        //show choosed icon
-        DishCellComponent fc = mapFoodCellComponents.get(dish.getId());
-        fc.changeAmount(choosedFood.getAmount());
         calculateFoodPrice();
+        refreshChooseAmountOnDishCell(dish);
+    }
+
+    private void refreshChooseAmountOnDishCell(Dish dish){
+        DishCellComponent fc = mapFoodCellComponents.get(dish.getId());
+        int amount = 0;
+        for(ChoosedDish cf : choosedFoodList){
+            if (cf.getDish().getId() == dish.getId())
+                amount += cf.getAmount();
+        }
+        fc.changeAmount(amount);
     }
 
     private void calculateFoodPrice(){
@@ -451,43 +491,36 @@ public class MainActivity extends AppCompatActivity{
         for(ChoosedDish cf : choosedFoodList){
             totalPrice += cf.getAmount() * cf.getPrice();
         }
-        double gst = totalPrice / 11;
+//        double gst = totalPrice / 11;
         tvChoosedItems.setText(String.valueOf(choosedFoodList.size()));
         tvChoosedPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, totalPrice));
     }
 
-//    public static MainActivity getInstance(){
-//        return instance;
-//    }
-
     public void plusDish(int position) {
         choosedFoodList.get(position).setAmount(choosedFoodList.get(position).getAmount() + 1);
         //show choosed icon
-        DishCellComponent fc = mapFoodCellComponents.get(choosedFoodList.get(position).getDish().getId());
-        fc.changeAmount(choosedFoodList.get(position).getAmount());
+        refreshChooseAmountOnDishCell(choosedFoodList.get(position).getDish());
         calculateFoodPrice();
         choosedFoodAdapter.notifyItemChanged(position);
     }
 
     public void minusDish(int position) {
         if (position >= choosedFoodList.size()){
-            return; //点击太快可以导致同时出发多次事件, 前面的时间把列表清空后, 后面的就出发OutofBounds异常
+            return; //点击太快可以导致同时触发多次事件, 前面的时间把列表清空后, 后面的就出发OutofBounds异常
         }
         Dish dish = choosedFoodList.get(position).getDish();
         int oldAmount = choosedFoodList.get(position).getAmount();
-        //change small icon in FoodCellComponent
-        DishCellComponent fc = mapFoodCellComponents.get(dish.getId());
-        fc.changeAmount(oldAmount - 1);
 
-        choosedFoodList.get(position).setAmount( oldAmount - 1);
         if (oldAmount == 1) {
             choosedFoodList.remove(position);
             choosedFoodAdapter.notifyItemRemoved(position);
             choosedFoodAdapter.notifyItemRangeChanged(position, choosedFoodList.size());
         }else {
+            choosedFoodList.get(position).setAmount( oldAmount - 1);
             choosedFoodAdapter.notifyItemChanged(position);
         }
         calculateFoodPrice();
+        refreshChooseAmountOnDishCell(dish);
     }
 
     public void addRequirements(int position) {
@@ -499,12 +532,14 @@ public class MainActivity extends AppCompatActivity{
     public ArrayList<ChoosedDish> getChoosedFoodList() {
         return choosedFoodList;
     }
-//    @Override
-//    public void deleteDish(int position) {
-//        choosedFoodList.remove(position);
-//        calculateFoodPrice();
-//        choosedFoodAdapter.notifyItemChanged(position);
-//    }
+
+    public String getConfirmCode() {
+        return confirmCode;
+    }
+
+    public void setConfirmCode(String confirmCode) {
+        this.confirmCode = confirmCode;
+    }
 
     /**
      * 1. clear local database
@@ -518,14 +553,42 @@ public class MainActivity extends AppCompatActivity{
         IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL);
         dbOperator.deleteAllData(Desk.class);
         dbOperator.deleteAllData(MenuVersion.class);
+        dbOperator.deleteAllData(Flavor.class);
+        dbOperator.deleteAllData(DishChoosePopinfo.class);
+        dbOperator.deleteAllData(DishChooseSubitem.class);
         dbOperator.deleteAllData(Dish.class);
         dbOperator.deleteAllData(Category2.class);
         dbOperator.deleteAllData(Category1.class);
         // synchronize and persist
         httpOperator.loadDeskData();
+        httpOperator.loadFlavorData();
         httpOperator.loadMenuVersionData();
         httpOperator.loadMenuData();
     }
+
+    @Override
+    public void onClick(View v) {
+        if ("uploaderrorlog".equals(v.getTag())){
+            IOOperator.onUploadErrorLog(this);
+        } else if ("lookfor".equals(v.getTag())){
+            QuickSearchDialog dlg = new QuickSearchDialog(MainActivity.this);
+            dlg.showDialog();
+        } else if ("refreshdata".equals(v.getTag())){
+            RefreshDataDialog dlg = new RefreshDataDialog(MainActivity.this);
+            dlg.showDialog();
+        } else if ("serverurl".equals(v.getTag())){
+            SaveServerURLDialog dlg = new SaveServerURLDialog(MainActivity.this);
+            dlg.showDialog();
+        } else if ("rbchinese".equals(v.getTag())){
+            onChangeLanguage(LANGUAGE_CHINESE);
+        } else if ("rbenglish".equals(v.getTag())){
+            onChangeLanguage(LANGUAGE_ENGLISH);
+        } else if ("btnorder".equals(v.getTag())){
+            onStartOrder();
+        }
+    }
+
+
 
     public SparseArray<DishDisplayFragment> getMapDishDisplayFragments() {
         return mapDishDisplayFragments;
@@ -604,18 +667,6 @@ public class MainActivity extends AppCompatActivity{
         return desks;
     }
 
-    public void popupToast(String msg, int shortlong){
-        Toast.makeText(this, msg, shortlong).show();
-    }
-
-    public void popupWarnDialog(int iconId, String title, String msg){
-        new AlertDialog.Builder(this)
-                .setIcon(iconId)
-                .setTitle(title)
-                .setMessage(msg)
-                .setNegativeButton("OK", null)
-                .create().show();
-    }
 
     //屏蔽实体按键BACK
     @Override
