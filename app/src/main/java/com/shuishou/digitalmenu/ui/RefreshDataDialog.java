@@ -82,17 +82,22 @@ class RefreshDataDialog {
         }
         dlg.dismiss();
         mainActivity.startProgressDialog("loading", "loading, please wait...");
-        new Thread(){
-            @Override
-            public void run() {
-                if (mainActivity.getConfirmCode().equals(code)){
-                    mainActivity.onRefreshData();
-                    dlg.dismiss();
-                } else {
-                    msgHandler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_HTTPERROR, "confirm code is wrong"));
+        if (mainActivity.getConfirmCode() != null){
+            new Thread(){
+                @Override
+                public void run() {
+                    if (mainActivity.getConfirmCode().equals(code)){
+                        mainActivity.onRefreshData();
+                        dlg.dismiss();
+                    } else {
+                        msgHandler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_HTTPERROR, "confirm code is wrong"));
+                    }
                 }
-            }
-        }.start();
+            }.start();
+        } else {
+            CommonTool.popupToast(mainActivity, "Confirm code is null now, please restart this app to load it", Toast.LENGTH_LONG);
+        }
+
     }
 
     public void showDialog(){

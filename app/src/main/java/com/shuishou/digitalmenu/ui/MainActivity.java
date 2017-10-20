@@ -171,7 +171,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         httpOperator = new HttpOperator(this);
         dbOperator = new DBOperator(this);
 
-        httpOperator.queryConfirmCode();
+        if (InstantValue.URL_TOMCAT != null && InstantValue.URL_TOMCAT.length() > 0)
+            httpOperator.queryConfirmCode();
 
         //read local database to memory
         desks = dbOperator.queryDesks();
@@ -283,6 +284,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void run() {
                 if(InstantValue.URL_TOMCAT == null || InstantValue.URL_TOMCAT.length() == 0)
+                    return;
+                //if local database is null, stop check
+                if (category1s == null || category1s.isEmpty())
                     return;
                 MenuVersion mv = (MenuVersion) dbOperator.queryObjectById(1, MenuVersion.class);
                 int localVersion = 0;
