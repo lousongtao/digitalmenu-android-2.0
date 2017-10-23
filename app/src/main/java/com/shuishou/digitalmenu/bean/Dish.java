@@ -71,6 +71,8 @@ public class Dish implements Serializable{
     @Column("automerge_whilechoose")
     private boolean autoMergeWhileChoose = true;
 
+    @Column("purchase_type")
+    private int purchaseType = InstantValue.DISH_PURCHASETYPE_UNIT;
 
     public Dish(){
 
@@ -85,6 +87,15 @@ public class Dish implements Serializable{
 //        this.pictureName = pictureName;
 //        this.category2 = category2;
 //    }
+
+
+    public int getPurchaseType() {
+        return purchaseType;
+    }
+
+    public void setPurchaseType(int purchaseType) {
+        this.purchaseType = purchaseType;
+    }
 
     public String getAbbreviation() {
         return abbreviation;

@@ -29,6 +29,9 @@ public final class InstantValue {
     public static final byte DISH_CHOOSEMODE_POPINFOCHOOSE = 3;
     public static final byte DISH_CHOOSEMODE_POPINFOQUIT = 4;
 
+    public static final byte DISH_PURCHASETYPE_UNIT = 1;//按份购买
+    public static final byte DISH_PURCHASETYPE_WEIGHT = 2;//按重量购买
+
     public static final String FORMAT_DOUBLE_2DECIMAL = "%.2f";
 
     public static String URL_TOMCAT = null;
