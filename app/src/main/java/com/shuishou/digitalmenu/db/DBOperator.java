@@ -8,6 +8,7 @@ import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.bean.DishChoosePopinfo;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.ui.MainActivity;
 
 import java.util.ArrayList;
@@ -88,9 +89,16 @@ public class DBOperator {
     }
 
     public ArrayList<Desk> queryDesks(){
-        return liteOrm.query(Desk.class);
+        return liteOrm.query(new QueryBuilder<Desk>(Desk.class).appendOrderAscBy("sequence"));
     }
 
+    public void clearFlavor(){
+        liteOrm.deleteAll(Flavor.class);
+    }
+
+    public ArrayList<Flavor> queryFlavors(){
+        return liteOrm.query(Flavor.class);
+    }
     public LiteOrm getLiteOrm(){
         return liteOrm;
     }

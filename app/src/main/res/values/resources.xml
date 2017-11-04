@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="CHOOSEDDISHIMAGEBUTTON_TAG_KEY_ACTION" type="id"/>
+    <item name="CHOOSEDDISHIMAGEBUTTON_TAG_KEY_ENTITY" type="id"/>
+    <item name="CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION" type="id"/>
+</resources>

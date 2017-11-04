@@ -47,14 +47,25 @@ import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.Logger;
 import com.yanzhenjie.nohttp.NoHttp;
 
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+    public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MainActivity.class.getSimpleName());
     public final static byte LANGUAGE_ENGLISH = 1;
     public final static byte LANGUAGE_CHINESE = 2;
-
+    private String TAG_UPLOADERRORLOG = "uploaderrorlog";
+    private String TAG_EXITSYSTEM = "exitsystem";
+    private String TAG_LOOKFOR = "lookfor";
+    private String TAG_REFRESHDATA = "refreshdata";
+    private String TAG_SERVERURL = "serverurl";
+    private String TAG_RBCHINESE = "rbchinese";
+    private String TAG_RBENGLISH = "rbenglish";
+    private String TAG_BTNORDER = "btnorder";
     private CategoryTabListView listViewCategorys;
     private RadioButton rbChinese;
     private RadioButton rbEnglish;
@@ -63,14 +74,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvOrdersLabel;
 
     private ArrayList<Desk> desks;
+    private ArrayList<Flavor> flavors;
     private RecyclerChoosedFoodAdapter choosedFoodAdapter;
     private ArrayList<ChoosedDish> choosedFoodList= new ArrayList<>();
     private ArrayList<Category1> category1s = new ArrayList<>(); // = TestData.makeCategory1();
-    private String confirmCode;
+    private HashMap<String, String> configsMap;
     private HttpOperator httpOperator;
     private DBOperator dbOperator;
 
     private PostOrderDialog dlgPostOrder;
+    private ChooseFlavorDialog dlgChooseFlavor;
 
     public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU = 1;
     private Handler refreshMenuHandler;
@@ -144,17 +157,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView tvRefreshData = (TextView)findViewById(R.id.drawermenu_refreshdata);
         TextView tvServerURL = (TextView)findViewById(R.id.drawermenu_serverurl);
         TextView tvUploadErrorLog = (TextView)findViewById(R.id.drawermenu_uploaderrorlog);
+        TextView tvExit = (TextView)findViewById(R.id.drawermenu_exit);
         listViewCategorys = (CategoryTabListView) findViewById(R.id.categorytab_listview);
 //        displayFragmentsLayout = (FrameLayout) findViewById(R.id.dishdisplayarea_layout);
         ImageButton btnLookfor = (ImageButton)findViewById(R.id.btnLookforDish);
-        tvUploadErrorLog.setTag("uploaderrorlog");
-        btnLookfor.setTag("lookfor");
-        tvRefreshData.setTag("refreshdata");
-        tvServerURL.setTag("serverurl");
-        rbChinese.setTag("rbchinese");
-        rbEnglish.setTag("rbenglish");
-        btnOrder.setTag("btnorder");
+
+        tvUploadErrorLog.setTag(TAG_UPLOADERRORLOG);
+        tvExit.setTag(TAG_EXITSYSTEM);
+        btnLookfor.setTag(TAG_LOOKFOR);
+        tvRefreshData.setTag(TAG_REFRESHDATA);
+        tvServerURL.setTag(TAG_SERVERURL);
+        rbChinese.setTag(TAG_RBCHINESE);
+        rbEnglish.setTag(TAG_RBENGLISH);
+        btnOrder.setTag(TAG_BTNORDER);
         tvUploadErrorLog.setOnClickListener(this);
+        tvExit.setOnClickListener(this);
         btnLookfor.setOnClickListener(this);
         tvRefreshData.setOnClickListener(this);
         tvServerURL.setOnClickListener(this);
@@ -167,17 +184,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Logger.setDebug(true);
         Logger.setTag("digitalmenu:nohttp");
 
-        InstantValue.URL_TOMCAT = IOOperator.loadServerURL();
+        InstantValue.URL_TOMCAT = IOOperator.loadServerURL(InstantValue.FILE_SERVERURL);
         httpOperator = new HttpOperator(this);
         dbOperator = new DBOperator(this);
 
         if (InstantValue.URL_TOMCAT != null && InstantValue.URL_TOMCAT.length() > 0)
-            httpOperator.queryConfirmCode();
+            httpOperator.queryConfigsMap();
 
         //read local database to memory
         desks = dbOperator.queryDesks();
+        flavors = dbOperator.queryFlavors();
 
         dlgPostOrder = new PostOrderDialog(this);
+        dlgChooseFlavor = new ChooseFlavorDialog(this);
 
         startRefreshMenuTimer();
         buildMenu();
@@ -262,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //loop to find Dish Object depending on the id, reload the data from database
                     for(Integer dishId : dishIdList){
                         Dish dish = dbOperator.queryDishById(dishId);
+                        mapFoodCellComponents.get(dish.getId()).setSoldOutVisibility(dish.isSoldOut());
                         //remind clients if the sold out dish are selected
                         for(ChoosedDish cf : choosedFoodList){
                             if (cf.getDish().getId() == dishId){
@@ -377,6 +397,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbOperator.saveObjectsByCascade(desks);
     }
 
+    public void persistFlavor(){
+        dbOperator.clearFlavor();
+        dbOperator.saveObjectsByCascade(flavors);
+    }
+
     /**
      * execute while click the dish add button.
      *
@@ -405,7 +430,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_DEFAULT){
-            addDishInChoosedList(dish, null);
+            addDishInChoosedList(dish);
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_SUBITEM){
             ChooseDishSubitemDialog dlg = new ChooseDishSubitemDialog(this, dish);
             dlg.showDialog();
@@ -418,7 +443,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            addDishInChoosedList(dish, null);
+                            addDishInChoosedList(dish);
                         }
                     })
                     .create().show();
@@ -449,9 +474,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *
      * otherwise, add a new item into list no matter whether the same dish exist or not.
      * @param dish
-     * @param requirements
+     * @param
      */
-    public void addDishInChoosedList(Dish dish, String requirements) {
+    public void addDishInChoosedList(Dish dish, ArrayList<DishChooseSubitem> subItems) {
         ChoosedDish choosedFood = null;
         if (dish.isAutoMergeWhileChoose()){
             //first check if the dish is exist in the list already
@@ -472,12 +497,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             choosedFood = new ChoosedDish(dish);
             choosedFoodList.add(choosedFood);
         }
-        if (requirements != null) {
-            choosedFood.setAdditionalRequirements(requirements);
+        if (subItems != null && !subItems.isEmpty()) {
+            choosedFood.setDishSubitemList(subItems);
         }
         choosedFoodAdapter.notifyDataSetChanged();
         calculateFoodPrice();
         refreshChooseAmountOnDishCell(dish);
+    }
+
+    public void addDishInChoosedList(Dish dish) {
+        addDishInChoosedList(dish, null);
     }
 
     private void refreshChooseAmountOnDishCell(Dish dish){
@@ -527,22 +556,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         refreshChooseAmountOnDishCell(dish);
     }
 
-    public void addRequirements(int position) {
-        ChoosedDish cf = choosedFoodList.get(position);
-        AddOrderRequirementsDialog dlg = new AddOrderRequirementsDialog(this);
-        dlg.showDialog(cf);
+    public void flavorDish(int position){
+        ChoosedDish cd = choosedFoodList.get(position);
+        ChooseFlavorDialog dlg = new ChooseFlavorDialog(this);
+        dlg.initValue(cd);
+        dlg.showDialog();
     }
 
+    public void notifyChoosedFoodFlavorChanged(){
+        choosedFoodAdapter.notifyDataSetChanged();
+    }
+    public void notifyChoosedFoodFlavorChanged(int position){
+        choosedFoodAdapter.notifyItemChanged(position);
+    }
+    public void notifyChoosedFoodFlavorChanged(ChoosedDish cd){
+        int position = -1;
+        for (int i = 0; i< choosedFoodList.size(); i++){
+            if (cd.getDish().getId() == choosedFoodList.get(i).getDish().getId()){
+                position = i;
+                break;
+            }
+        }
+        if (position > -1){
+            choosedFoodAdapter.notifyItemChanged(position);
+        }
+    }
     public ArrayList<ChoosedDish> getChoosedFoodList() {
         return choosedFoodList;
     }
 
-    public String getConfirmCode() {
-        return confirmCode;
+    public HashMap<String, String> getConfigsMap() {
+        return configsMap;
     }
 
-    public void setConfirmCode(String confirmCode) {
-        this.confirmCode = confirmCode;
+    public void setConfigsMap(HashMap<String, String> configsMap) {
+        this.configsMap = configsMap;
     }
 
     /**
@@ -572,23 +620,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if ("uploaderrorlog".equals(v.getTag())){
+        if (TAG_UPLOADERRORLOG.equals(v.getTag())){
             IOOperator.onUploadErrorLog(this);
-        } else if ("lookfor".equals(v.getTag())){
+        } else if (TAG_LOOKFOR.equals(v.getTag())){
             QuickSearchDialog dlg = new QuickSearchDialog(MainActivity.this);
             dlg.showDialog();
-        } else if ("refreshdata".equals(v.getTag())){
+        } else if (TAG_REFRESHDATA.equals(v.getTag())){
             RefreshDataDialog dlg = new RefreshDataDialog(MainActivity.this);
             dlg.showDialog();
-        } else if ("serverurl".equals(v.getTag())){
+        } else if (TAG_SERVERURL.equals(v.getTag())){
             SaveServerURLDialog dlg = new SaveServerURLDialog(MainActivity.this);
             dlg.showDialog();
-        } else if ("rbchinese".equals(v.getTag())){
+        } else if (TAG_RBCHINESE.equals(v.getTag())){
             onChangeLanguage(LANGUAGE_CHINESE);
-        } else if ("rbenglish".equals(v.getTag())){
+        } else if (TAG_RBENGLISH.equals(v.getTag())){
             onChangeLanguage(LANGUAGE_ENGLISH);
-        } else if ("btnorder".equals(v.getTag())){
+        } else if (TAG_BTNORDER.equals(v.getTag())){
             onStartOrder();
+        } else if (TAG_EXITSYSTEM.equals(v.getTag())){
+            QuitSystemDialog dlg = new QuitSystemDialog(this);
+            dlg.showDialog();
         }
     }
 
@@ -671,6 +722,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return desks;
     }
 
+    public ArrayList<Flavor> getFlavors() {
+        return flavors;
+    }
+
+    public void setFlavors(ArrayList<Flavor> flavors) {
+        this.flavors = flavors;
+    }
 
     //屏蔽实体按键BACK
     @Override

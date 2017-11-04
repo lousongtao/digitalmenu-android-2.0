@@ -25,6 +25,7 @@ class DishCellComponent{
     private final View layDishPicture;
     private final View foodCellView;
     private final Dish dish;
+    private ImageView ivSoldOut;
     private MainActivity mainActivity;
     public DishCellComponent(final MainActivity mainActivity, Dish _dish){
         this.mainActivity = mainActivity;
@@ -56,6 +57,9 @@ class DishCellComponent{
                 img.setBackgroundResource(R.drawable.chili3);
             foodcellPriceLayout.addView(img);
         }
+        if (dish.isSoldOut()){
+            setSoldOutVisibility(dish.isSoldOut());
+        }
     }
 
     public View getFoodCellView() {
@@ -64,7 +68,13 @@ class DishCellComponent{
 
     public void setSoldOutVisibility(boolean isSoldOut){
         dish.setSoldOut(isSoldOut);
-//        ivSoldOut.setVisibility(dish.isSoldOut() ? View.VISIBLE : View.INVISIBLE);
+        if (ivSoldOut == null){
+            //create this image just when needed
+            ivSoldOut = new ImageView(mainActivity);
+            ivSoldOut.setImageResource(R.drawable.soldout);
+            chooseButtonLayout.addView(ivSoldOut, 1);
+        }
+        ivSoldOut.setVisibility(dish.isSoldOut() ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void setPicture(Drawable d){

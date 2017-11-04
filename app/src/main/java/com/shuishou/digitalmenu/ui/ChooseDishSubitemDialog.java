@@ -30,22 +30,15 @@ import java.util.HashMap;
 
 public class ChooseDishSubitemDialog {
     private AlertDialog dlg;
-    private CheckBox cb1;
-    private CheckBox cb2;
-    private CheckBox cb3;
-    private CheckBox cb4;
-    private CheckBox cb5;
-    private CheckBox cb6;
-    private CheckBox cb7;
     private MainActivity mainActivity;
 
     private Dish dish;
     private int requireamount = 0;
-    private ArrayList<HashMap<String, String>> choosedSubitem = new ArrayList<>();
+    private ArrayList<HashMap<String, Object>> choosedSubitem = new ArrayList<>();
     private SimpleAdapter adapter;
     private final static String SHOWFIELD = "name";
-    private final static String TAG_SUBITEM = "SUBITEM";
-    private final static String TAG_REMOVE = "REMOVE";
+    private final static String ENTITY = "entity";
+//    private final static String TAG_SUBITEM = "SUBITEM";
     private final static int ROWAMOUNT = 3;
     public ChooseDishSubitemDialog(@NonNull MainActivity mainActivity, Dish dish) {
         this.mainActivity = mainActivity;
@@ -71,7 +64,7 @@ public class ChooseDishSubitemDialog {
             }
             TextView tv = new TextView(mainActivity);
             tv.setTextSize(25);
-            tv.setTag(TAG_SUBITEM);
+            tv.setTag(subitems.get(i));
             tv.setEllipsize(TextUtils.TruncateAt.END);
             tv.setSingleLine();
             tv.setMaxWidth(250);
@@ -100,15 +93,21 @@ public class ChooseDishSubitemDialog {
             tvInfo.setText("点选列表项可删除");
             builder.setTitle("选择");
             builder.setMessage("您选择的是 "+ dish.getChineseName() +" , 请选择 " + requireamount + " 项.");
+            //here cannot use listener on the positive button because the dialog will dismiss no matter
+            //the input value is valiable or not. I wish the dialog keep while input info is wrong.
+            builder.setPositiveButton("确认", null);
+            builder.setNegativeButton("取消", null);
         } else {
             tvInfo.setText("Delete item by clicking");
             builder.setTitle("Flavor");
             builder.setMessage("Please choose "+ requireamount + " flavor for " + dish.getEnglishName());
+            //here cannot use listener on the positive button because the dialog will dismiss no matter
+            //the input value is valiable or not. I wish the dialog keep while input info is wrong.
+            builder.setPositiveButton("Confirm", null);
+            builder.setNegativeButton("Cancel", null);
         }
-        //here cannot use listener on the positive button because the dialog will dismiss no matter
-        //the input value is valiable or not. I wish the dialog keep while input info is wrong.
-        builder.setPositiveButton("Confirm", null);
-        builder.setNegativeButton("Cancel", null);
+
+
         builder.setView(view);
         dlg = builder.create();
 
@@ -142,11 +141,11 @@ public class ChooseDishSubitemDialog {
             Toast.makeText(mainActivity, "The choosed amount is not right, you should choose " + requireamount, Toast.LENGTH_LONG).show();
             return;
         }
-        StringBuffer sb = new StringBuffer();
+        ArrayList<DishChooseSubitem> subitems = new ArrayList<>();
         for (int i = 0; i < requireamount; i++) {
-            sb.append(choosedSubitem.get(i).get(SHOWFIELD));
+            subitems.add((DishChooseSubitem)choosedSubitem.get(i).get(ENTITY));
         }
-        mainActivity.addDishInChoosedList(dish, sb.toString());
+        mainActivity.addDishInChoosedList(dish, subitems);
         dlg.dismiss();
     }
 
@@ -158,13 +157,12 @@ public class ChooseDishSubitemDialog {
 
         @Override
         public void onClick(View v) {
-            if (TAG_SUBITEM.equals(v.getTag())){
-                HashMap<String, String> map = new HashMap<>();
-                map.put(SHOWFIELD, ((TextView)v).getText().toString());
+            if (v.getTag() instanceof DishChooseSubitem){
+                HashMap<String, Object> map = new HashMap<>();
+                map.put(ENTITY, v.getTag());
+                map.put(SHOWFIELD, ((TextView) v).getText().toString());
                 choosedSubitem.add(map);
                 adapter.notifyDataSetChanged();
-            } else if (TAG_REMOVE.equals(v.getTag())){
-
             }
         }
     }

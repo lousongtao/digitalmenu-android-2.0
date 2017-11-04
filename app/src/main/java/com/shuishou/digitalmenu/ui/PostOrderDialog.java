@@ -21,6 +21,8 @@ import android.widget.Toast;
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Desk;
+import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
@@ -161,7 +163,7 @@ public class PostOrderDialog {
         new Thread(){
             @Override
             public void run() {
-                if (mainActivity.getConfirmCode().equals(txtCode.getText().toString())){
+                if (mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(txtCode.getText().toString())){
                     String deskstatus = httpOperator.checkDeskStatus(choosedDesk.getName());
                     if (InstantValue.CHECKDESK4MAKEORDER_OCCUPIED.equals(deskstatus)){
                         handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ASKTOADDDISHINORDER, choosedDesk.getId()));
@@ -238,11 +240,22 @@ public class PostOrderDialog {
 
     private JSONArray generateOrderJson() throws JSONException {
         JSONArray ja = new JSONArray();
-        for(ChoosedDish cf: choosedFoodList){
+        for(ChoosedDish cd: choosedFoodList){
             JSONObject jo = new JSONObject();
-            jo.put("id", cf.getDish().getId());
-            jo.put("amount", cf.getAmount());
-            jo.put("addtionalRequirements", cf.getAdditionalRequirements());
+            jo.put("id", cd.getDish().getId());
+            jo.put("amount", cd.getAmount());
+            StringBuffer sbReq = new StringBuffer();
+            if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
+                for ( DishChooseSubitem si: cd.getDishSubitemList()) {
+                    sbReq.append(si.getChineseName() + InstantValue.SPACESTRING);
+                }
+            }
+            if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
+                for (Flavor f: cd.getFlavorList()){
+                    sbReq.append(f.getChineseName()+ InstantValue.SPACESTRING);
+                }
+            }
+            jo.put("additionalRequirements", sbReq.toString());
             ja.put(jo);
         }
         return ja;

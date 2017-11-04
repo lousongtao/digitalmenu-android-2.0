@@ -19,6 +19,9 @@ public class Desk implements Serializable {
     @Column("name")
     private String name;
 
+    @Column("sequence")
+    private int sequence;
+
     public Desk(int id, String name) {
         this.id = id;
         this.name = name;
@@ -38,6 +41,14 @@ public class Desk implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
     }
 
     @Override

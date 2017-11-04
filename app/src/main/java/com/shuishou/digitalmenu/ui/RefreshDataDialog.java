@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.utils.CommonTool;
 
@@ -82,11 +83,11 @@ class RefreshDataDialog {
         }
         dlg.dismiss();
         mainActivity.startProgressDialog("loading", "loading, please wait...");
-        if (mainActivity.getConfirmCode() != null){
+        if (mainActivity.getConfigsMap() != null && mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE) != null){
             new Thread(){
                 @Override
                 public void run() {
-                    if (mainActivity.getConfirmCode().equals(code)){
+                    if (mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(code)){
                         mainActivity.onRefreshData();
                         dlg.dismiss();
                     } else {

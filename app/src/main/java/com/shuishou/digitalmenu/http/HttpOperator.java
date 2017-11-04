@@ -11,6 +11,7 @@ import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.bean.Indent;
 import com.shuishou.digitalmenu.bean.MenuVersion;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,25 +51,12 @@ public class HttpOperator {
     private MainActivity mainActivity;
 //    private ArrayList<String> listDishPictures = new ArrayList<>();
     private static final int WHAT_VALUE_QUERYMENU = 1;
-    private static final int WHAT_VALUE_CONFIRMCODE = 2;
-    private static final int WHAT_VALUE_UPLOADERRORLOG= 3;
+    private static final int WHAT_VALUE_QUERYFLAVOR = 2;
     private static final int WHAT_VALUE_QUERYDESK = 4;
     private static final int WHAT_VALUE_QUERYMENUVERSION = 5;
-    private static final int WHAT_VALUE_QUERYCONFIRMCODE = 6;
-    private static final int WHAT_VALUE_DOWNLOADIMAGE = 10;
+    private static final int WHAT_VALUE_QUERYCONFIGSMAP = 6;
 
     private Gson gson = new Gson();
-//    private StoreOrderData storeOrderData;
-//    private class StoreOrderData{
-//        String orders;
-//        int deskid;
-//        String confirmCode;
-//        StoreOrderData(String _confirmCode, String _orders, int _deskid){
-//            orders = _orders;
-//            deskid = _deskid;
-//            confirmCode = _confirmCode;
-//        }
-//    }
 
     private OnResponseListener responseListener =  new OnResponseListener<JSONObject>() {
         @Override
@@ -80,20 +69,17 @@ public class HttpOperator {
                 case WHAT_VALUE_QUERYMENU :
                     doResponseQueryMenu(response);
                     break;
-                case WHAT_VALUE_QUERYCONFIRMCODE:
-                    doResponseQueryConfirmCode(response);
+                case WHAT_VALUE_QUERYCONFIGSMAP:
+                    doResponseQueryConfigsMap(response);
                     break;
-//                case WHAT_VALUE_CONFIRMCODE:
-//                    doResponseConfirmCode4RefreshData(response);
-//                    break;
-//                case WHAT_VALUE_MAKEORDER :
-//                    doResponseMakeOrder(response);
-//                    break;
                 case WHAT_VALUE_QUERYDESK :
                     doResponseQueryDesk(response);
                     break;
                 case WHAT_VALUE_QUERYMENUVERSION:
                     doResponseQueryMenuVersion(response);
+                    break;
+                case WHAT_VALUE_QUERYFLAVOR:
+                    doResponseQueryFlavor(response);
                     break;
                 default:
             }
@@ -102,23 +88,20 @@ public class HttpOperator {
         @Override
         public void onFailed(int what, Response<JSONObject> response) {
             Log.e("Http failed", "what = "+ what + "\nresponse = "+ response.get());
+            MainActivity.LOG.error("Response Listener On Faid. what = "+ what + "\nresponse = "+ response.get());
             String msg = InstantValue.NULLSTRING;
             switch (what){
                 case WHAT_VALUE_QUERYMENU :
                     msg = "Failed to load Menu data. Please restart app!";
                     break;
-                case WHAT_VALUE_QUERYCONFIRMCODE:
-                    msg = "Failed to load Confirm Code. Please restart app!";
+                case WHAT_VALUE_QUERYCONFIGSMAP:
+                    msg = "Failed to load ConfigsMap. Please restart app!";
                     break;
-//                case WHAT_VALUE_CONFIRMCODE:
-//                    msg = "The input code is wrong.";
-//                    break;
-//                case WHAT_VALUE_MAKEORDER :
-//                    msg = "Failed to make order. Please try again!";
-//                    break;
                 case WHAT_VALUE_QUERYDESK :
                     msg = "Failed to load Desk data. Please restart app!";
                     break;
+                case WHAT_VALUE_QUERYFLAVOR:
+                    msg = "Failed to load Flavor data. Please restart app!";
             }
             new AlertDialog.Builder(mainActivity)
                     .setIcon(R.drawable.error)
@@ -142,6 +125,7 @@ public class HttpOperator {
     private void doResponseQueryMenu(Response<JSONObject> response){
         if (response.getException() != null){
             Log.e(logTag, "doResponseQueryMenu: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryMenu: " + response.getException().getMessage());
             sendErrorMessageToToast("Http:doResponseQueryMenu: " + response.getException().getMessage());
             return;
         }
@@ -154,25 +138,54 @@ public class HttpOperator {
             loadDishPictureFromServer();
         }else {
             Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
+            MainActivity.LOG.error("doResponseQueryMenu: get FALSE for query confirm code");
         }
     }
 
-    private void doResponseQueryConfirmCode(Response<JSONObject> response){
+    private void doResponseQueryConfigsMap(Response<JSONObject> response){
         if (response.getException() != null){
-            Log.e(logTag, "doResponseQueryMenu: " + response.getException().getMessage() );
-            sendErrorMessageToToast("Http:doResponseQueryMenu: " + response.getException().getMessage());
+            Log.e(logTag, "doResponseQueryConfigsMap: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryConfigsMap: " + response.getException().getMessage());
+            sendErrorMessageToToast("Http:doResponseQueryConfigsMap: " + response.getException().getMessage());
             return;
         }
-        HttpResult<String> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<String>>(){}.getType());
+        HttpResult<HashMap<String, String>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<HashMap<String, String>>>(){}.getType());
         if (result.success){
-            mainActivity.setConfirmCode(result.data);
+            mainActivity.setConfigsMap(result.data);
         } else {
-            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
+            Log.e(logTag, "doResponseQueryConfigsMap: get FALSE for query confirm code");
+            MainActivity.LOG.error("doResponseQueryConfigsMap: get FALSE for query confirm code");
         }
     }
+
+    private void doResponseQueryFlavor(Response<JSONObject> response){
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryFlavor: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryFlavor: " + response.getException().getMessage());
+            sendErrorMessageToToast("Http:doResponseQueryFlavor: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<ArrayList<Flavor>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<Flavor>>>(){}.getType());
+        if (result.success){
+            ArrayList<Flavor> flavors = result.data;
+            mainActivity.setFlavors(result.data);
+            mainActivity.persistFlavor();
+        } else {
+            Log.e(logTag, "doResponseQueryFlavor: get FALSE for query flavor");
+            MainActivity.LOG.error("doResponseQueryFlavor: get FALSE for query flavor");
+            new AlertDialog.Builder(mainActivity)
+                    .setIcon(R.drawable.error)
+                    .setTitle("WRONG")
+                    .setMessage("Failed to load flavor data. Please restart app!")
+                    .setNegativeButton("OK", null)
+                    .create().show();
+        }
+    }
+
     private void doResponseQueryDesk(Response<JSONObject> response){
         if (response.getException() != null){
             Log.e(logTag, "doResponseQueryDesk: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryDesk: " + response.getException().getMessage());
             sendErrorMessageToToast("Http:doResponseQueryDesk: " + response.getException().getMessage());
             return;
         }
@@ -189,7 +202,8 @@ public class HttpOperator {
             mainActivity.persistDesk();
             mainActivity.getPostOrderDialog().initDeskData(result.data);
         } else {
-            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
+            Log.e(logTag, "doResponseQueryDesk: get FALSE for query desk");
+            MainActivity.LOG.error("doResponseQueryDesk: get FALSE for query desk");
             new AlertDialog.Builder(mainActivity)
                     .setIcon(R.drawable.error)
                     .setTitle("WRONG")
@@ -202,6 +216,7 @@ public class HttpOperator {
     private void doResponseQueryMenuVersion(Response<JSONObject> response){
         if (response.getException() != null){
             Log.e(logTag, "doResponseQueryMenuVersion: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryMenuVersion: " + response.getException().getMessage());
             sendErrorMessageToToast("Http:doResponseQueryMenuVersion: " + response.getException().getMessage());
             return;
         }
@@ -209,7 +224,8 @@ public class HttpOperator {
         if (result.success){
             mainActivity.getDbOperator().saveObjectByCascade(new MenuVersion(1, result.data));
         } else {
-            Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
+            Log.e(logTag, "doResponseQueryMenuVersion: get FALSE for query menu version");
+            MainActivity.LOG.error("doResponseQueryMenuVersion: get FALSE for query menu version");
             new AlertDialog.Builder(mainActivity)
                     .setIcon(R.drawable.error)
                     .setTitle("WRONG")
@@ -229,10 +245,10 @@ public class HttpOperator {
 
     //load flavor
     public void loadFlavorData(){
-//        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
-//                "start loading flavor data ..."));
-//        Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/getdesks");
-//        requestQueue.add(WHAT_VALUE_QUERYDESK, deskRequest, responseListener);
+        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
+                "start loading flavor data ..."));
+        Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/queryflavor");
+        requestQueue.add(WHAT_VALUE_QUERYFLAVOR, deskRequest, responseListener);
     }
 
     //load menu
@@ -249,27 +265,10 @@ public class HttpOperator {
         requestQueue.add(WHAT_VALUE_QUERYMENUVERSION, mvRequest, responseListener);
     }
 
-    public void queryConfirmCode(){
-        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/getconfirmcode", RequestMethod.GET);
-        requestQueue.add(WHAT_VALUE_QUERYCONFIRMCODE, request, responseListener);
+    public void queryConfigsMap(){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/queryconfigmap", RequestMethod.GET);
+        requestQueue.add(WHAT_VALUE_QUERYCONFIGSMAP, request, responseListener);
     }
-//    public String checkConfirmCodeSync(String code){
-//        Request<JSONObject> codeRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/checkconfirmcode", RequestMethod.POST);
-//        codeRequest.add("code", code);
-//        Response<JSONObject> response = NoHttp.startRequestSync(codeRequest);
-//        if (response.getException() != null){
-//            return response.getException().getMessage();
-//        }
-//        if (response.get() == null) {
-//            Log.e(logTag, "Error occur while synchronize check confirm code. response.get() is null.");
-//            return "Error occur while synchronize check confirm code. response.get() is null";
-//        }
-//        HttpResult<Boolean> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Boolean>>(){}.getType());
-//        if (result.data)
-//            return InstantValue.RESULT_SUCCESS;
-//        else
-//            return "Confirm code is wrong!";
-//    }
 
     /**
      * check the desk if available for making order.
@@ -331,36 +330,6 @@ public class HttpOperator {
         //TODO: require restart app
     }
 
-
-//    private void doResponseMakeOrder(Response<JSONObject> response){
-//        if (response.getException() != null){
-//            Log.e(logTag, "doResponseQueryMakeOrder: " + response.getException().getMessage() );
-//            return;
-//        }
-//        HttpResult<Integer> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
-//        if (result.success){
-//            mainActivity.onFinishMakeOrder(result.data);
-//        } else {
-//            mainActivity.popupWarnDialog(R.drawable.error, "WRONG", "Something wrong happened while making order! \n\nError message : " + result.result);
-//        }
-//    }
-
-
-//    private void doResponseConfirmCode4RefreshData(Response<JSONObject> response){
-//        JSONObject result = response.get();
-//        try {
-//            boolean b = Boolean.valueOf(result.get("success").toString());
-//            if (b){
-//                mainActivity.onRefreshData();
-//            } else {
-//                mainActivity.popupWarnDialog(R.drawable.error, "WRONG", "Confirmation Code is wrong!");
-//            }
-//        } catch (JSONException e) {
-//            Log.e("HttpOperator", "JSON exception in checkConfirmCode");
-//            e.printStackTrace();
-//        }
-//    }
-
     /**
      * first check the CONFIRM CODE, if it is right, make order
      * @param orders
@@ -381,6 +350,7 @@ public class HttpOperator {
         }
         if (response.get() == null) {
             Log.e(logTag, "Error occur while make order. response.get() is null.");
+            MainActivity.LOG.error("Error occur while make order. response.get() is null.");
             HttpResult<Integer> result = new HttpResult<>();
             result.result = "Error occur while make order. response.get() is null";
             return result;
@@ -402,6 +372,7 @@ public class HttpOperator {
         }
         if (response.get() == null) {
             Log.e(logTag, "Error occur while add dish to order. response.get() is null.");
+            MainActivity.LOG.error("Error occur while add dish to order. response.get() is null.");
             HttpResult<Integer> result = new HttpResult<>();
             result.result = "Error occur while add dish to order. response.get() is null";
             return result;
@@ -422,6 +393,7 @@ public class HttpOperator {
         Response<JSONObject> response = NoHttp.startRequestSync(request);
         if (response.getException() != null){
             Log.e(logTag, "chechMenuVersion: There are Exception to checkmenuversion" );//TODO:
+            MainActivity.LOG.error("chechMenuVersion: There are Exception to checkmenuversion" );
             sendErrorMessageToToast("Http:chechMenuVersion: " + response.getException().getMessage());
             return null;
         }
@@ -447,6 +419,7 @@ public class HttpOperator {
                 Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
                 if (respDish.getException() != null){
                     Log.e(logTag, "get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
+                    MainActivity.LOG.error("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
                     sendErrorMessageToToast("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
                 }
                 HttpResult<ArrayList<Dish>> resultDish = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Dish>>>(){}.getType());
@@ -466,6 +439,7 @@ public class HttpOperator {
             return dishIdList;
         } else {
             Log.e(logTag, "get false from server while Check Menu Version");
+            MainActivity.LOG.error("get false from server while Check Menu Version");
             sendErrorMessageToToast("get false from server while Check Menu Version");
         }
         return null;

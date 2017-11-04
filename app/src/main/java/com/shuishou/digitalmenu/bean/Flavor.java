@@ -45,7 +45,7 @@ public class Flavor implements Serializable{
 
 	@Override
 	public String toString() {
-		return "Category1 [chineseName=" + chineseName + ", englishName=" + englishName + "]";
+		return "Flavor [chineseName=" + chineseName + ", englishName=" + englishName + "]";
 	}
 
 	@Override

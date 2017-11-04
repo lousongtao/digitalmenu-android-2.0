@@ -5,6 +5,7 @@ import android.view.View;
 import com.shuishou.digitalmenu.bean.Dish;
 
 /**
+ * click the dish choose button to add it into choosed list
  * Created by Administrator on 2017/9/22.
  */
 

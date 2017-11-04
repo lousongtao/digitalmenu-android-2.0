@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="600dp"
+    android:layout_height="match_parent"
+    android:minWidth="800dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/frame_choosedSubitem"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/color_OrangeTheme_FoodDisplayFragmentBackground"
+        android:orientation="horizontal"></LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/frame_choosedflavor"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:background="@color/color_OrangeTheme_FoodDisplayFragmentBackground"
+        android:orientation="horizontal"></LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/frame_flavors"
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:background="@color/color_OrangeTheme_ChoosedFoodBackgroundArea"
+        android:orientation="horizontal"></LinearLayout>
+</LinearLayout>

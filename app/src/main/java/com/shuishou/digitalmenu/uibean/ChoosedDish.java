@@ -4,6 +4,10 @@ import android.graphics.drawable.Drawable;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.Flavor;
+
+import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2016/12/25.
@@ -13,8 +17,10 @@ public class ChoosedDish {
     private Dish dish;
     private int imageId;
     private Drawable image;
-    private String additionalRequirements = InstantValue.NULLSTRING;
+//    private String additionalRequirements = InstantValue.NULLSTRING;
     private int amount = 1; //default value
+    private ArrayList<DishChooseSubitem> dishSubitemList = new ArrayList<>();
+    private ArrayList<Flavor> flavorList = new ArrayList<>();
 
     public ChoosedDish() {
     }
@@ -47,12 +53,36 @@ public class ChoosedDish {
         return dish;
     }
 
-    public String getAdditionalRequirements() {
-        return additionalRequirements;
+//    public String getAdditionalRequirements() {
+//        return additionalRequirements;
+//    }
+//
+//    public void setAdditionalRequirements(String additionalRequirements) {
+//        this.additionalRequirements = additionalRequirements;
+//    }
+
+    public ArrayList<DishChooseSubitem> getDishSubitemList() {
+        return dishSubitemList;
     }
 
-    public void setAdditionalRequirements(String additionalRequirements) {
-        this.additionalRequirements = additionalRequirements;
+    public void setDishSubitemList(ArrayList<DishChooseSubitem> dishSubitemList) {
+        this.dishSubitemList = dishSubitemList;
+    }
+
+    public void addDishSubitemList(DishChooseSubitem dishSubitem) {
+        this.dishSubitemList.add(dishSubitem);
+    }
+
+    public ArrayList<Flavor> getFlavorList() {
+        return flavorList;
+    }
+
+    public void setFlavorList(ArrayList<Flavor> flavorList) {
+        this.flavorList = flavorList;
+    }
+
+    public void addFlavorList(Flavor flavor) {
+        this.flavorList.add(flavor);
     }
 
     @Override

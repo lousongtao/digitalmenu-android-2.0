@@ -58,6 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="bottom|right|end"
+                android:background="@drawable/logo2"
                 android:orientation="horizontal">
 
                 <RadioGroup
@@ -71,8 +72,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:text="@string/english_version"
-                        android:textColor="@color/colorAccent"
-                        android:textColorHighlight="@color/colorFoodAreaBG" />
+                        android:textColor="@color/colorWhite"
+                        android:textColorLink="@color/colorWhite"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold" />
 
                     <RadioButton
                         android:id="@+id/rbChinese"
@@ -80,7 +83,9 @@
                         android:layout_height="match_parent"
                         android:checked="true"
                         android:text="@string/chinese_version"
-                        android:textColor="@color/colorFoodAreaBG" />
+                        android:textColor="@color/color_OrangeTheme_Category1Font"
+                        android:textSize="19sp"
+                        android:textStyle="bold" />
                 </RadioGroup>
 
             </LinearLayout>
@@ -187,6 +192,14 @@
             android:layout_height="80dp"
             android:paddingTop="20dp"
             android:text="@string/drawmenu_uploaderrorlog"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/drawermenu_exit"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingTop="20dp"
+            android:text="@string/drawmenu_exit"
             android:textSize="30sp" />
     </LinearLayout>
 
