@@ -22,7 +22,6 @@
         android:id="@+id/imgChoosedArrow"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="0"
         android:contentDescription="arrow"
         android:paddingBottom="10dp"
         android:paddingTop="10dp"

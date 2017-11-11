@@ -1,28 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="600dp"
+    android:layout_width="800dp"
     android:layout_height="match_parent"
     android:minWidth="800dp"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/txtDishSubitem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <LinearLayout
-        android:id="@+id/frame_choosedSubitem"
+        android:id="@+id/frame_choosedflavor"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@color/color_OrangeTheme_FoodDisplayFragmentBackground"
         android:orientation="horizontal"></LinearLayout>
 
     <LinearLayout
-        android:id="@+id/frame_choosedflavor"
+        android:id="@+id/frame_flavors"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="@color/color_OrangeTheme_FoodDisplayFragmentBackground"
+        android:layout_height="80dp"
+        android:background="@color/color_OrangeTheme_ChoosedFoodBackgroundArea"
         android:orientation="horizontal"></LinearLayout>
 
     <LinearLayout
-        android:id="@+id/frame_flavors"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:background="@color/color_OrangeTheme_ChoosedFoodBackgroundArea"
-        android:orientation="horizontal"></LinearLayout>
+        android:layout_height="50dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="101dp"
+            android:layout_height="wrap_content"
+            android:text="Other Flavor" />
+
+        <EditText
+            android:id="@+id/txtOtherFlavor"
+            android:layout_width="291dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/btnConfirmFlavor"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:text="Add" />
+
+    </LinearLayout>
 </LinearLayout>

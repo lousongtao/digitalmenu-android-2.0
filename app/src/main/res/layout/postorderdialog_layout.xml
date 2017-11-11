@@ -3,48 +3,63 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/textView"
-            android:layout_width="180dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
             android:text="Confirmation Code"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/txt_confirmcode"
-            android:layout_width="150dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="160dp"
             android:inputType="number"
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/textView3"
-            android:layout_width="180dp"
+            android:layout_width="160dp"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="50dp"
+            android:layout_marginLeft="240dp"
             android:text="Customer Amount"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/txt_customeramount"
-            android:layout_width="100dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="400dp"
             android:ems="10"
             android:inputType="number"
             android:text="2"
             android:textSize="18sp" />
 
-    </LinearLayout>
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="470dp"
+            android:text="Comments"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/txtComments"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="570dp"
+            android:ems="10"
+            android:inputType="textPersonName" />
+
+    </FrameLayout>
 
     <TableLayout
         android:id="@+id/postorder_deskarea"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="250dp"
         android:orientation="horizontal">
 
     </TableLayout>

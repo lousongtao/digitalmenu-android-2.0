@@ -38,6 +38,8 @@ public final class InstantValue {
     public static String URL_TOMCAT = null;
     public static final String SERVER_CATALOG_DISH_PICTURE_BIG = "dishimage_big";
     public static final String SERVER_CATALOG_DISH_PICTURE_SMALL = "dishimage_small";
+    public static final String SERVER_CATALOG_DISH_PICTURE_ORIGIN = "dishimage_origin";
+    public static final String LOCAL_CATALOG_DISH_PICTURE_ORIGIN = "/data/data/com.shuishou.digitalmenu/dishimage_origin/";
     public static final String LOCAL_CATALOG_DISH_PICTURE_BIG = "/data/data/com.shuishou.digitalmenu/dishimage_big/";
     public static final String LOCAL_CATALOG_DISH_PICTURE_SMALL = "/data/data/com.shuishou.digitalmenu/dishimage_small/";
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";

@@ -3,17 +3,24 @@ package com.shuishou.digitalmenu.ui;
 import android.content.DialogInterface;
 import android.content.IntentFilter;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -22,26 +29,42 @@ import java.util.ArrayList;
  */
 
 public class ChooseFlavorDialog {
-    private float fontSize = 20;
+    private static ChooseFlavorDialog instance;
+    private float fontSize = 15;
     private MainActivity mainActivity;
     private ChoosedDish choosedDish;
     private LinearLayout frameChoosedFlavor;
     private LinearLayout frameAllFlavor;
-    private LinearLayout frameChoosedSubitem;
+    private EditText txtOtherFlavor;
+    private TextView txtDishSubitem;
+    private Button btnConfirmFlavor;
     private ChooseFlavorListener chooseFlavorListener = new ChooseFlavorListener();
     private UnchooseFlavorListener unchooseFlavorListener = new UnchooseFlavorListener();
     private AlertDialog dlg;
-    public ChooseFlavorDialog(MainActivity mainActivity){
+    private ChooseFlavorDialog(MainActivity mainActivity){
         this.mainActivity = mainActivity;
         initUI();
+    }
+
+    public static ChooseFlavorDialog getInstance(MainActivity mainActivity){
+        if (instance == null)
+            instance = new ChooseFlavorDialog(mainActivity);
+        return instance;
     }
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.chooseflavor_layout, null);
         frameAllFlavor = (LinearLayout)view.findViewById(R.id.frame_flavors);
         frameChoosedFlavor = (LinearLayout)view.findViewById(R.id.frame_choosedflavor);
-        frameChoosedSubitem = (LinearLayout)view.findViewById(R.id.frame_choosedSubitem);
-
+        txtDishSubitem = (TextView) view.findViewById(R.id.txtDishSubitem);
+        txtOtherFlavor = (EditText)view.findViewById(R.id.txtOtherFlavor);
+        btnConfirmFlavor = (Button)view.findViewById(R.id.btnConfirmFlavor);
+        btnConfirmFlavor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addOtherFlavor();
+            }
+        });
         ArrayList<Flavor> flavors = mainActivity.getFlavors();
         if (flavors != null && !flavors.isEmpty()){
             for (int i = 0; i < flavors.size(); i++) {
@@ -59,38 +82,40 @@ public class ChooseFlavorDialog {
             }
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+
         builder.setTitle("Choose your flavor")
                 .setIcon(R.drawable.info)
                 .setNegativeButton("OK", null)
-
                 .setView(view);
         dlg = builder.create();
-
         dlg.setCancelable(false);
         dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams param = window.getAttributes();
+        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        param.y = 0;
+        window.setAttributes(param);
     }
 
     public void initValue(ChoosedDish choosedDish){
         this.choosedDish = choosedDish;
         frameChoosedFlavor.removeAllViews();
-        frameChoosedSubitem.removeAllViews();
         if (choosedDish.getDishSubitemList().isEmpty()){
-            frameChoosedSubitem.setVisibility(View.GONE);
+            txtDishSubitem.setVisibility(View.GONE);
         } else {
-            frameChoosedSubitem.setVisibility(View.VISIBLE);
-
+            txtDishSubitem.setVisibility(View.VISIBLE);
+            StringBuffer sbSubitem = new StringBuffer();
             for (int i = 0; i < choosedDish.getDishSubitemList().size(); i++) {
                 DishChooseSubitem si = choosedDish.getDishSubitemList().get(i);
-                TextView tv = new TextView(mainActivity);
-                tv.setTag(si);
-                tv.setTextSize(fontSize);
                 if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
-                    tv.setText(si.getEnglishName());
+                    sbSubitem.append(si.getEnglishName());
+                    sbSubitem.append(InstantValue.SPACESTRING);
                 } else {
-                    tv.setText(si.getChineseName());
+                    sbSubitem.append(si.getChineseName());
+                    sbSubitem.append(InstantValue.SPACESTRING);
                 }
-                frameChoosedSubitem.addView(tv);
             }
+            txtDishSubitem.setText(sbSubitem.toString());
         }
 
         for (int i = 0; i < choosedDish.getFlavorList().size(); i++) {
@@ -108,17 +133,34 @@ public class ChooseFlavorDialog {
         }
     }
 
-//    public ChoosedDish getChoosedDish() {
-//        return choosedDish;
-//    }
-//
-//    public void setChoosedDish(ChoosedDish choosedDish) {
-//        this.choosedDish = choosedDish;
-//    }
-
-    public void showDialog(){
+    private void addOtherFlavor(){
+        if (txtOtherFlavor.getText() == null || txtOtherFlavor.getText().length() == 0)
+            return;
+        //create a virtual Flavor object
+        Flavor f = new Flavor();
+        f.setChineseName(txtOtherFlavor.getText().toString());
+        f.setEnglishName(txtOtherFlavor.getText().toString());
+        choosedDish.addFlavorList(f);
+        final Button btn = new Button(mainActivity);
+        btn.setTag(f);
+        btn.setTextSize(fontSize);
+        btn.setText(txtOtherFlavor.getText().toString());
+        btn.setOnClickListener(unchooseFlavorListener);
+        txtOtherFlavor.setText(InstantValue.NULLSTRING);
+        frameChoosedFlavor.addView(btn);
+        mainActivity.notifyChoosedDishFlavorChanged(choosedDish);
+    }
+    public void showDialog(byte language){
+        if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
+            dlg.setTitle("Choose your flavor");
+            btnConfirmFlavor.setText("ADD");
+        } else {
+            dlg.setTitle("挑选您喜欢的口味");
+            btnConfirmFlavor.setText("添加");
+        }
         dlg.show();
     }
+
 
     class ChooseFlavorListener implements View.OnClickListener{
 
@@ -141,7 +183,7 @@ public class ChooseFlavorDialog {
                 btn.setText(f.getChineseName());
             }
             frameChoosedFlavor.addView(btn);
-            mainActivity.notifyChoosedFoodFlavorChanged(choosedDish);
+            mainActivity.notifyChoosedDishFlavorChanged(choosedDish);
         }
     }
 
@@ -151,7 +193,7 @@ public class ChooseFlavorDialog {
         public void onClick(View v) {
             choosedDish.getFlavorList().remove(v.getTag());
             frameChoosedFlavor.removeView(v);
-            mainActivity.notifyChoosedFoodFlavorChanged(choosedDish);
+            mainActivity.notifyChoosedDishFlavorChanged(choosedDish);
         }
     }
 }

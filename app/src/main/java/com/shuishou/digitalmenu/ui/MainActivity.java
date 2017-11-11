@@ -75,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ArrayList<Desk> desks;
     private ArrayList<Flavor> flavors;
-    private RecyclerChoosedFoodAdapter choosedFoodAdapter;
-    private ArrayList<ChoosedDish> choosedFoodList= new ArrayList<>();
+    private RecyclerChoosedDishAdapter choosedDishAdapter;
+    private ArrayList<ChoosedDish> choosedDishList= new ArrayList<>();
     private ArrayList<Category1> category1s = new ArrayList<>(); // = TestData.makeCategory1();
     private HashMap<String, String> configsMap;
     private HttpOperator httpOperator;
@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private PostOrderDialog dlgPostOrder;
     private ChooseFlavorDialog dlgChooseFlavor;
+    private DishDetailDialog dlgDishDetail;
 
     public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU = 1;
     private Handler refreshMenuHandler;
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String logTag = "TestTime-MainActivity";
 
     private SparseArray<DishDisplayFragment> mapDishDisplayFragments = new SparseArray<>();
-    private SparseArray<DishCellComponent> mapFoodCellComponents = new SparseArray<>();
+    private SparseArray<DishCellComponent> mapDishCellComponents = new SparseArray<>();
 
     public static final int PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA = 3;
     public static final int PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH = 2;
@@ -143,11 +144,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        }
 
         setContentView(R.layout.activity_main);
-        RecyclerView lvChoosedFood = (RecyclerView) findViewById(R.id.list_choosedfood);
-        choosedFoodAdapter = new RecyclerChoosedFoodAdapter(this, R.layout.choosedfood_item, choosedFoodList);
+        RecyclerView lvChoosedDish = (RecyclerView) findViewById(R.id.list_choosedfood);
+        choosedDishAdapter = new RecyclerChoosedDishAdapter(this, R.layout.choosedfood_item, choosedDishList);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        lvChoosedFood.setLayoutManager(layoutManager);
-        lvChoosedFood.setAdapter(choosedFoodAdapter);
+        lvChoosedDish.setLayoutManager(layoutManager);
+        lvChoosedDish.setAdapter(choosedDishAdapter);
         tvChoosedItems = (TextView) findViewById(R.id.tvChoosedFoodItems);
         tvChoosedPrice  = (TextView) findViewById(R.id.tvChoosedFoodPrice);
         rbChinese = (RadioButton) findViewById(R.id.rbChinese);
@@ -195,12 +196,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         desks = dbOperator.queryDesks();
         flavors = dbOperator.queryFlavors();
 
-        dlgPostOrder = new PostOrderDialog(this);
-        dlgChooseFlavor = new ChooseFlavorDialog(this);
+        dlgPostOrder = PostOrderDialog.getInstance(this);
+        dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
+        dlgDishDetail = DishDetailDialog.getInstance(this);
 
         startRefreshMenuTimer();
         buildMenu();
-//        ViewServer.get(this).addWindow(this);
     }
 
     /**
@@ -208,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * them in a SparseArray. While need to display one fragment, just get it from the list.
      * one category2 = one fragment
      */
-    private void initialFoodCellComponents(){
+    private void initialDishCellComponents(){
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = displayMetrics.widthPixels;
@@ -247,13 +248,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     tl.addView(tr);
                                 }
                                 DishCellComponent fc = new DishCellComponent(this, dish);
-                                tr.addView(fc.getFoodCellView(), trlp);
+                                tr.addView(fc.getDishCellView(), trlp);
                                 //这里要把fc先加入进tablerow才可以设置background,否则fc会被background的size撑大
                                 if (dish.getPictureName() != null) {
                                     Drawable d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + dish.getPictureName());
                                     fc.setPicture(d);
                                 }
-                                mapFoodCellComponents.put(dish.getId(), fc);
+                                mapDishCellComponents.put(dish.getId(), fc);
                             }
                             sv.addView(tl);
                         }
@@ -281,9 +282,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //loop to find Dish Object depending on the id, reload the data from database
                     for(Integer dishId : dishIdList){
                         Dish dish = dbOperator.queryDishById(dishId);
-                        mapFoodCellComponents.get(dish.getId()).setSoldOutVisibility(dish.isSoldOut());
+                        mapDishCellComponents.get(dish.getId()).setSoldOutVisibility(dish.isSoldOut());
                         //remind clients if the sold out dish are selected
-                        for(ChoosedDish cf : choosedFoodList){
+                        for(ChoosedDish cf : choosedDishList){
                             if (cf.getDish().getId() == dishId){
                                 if (dish.isSoldOut()) {
                                     String errormsg = "Dish " + dish.getEnglishName() + " is Sold Out already, please remove it from your selection.";
@@ -328,23 +329,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onStartOrder(){
-        if (choosedFoodList == null || choosedFoodList.isEmpty())
+        if (choosedDishList == null || choosedDishList.isEmpty())
             return;
         dlgPostOrder.clearup();
-        dlgPostOrder.showDialog(httpOperator, choosedFoodList);
+        dlgPostOrder.showDialog(httpOperator, choosedDishList);
     }
 
     public void onFinishMakeOrder(String title, String message){
         //clear data
-        choosedFoodList.clear();
-        choosedFoodAdapter.notifyDataSetChanged();
+        choosedDishList.clear();
+        choosedDishAdapter.notifyDataSetChanged();
 //        adapter.clear();
         tvChoosedItems.setText("0");
         tvChoosedPrice.setText("$0");
         dlgPostOrder.dismiss();
-        int fcCount = mapFoodCellComponents.size();
+        int fcCount = mapDishCellComponents.size();
         for (int i = 0; i< fcCount; i++){
-            DishCellComponent fc = mapFoodCellComponents.valueAt(i);
+            DishCellComponent fc = mapDishCellComponents.valueAt(i);
             fc.changeAmount(0);
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -357,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void buildMenu(){
         category1s = dbOperator.queryAllMenu();
-        initialFoodCellComponents();
+        initialDishCellComponents();
 
         CategoryTabAdapter categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
         listViewCategorys.setAdapter(categoryTabAdapter);
@@ -477,31 +478,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param
      */
     public void addDishInChoosedList(Dish dish, ArrayList<DishChooseSubitem> subItems) {
-        ChoosedDish choosedFood = null;
+        ChoosedDish choosedDish = null;
         if (dish.isAutoMergeWhileChoose()){
             //first check if the dish is exist in the list already
-            for (ChoosedDish cf : choosedFoodList) {
+            for (ChoosedDish cf : choosedDishList) {
                 if (cf.getDish().getId() == dish.getId()) {
-                    choosedFood = cf;
+                    choosedDish = cf;
                     break;
                 }
             }
-            if (choosedFood != null) {
-                choosedFood.setAmount(choosedFood.getAmount() + 1);
+            if (choosedDish != null) {
+                choosedDish.setAmount(choosedDish.getAmount() + 1);
             } else {
-                choosedFood = new ChoosedDish(dish);
-                choosedFoodList.add(choosedFood);
+                choosedDish = new ChoosedDish(dish);
+                choosedDishList.add(choosedDish);
             }
 
         } else {
-            choosedFood = new ChoosedDish(dish);
-            choosedFoodList.add(choosedFood);
+            choosedDish = new ChoosedDish(dish);
+            choosedDishList.add(choosedDish);
         }
         if (subItems != null && !subItems.isEmpty()) {
-            choosedFood.setDishSubitemList(subItems);
+            choosedDish.setDishSubitemList(subItems);
         }
-        choosedFoodAdapter.notifyDataSetChanged();
-        calculateFoodPrice();
+        choosedDishAdapter.notifyDataSetChanged();
+        calculateDishPrice();
         refreshChooseAmountOnDishCell(dish);
     }
 
@@ -510,79 +511,88 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void refreshChooseAmountOnDishCell(Dish dish){
-        DishCellComponent fc = mapFoodCellComponents.get(dish.getId());
+        DishCellComponent fc = mapDishCellComponents.get(dish.getId());
         int amount = 0;
-        for(ChoosedDish cf : choosedFoodList){
+        for(ChoosedDish cf : choosedDishList){
             if (cf.getDish().getId() == dish.getId())
                 amount += cf.getAmount();
         }
         fc.changeAmount(amount);
     }
 
-    private void calculateFoodPrice(){
+    private void calculateDishPrice(){
         double totalPrice = 0.0;
-        for(ChoosedDish cf : choosedFoodList){
+        for(ChoosedDish cf : choosedDishList){
             totalPrice += cf.getAmount() * cf.getPrice();
         }
 //        double gst = totalPrice / 11;
-        tvChoosedItems.setText(String.valueOf(choosedFoodList.size()));
+        tvChoosedItems.setText(String.valueOf(choosedDishList.size()));
         tvChoosedPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, totalPrice));
     }
 
     public void plusDish(int position) {
-        choosedFoodList.get(position).setAmount(choosedFoodList.get(position).getAmount() + 1);
+        choosedDishList.get(position).setAmount(choosedDishList.get(position).getAmount() + 1);
         //show choosed icon
-        refreshChooseAmountOnDishCell(choosedFoodList.get(position).getDish());
-        calculateFoodPrice();
-        choosedFoodAdapter.notifyItemChanged(position);
+        refreshChooseAmountOnDishCell(choosedDishList.get(position).getDish());
+        calculateDishPrice();
+        choosedDishAdapter.notifyItemChanged(position);
     }
 
     public void minusDish(int position) {
-        if (position >= choosedFoodList.size()){
+        if (position >= choosedDishList.size()){
             return; //点击太快可以导致同时触发多次事件, 前面的时间把列表清空后, 后面的就出发OutofBounds异常
         }
-        Dish dish = choosedFoodList.get(position).getDish();
-        int oldAmount = choosedFoodList.get(position).getAmount();
+        Dish dish = choosedDishList.get(position).getDish();
+        int oldAmount = choosedDishList.get(position).getAmount();
 
         if (oldAmount == 1) {
-            choosedFoodList.remove(position);
-            choosedFoodAdapter.notifyItemRemoved(position);
-            choosedFoodAdapter.notifyItemRangeChanged(position, choosedFoodList.size());
+            choosedDishList.remove(position);
+            choosedDishAdapter.notifyItemRemoved(position);
+            choosedDishAdapter.notifyItemRangeChanged(position, choosedDishList.size());
         }else {
-            choosedFoodList.get(position).setAmount( oldAmount - 1);
-            choosedFoodAdapter.notifyItemChanged(position);
+            choosedDishList.get(position).setAmount( oldAmount - 1);
+            choosedDishAdapter.notifyItemChanged(position);
         }
-        calculateFoodPrice();
+        calculateDishPrice();
         refreshChooseAmountOnDishCell(dish);
     }
 
     public void flavorDish(int position){
-        ChoosedDish cd = choosedFoodList.get(position);
-        ChooseFlavorDialog dlg = new ChooseFlavorDialog(this);
-        dlg.initValue(cd);
-        dlg.showDialog();
+        ChoosedDish cd = choosedDishList.get(position);
+        dlgChooseFlavor.initValue(cd);
+        dlgChooseFlavor.showDialog(getLanguage());
     }
 
-    public void notifyChoosedFoodFlavorChanged(){
-        choosedFoodAdapter.notifyDataSetChanged();
+    public void showDishDetailDialog(Dish dish){
+        int choosedAmount = 0;
+        for(ChoosedDish cd : choosedDishList){
+            if (dish.getId() == cd.getDish().getId()){
+                choosedAmount = cd.getAmount();
+                break;
+            }
+        }
+        dlgDishDetail.showDialog(getLanguage(), dish, choosedAmount);
     }
-    public void notifyChoosedFoodFlavorChanged(int position){
-        choosedFoodAdapter.notifyItemChanged(position);
+    public void notifyChoosedDishFlavorChanged(){
+        choosedDishAdapter.notifyDataSetChanged();
     }
-    public void notifyChoosedFoodFlavorChanged(ChoosedDish cd){
+    public void notifyChoosedDishFlavorChanged(int position){
+        choosedDishAdapter.notifyItemChanged(position);
+    }
+    public void notifyChoosedDishFlavorChanged(ChoosedDish cd){
         int position = -1;
-        for (int i = 0; i< choosedFoodList.size(); i++){
-            if (cd.getDish().getId() == choosedFoodList.get(i).getDish().getId()){
+        for (int i = 0; i< choosedDishList.size(); i++){
+            if (cd.getDish().getId() == choosedDishList.get(i).getDish().getId()){
                 position = i;
                 break;
             }
         }
         if (position > -1){
-            choosedFoodAdapter.notifyItemChanged(position);
+            choosedDishAdapter.notifyItemChanged(position);
         }
     }
-    public ArrayList<ChoosedDish> getChoosedFoodList() {
-        return choosedFoodList;
+    public ArrayList<ChoosedDish> getChoosedDishList() {
+        return choosedDishList;
     }
 
     public HashMap<String, String> getConfigsMap() {
@@ -603,6 +613,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //clear all data and picture files
         IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG);
         IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL);
+        IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN);
         dbOperator.deleteAllData(Desk.class);
         dbOperator.deleteAllData(MenuVersion.class);
         dbOperator.deleteAllData(Flavor.class);
@@ -653,12 +664,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         this.mapDishDisplayFragments = mapDishDisplayFragments;
     }
 
-    public SparseArray<DishCellComponent> getMapFoodCellComponents() {
-        return mapFoodCellComponents;
+    public SparseArray<DishCellComponent> getMapDishCellComponents() {
+        return mapDishCellComponents;
     }
 
-    public void setMapFoodCellComponents(SparseArray<DishCellComponent> mapFoodCellComponents) {
-        this.mapFoodCellComponents = mapFoodCellComponents;
+    public void setMapDishCellComponents(SparseArray<DishCellComponent> mapDishCellComponents) {
+        this.mapDishCellComponents = mapDishCellComponents;
     }
 
     /**
@@ -772,6 +783,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         refreshMenuTimer = null;
-//        ViewServer.get(this).removeWindow(this);
     }
 }

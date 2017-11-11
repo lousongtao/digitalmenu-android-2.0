@@ -8,6 +8,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,8 +41,10 @@ import java.util.ArrayList;
  */
 
 public class PostOrderDialog {
+    private static PostOrderDialog instance;
     private EditText txtCode;
     private EditText txtCustomerAmount;
+    private EditText txtComments;
     private TableLayout deskAreaLayout;
     private ArrayList<ChoosedDish> choosedFoodList;
     private HttpOperator httpOperator;
@@ -69,16 +72,22 @@ public class PostOrderDialog {
         }
     };
 
-    public PostOrderDialog(@NonNull MainActivity mainActivity) {
+    private PostOrderDialog(@NonNull MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         initUI();
     }
 
+    public static PostOrderDialog getInstance(MainActivity mainActivity){
+        if (instance == null)
+            instance = new PostOrderDialog(mainActivity);
+        return instance;
+    }
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.postorderdialog_layout, null);
         txtCode = (EditText) view.findViewById(R.id.txt_confirmcode);
         deskAreaLayout = (TableLayout)view.findViewById(R.id.postorder_deskarea);
         txtCustomerAmount = (EditText) view.findViewById(R.id.txt_customeramount);
+        txtComments = (EditText) view.findViewById(R.id.txtComments);
         initDeskData(mainActivity.getDesks());
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
 //        builder.setTitle("Confirm");
@@ -105,17 +114,21 @@ public class PostOrderDialog {
         });
         dlg.setCancelable(false);
         dlg.setCanceledOnTouchOutside(false);
-        Window window = dlg.getWindow();
-        WindowManager.LayoutParams param = window.getAttributes();
-        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        param.y = 50;
-        window.setAttributes(param);
+
     }
 
     public void showDialog(HttpOperator httpOperator, ArrayList<ChoosedDish> choosedFoodList){
         this.choosedFoodList = choosedFoodList;
         this.httpOperator = httpOperator;
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams param = window.getAttributes();
+        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        param.y = 0;
+        param.width = WindowManager.LayoutParams.MATCH_PARENT;
+        param.height = 330;
+        window.setAttributes(param);
         dlg.show();
+
     }
 
     private void dealHandlerMessage(Message msg){
@@ -192,7 +205,7 @@ public class PostOrderDialog {
 
         if (os != null){
             HttpResult<Integer> result = httpOperator.makeOrder(txtCode.getText().toString(), os.toString(), deskid,
-                    Integer.parseInt(txtCustomerAmount.getText().toString()));
+                    Integer.parseInt(txtCustomerAmount.getText().toString()), txtComments.getText().toString());
             if (result.success){
                 handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_MAKEORDERSUCCESS, result.data));
             } else {
@@ -262,11 +275,16 @@ public class PostOrderDialog {
     }
     public void initDeskData(ArrayList<Desk> desks){
         deskAreaLayout.removeAllViews();
+        int margin = 5;
         TableRow.LayoutParams trlp = new TableRow.LayoutParams();
-        trlp.setMargins(5, 5 ,0 ,0);
+        trlp.setMargins(margin, margin ,0 ,0);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int rowamount = (int) Math.floor((displayMetrics.widthPixels - 200) / InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
+//        int rowamount = (int) Math.floor(mainActivity.getWindow().getAttributes().width / InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
         TableRow tr = null;
         for (int i = 0; i < desks.size(); i++) {
-            if (i % 10 == 0){
+            if (i % rowamount == 0){
                 tr = new TableRow(mainActivity);
                 deskAreaLayout.addView(tr);
             }
@@ -280,6 +298,7 @@ public class PostOrderDialog {
     //clear up old data in the components
     public void clearup(){
         txtCode.setText(InstantValue.NULLSTRING);
+        txtComments.setText(InstantValue.NULLSTRING);
         for(DeskIcon di : deskIconList){
             di.setChoosed(false);
         }

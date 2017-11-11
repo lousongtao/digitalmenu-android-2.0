@@ -1,13 +1,11 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.provider.ContactsContract;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
@@ -24,14 +22,15 @@ import java.util.ArrayList;
  * Created by Administrator on 2016/12/25.
  */
 
-public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerChoosedFoodAdapter.ViewHolder> {
+public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerChoosedDishAdapter.ViewHolder> {
 
     private final int resourceId;
     private final ArrayList<ChoosedDish> choosedFoods;
     private final MainActivity mainActivity;
     static class ViewHolder extends RecyclerView.ViewHolder{
         final ChangeLanguageTextView tvFoodName;
-        final FrameLayout foodImage;
+//        final FrameLayout foodImage;
+        final ImageView imgDishPicture;
         final TextView tvFoodPrice;
         final TextView tvAmount;
         final ChangeLanguageTextView tvAddtionalRequirements;
@@ -40,7 +39,8 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
         final ImageView flavorImage;
         public ViewHolder(View view){
             super(view);
-            foodImage = (FrameLayout) view.findViewById(R.id.choosedfood_image);
+//            foodImage = (FrameLayout) view.findViewById(R.id.choosedfood_image);
+            imgDishPicture = (ImageView) view.findViewById(R.id.imgChoosedFood);
             tvFoodName = (ChangeLanguageTextView) view.findViewById(R.id.choosedfood_name);
             tvFoodPrice = (TextView) view.findViewById(R.id.choosedfood_price);
             tvAmount = (TextView) view.findViewById(R.id.choosedfood_amount);
@@ -54,9 +54,7 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
         }
     }
 
-
-
-    public RecyclerChoosedFoodAdapter(MainActivity mainActivity,int resourceId, ArrayList<ChoosedDish> objects){
+    public RecyclerChoosedDishAdapter(MainActivity mainActivity,int resourceId, ArrayList<ChoosedDish> objects){
         choosedFoods = objects;
         this.resourceId = resourceId;
         this.mainActivity = mainActivity;
@@ -78,33 +76,19 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
         holder.tvAddtionalRequirements.setTxtEnglish(getAdditionalRequirementsEN(cd));
         holder.tvAddtionalRequirements.setTxtChinese(getAdditionalRequirementsCN(cd));
         holder.tvAddtionalRequirements.show(mainActivity.getLanguage());
-        holder.foodImage.setBackground(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cd.getDish().getPictureName()));
+//        holder.foodImage.setBackground(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cd.getDish().getPictureName()));
+        holder.imgDishPicture.setImageDrawable(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cd.getDish().getPictureName()));
         holder.tvFoodName.setTxtEnglish(cd.getName_en());
         holder.tvFoodName.setTxtChinese(cd.getName_cn());
         holder.tvFoodName.show(mainActivity.getLanguage());
         holder.tvFoodPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, cd.getPrice()));
-//        holder.plusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_ENTITY, cd);
-//        holder.minusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_ENTITY, cd);
-//        holder.flavorImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_ENTITY, cd);
+
         holder.plusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
         holder.minusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
         holder.flavorImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
         holder.plusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.minusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.flavorImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
-//        holder.plusImage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mainActivity.plusDish(pos);
-//            }
-//        });
-//
-//        holder.minusImage.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mainActivity.minusDish(pos);
-//            }
-//        });
     }
 
     @Override
@@ -116,12 +100,12 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
         StringBuffer sb = new StringBuffer();
         if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
             for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getEnglishName());
+                sb.append(si.getEnglishName() + InstantValue.SPACESTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getEnglishName());
+                sb.append(f.getEnglishName() + InstantValue.SPACESTRING);
             }
         }
         return sb.toString();
@@ -131,12 +115,12 @@ public class RecyclerChoosedFoodAdapter extends RecyclerView.Adapter<RecyclerCho
         StringBuffer sb = new StringBuffer();
         if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
             for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getChineseName());
+                sb.append(si.getChineseName() + InstantValue.SPACESTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getChineseName());
+                sb.append(f.getChineseName() + InstantValue.SPACESTRING);
             }
         }
         return sb.toString();

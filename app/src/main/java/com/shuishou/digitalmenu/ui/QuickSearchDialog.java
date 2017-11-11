@@ -135,7 +135,7 @@ public class QuickSearchDialog {
 
             tvEnglishName.setText(dish.getEnglishName());
             tvChineseName.setText(dish.getChineseName());
-            for(ChoosedDish cd: mainActivity.getChoosedFoodList()){
+            for(ChoosedDish cd: mainActivity.getChoosedDishList()){
                 if (dish.getId() == cd.getDish().getId()){
                     tvChoosedAmount.setVisibility(View.VISIBLE);
                     tvChoosedAmount.setText(String.valueOf(cd.getAmount()));
@@ -161,7 +161,7 @@ public class QuickSearchDialog {
                 Dish dish = (Dish)v.getTag();
                 mainActivity.onDishChoosed(dish);
                 TextView tvChoosedAmount = (TextView) ((View)v.getParent()).findViewById(R.id.tvChoosedAmount);
-                for(ChoosedDish cd: mainActivity.getChoosedFoodList()){
+                for(ChoosedDish cd: mainActivity.getChoosedDishList()){
                     if (dish.getId() == cd.getDish().getId()){
                         tvChoosedAmount.setVisibility(View.VISIBLE);
                         tvChoosedAmount.setText(String.valueOf(cd.getAmount()));

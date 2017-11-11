@@ -22,7 +22,7 @@ class DishCellComponent{
     private TextView tvChoosedAmount;
     private static FrameLayout.LayoutParams choosedAmountParam = new FrameLayout.LayoutParams(20, 20);
     private final FrameLayout chooseButtonLayout;
-    private final View layDishPicture;
+    private final ImageView imgDishPicture;
     private final View foodCellView;
     private final Dish dish;
     private ImageView ivSoldOut;
@@ -32,12 +32,12 @@ class DishCellComponent{
         this.dish = _dish;
         foodCellView = LayoutInflater.from(mainActivity).inflate(R.layout.dishcell_layout, null);
         ChangeLanguageTextView foodNameText = (ChangeLanguageTextView) foodCellView.findViewById(R.id.foodNameText);
-//        tvChoosedAmount = (TextView) foodCellView.findViewById(R.id.tvChoosedAmount);
         chooseButtonLayout = (FrameLayout) foodCellView.findViewById(R.id.chooseButtonLayout);
         TextView foodPriceText = (TextView) foodCellView.findViewById(R.id.foodPriceText);
         LinearLayout foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
-//        ivSoldOut = (ImageView) foodCellView.findViewById(R.id.imgSoldOut);
-        layDishPicture = foodCellView.findViewById(R.id.layDishPicture);
+        imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
+        imgDishPicture.setTag(dish);
+        imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance(mainActivity));
         ImageButton chooseButton = (ImageButton) foodCellView.findViewById(R.id.chooseBtn);
         chooseButton.setTag(dish);
         chooseButton.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
@@ -62,7 +62,7 @@ class DishCellComponent{
         }
     }
 
-    public View getFoodCellView() {
+    public View getDishCellView() {
         return foodCellView;
     }
 
@@ -78,7 +78,7 @@ class DishCellComponent{
     }
 
     public void setPicture(Drawable d){
-        layDishPicture.setBackground(d);
+        imgDishPicture.setImageDrawable(d);
     }
 
     public void changeAmount(int amount){

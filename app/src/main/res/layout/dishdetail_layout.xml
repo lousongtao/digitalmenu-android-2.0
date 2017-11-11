@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="540dp"
+    android:layout_height="650dp"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/imgPicture"
+        android:layout_width="match_parent"
+        android:layout_height="540dp"
+        android:orientation="vertical">
+
+    </ImageView>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:layout_gravity="bottom"
+        android:alpha="1"
+        android:background="@color/color_OrangeTheme_FoodCellBackground"
+        android:baselineAligned="false"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/foodNameText"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="top"
+            android:singleLine="true"
+            android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
+            android:textSize="32sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/foodPriceText"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="300dp"
+            android:gravity="bottom"
+            android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
+            android:textSize="32sp" />
+
+        <ImageView
+            android:id="@+id/imgHotLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="320dp" />
+
+        <FrameLayout
+            android:id="@+id/chooseButtonLayout"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="480dp">
+
+            <ImageButton
+                android:id="@+id/btnChoose_dishdetail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:contentDescription="ChooseButton"
+                android:scaleType="centerInside"
+                android:src="@drawable/select_btn_icon_s" />
+
+            <TextView
+                android:id="@+id/txtAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/small_red_circle" />
+        </FrameLayout>
+
+
+    </FrameLayout>
+
+</LinearLayout>

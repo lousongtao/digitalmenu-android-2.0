@@ -103,12 +103,7 @@ public class HttpOperator {
                 case WHAT_VALUE_QUERYFLAVOR:
                     msg = "Failed to load Flavor data. Please restart app!";
             }
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.error)
-                    .setTitle("WRONG")
-                    .setMessage(msg)
-                    .setNegativeButton("OK", null)
-                    .create().show();
+            CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", msg);
         }
 
         @Override
@@ -173,12 +168,7 @@ public class HttpOperator {
         } else {
             Log.e(logTag, "doResponseQueryFlavor: get FALSE for query flavor");
             MainActivity.LOG.error("doResponseQueryFlavor: get FALSE for query flavor");
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.error)
-                    .setTitle("WRONG")
-                    .setMessage("Failed to load flavor data. Please restart app!")
-                    .setNegativeButton("OK", null)
-                    .create().show();
+            CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", "Failed to load flavor data. Please restart app!");
         }
     }
 
@@ -204,12 +194,7 @@ public class HttpOperator {
         } else {
             Log.e(logTag, "doResponseQueryDesk: get FALSE for query desk");
             MainActivity.LOG.error("doResponseQueryDesk: get FALSE for query desk");
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.error)
-                    .setTitle("WRONG")
-                    .setMessage("Failed to load Desk data. Please restart app!")
-                    .setNegativeButton("OK", null)
-                    .create().show();
+            CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", "Failed to load Desk data. Please restart app!");
         }
     }
 
@@ -226,12 +211,7 @@ public class HttpOperator {
         } else {
             Log.e(logTag, "doResponseQueryMenuVersion: get FALSE for query menu version");
             MainActivity.LOG.error("doResponseQueryMenuVersion: get FALSE for query menu version");
-            new AlertDialog.Builder(mainActivity)
-                    .setIcon(R.drawable.error)
-                    .setTitle("WRONG")
-                    .setMessage("Failed to load Menu version data. Please redo synchronization action!")
-                    .setNegativeButton("OK", null)
-                    .create().show();
+            CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", "Failed to load Menu version data. Please redo synchronization action!");
         }
     }
 
@@ -335,12 +315,13 @@ public class HttpOperator {
      * @param orders
      * @param deskid
      */
-    public HttpResult<Integer> makeOrder(String code, String orders, int deskid, int customerAmount){
+    public HttpResult<Integer> makeOrder(String code, String orders, int deskid, int customerAmount, String comments){
         Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/makeindent", RequestMethod.POST);
         request.add("confirmCode", code);
         request.add("indents", orders);
         request.add("deskid", deskid);
         request.add("customerAmount", customerAmount);
+        request.add("comments", comments);
         Response<JSONObject> response = NoHttp.startRequestSync(request);
 
         if (response.getException() != null){
@@ -392,8 +373,8 @@ public class HttpOperator {
         request.add("versionId", localVersion);
         Response<JSONObject> response = NoHttp.startRequestSync(request);
         if (response.getException() != null){
-            Log.e(logTag, "chechMenuVersion: There are Exception to checkmenuversion" );//TODO:
-            MainActivity.LOG.error("chechMenuVersion: There are Exception to checkmenuversion" );
+            Log.e(logTag, "chechMenuVersion: There are Exception to checkmenuversion\n"+ response.getException().getMessage() );//TODO:
+            MainActivity.LOG.error("chechMenuVersion: There are Exception to checkmenuversion\n"+ response.getException().getMessage() );
             sendErrorMessageToToast("Http:chechMenuVersion: " + response.getException().getMessage());
             return null;
         }
@@ -474,6 +455,8 @@ public class HttpOperator {
         DownloadDishImageListener listener = new DownloadDishImageListener(mainActivity);
         DownloadQueue queue = NoHttp.newDownloadQueue();
         int key = 0;// the key of filelist;
+        String temps1 = "/../";
+        String temps2 = "/";
         for (Category1 c1: mainActivity.getMenu()) {
             for(Category2 c2 : c1.getCategory2s()){
                 for(Dish dish : c2.getDishes()){
@@ -481,15 +464,21 @@ public class HttpOperator {
                     if (filename != null){
                         key++;
                         listener.addFiletoList(key, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + filename);
-                        String urlbig = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+"/"+ filename;
+                        String urlbig = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+ temps2 + filename;
                         DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
                         queue.add(key, requestbig, listener);
 
                         key++;
                         listener.addFiletoList(key, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + filename);
-                        String urlsmall = InstantValue.URL_TOMCAT + "/../"+ InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+"/"+ filename;
+                        String urlsmall = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+ temps2 + filename;
                         DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
                         queue.add(key, requestsmall, listener);
+
+                        key++;
+                        listener.addFiletoList(key, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN + filename);
+                        String urlorigin = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_ORIGIN + temps2 + filename;
+                        DownloadRequest requestorigin = NoHttp.createDownloadRequest(urlorigin, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN, filename, true, true);
+                        queue.add(key, requestorigin, listener);
                     }
                 }
             }
