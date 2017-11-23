@@ -10,8 +10,8 @@ import android.util.AttributeSet;
  */
 
 public class ChangeLanguageTextView extends android.support.v7.widget.AppCompatTextView {
-    private String txtChinese;
-    private String txtEnglish;
+    private String txtFirstLanguageName;
+    private String txtSecondLanguageName;
 
     public ChangeLanguageTextView(Context context){
         super(context);
@@ -25,38 +25,37 @@ public class ChangeLanguageTextView extends android.support.v7.widget.AppCompatT
         setEllipsize(TextUtils.TruncateAt.END);
     }
 
-    public ChangeLanguageTextView(Context context, String txtChinese, String txtEnglish){
+    public ChangeLanguageTextView(Context context, String txtFirstLanguageName, String txtSecondLanguageName){
         super(context);
         setTypeface(null, Typeface.BOLD);
         setEllipsize(TextUtils.TruncateAt.END);
-        this.txtChinese = txtChinese;
-        this.txtEnglish = txtEnglish;
+        this.txtFirstLanguageName = txtFirstLanguageName;
+        this.txtSecondLanguageName = txtSecondLanguageName;
     }
 
     public void show(byte language){
-        if (language == MainActivity.LANGUAGE_CHINESE){
-                setText(txtChinese);
-        } else if (language == MainActivity.LANGUAGE_ENGLISH){
-                setText(txtEnglish);
+        if (language == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+            setText(txtFirstLanguageName);
+        } else if (language == MainActivity.LANGUAGE_SECONDLANGUAGE){
+            setText(txtSecondLanguageName);
         }
     }
 
-    public String getTxtChinese() {
-        return txtChinese;
+    public String getTxtFirstLanguageName() {
+        return txtFirstLanguageName;
     }
 
-    public void setTxtChinese(String txtChinese) {
-        this.txtChinese = txtChinese;
+    public void setTxtFirstLanguageName(String txtFirstLanguageName) {
+        this.txtFirstLanguageName = txtFirstLanguageName;
     }
 
-    public String getTxtEnglish() {
-        return txtEnglish;
+    public String getTxtSecondLanguageName() {
+        return txtSecondLanguageName;
     }
 
-    public void setTxtEnglish(String txtEnglish) {
-        this.txtEnglish = txtEnglish;
+    public void setTxtSecondLanguageName(String txtSecondLanguageName) {
+        this.txtSecondLanguageName = txtSecondLanguageName;
     }
-
 
 //    public void
 }

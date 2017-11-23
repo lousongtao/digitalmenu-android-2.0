@@ -12,12 +12,12 @@ public class Flavor implements Serializable{
 
 	@PrimaryKey(value = AssignType.BY_MYSELF)
 	private int id;
-	
-	@Column("chinese_name")
-	private String chineseName;
-	
-	@Column("english_name")
-	private String englishName;
+
+	@Column("first_language_name")
+	private String firstLanguageName;
+
+	@Column("second_language_name")
+	private String secondLanguageName;
 	
 	public int getId() {
 		return id;
@@ -27,25 +27,27 @@ public class Flavor implements Serializable{
 		this.id = id;
 	}
 
-	public String getChineseName() {
-		return chineseName;
+	public String getFirstLanguageName() {
+		return firstLanguageName;
 	}
 
-	public void setChineseName(String chineseName) {
-		this.chineseName = chineseName;
+	public void setFirstLanguageName(String firstLanguageName) {
+		this.firstLanguageName = firstLanguageName;
 	}
 
-	public String getEnglishName() {
-		return englishName;
+	public String getSecondLanguageName() {
+		return secondLanguageName;
 	}
 
-	public void setEnglishName(String englishName) {
-		this.englishName = englishName;
+	public void setSecondLanguageName(String secondLanguageName) {
+		this.secondLanguageName = secondLanguageName;
 	}
 
 	@Override
 	public String toString() {
-		return "Flavor [chineseName=" + chineseName + ", englishName=" + englishName + "]";
+		return "Flavor{" +
+				"firstLanguageName='" + firstLanguageName + '\'' +
+				'}';
 	}
 
 	@Override

@@ -114,7 +114,8 @@ public class QuickSearchDialog {
         String code = txtSearchCode.getText().toString();
         ArrayList<Dish> results = new ArrayList<>();
         for(Dish d : allDishes){
-            if (d.getEnglishName().toLowerCase().contains(code.toLowerCase())
+            if (d.getFirstLanguageName().toLowerCase().contains(code.toLowerCase())
+                    || (d.getSecondLanguageName() != null && d.getSecondLanguageName().toLowerCase().contains(code.toLowerCase()))
                     || (d.getAbbreviation() != null && d.getAbbreviation().toLowerCase().contains(code.toLowerCase()))){
                 results.add(d);
             }
@@ -127,14 +128,14 @@ public class QuickSearchDialog {
             Dish dish = results.get(i);
             View v = resultCellList.get(i);
             v.setVisibility(View.VISIBLE);
-            TextView tvEnglishName = (TextView)v.findViewById(R.id.txtEnglishName);
-            TextView tvChineseName = (TextView)v.findViewById(R.id.txtChineseName);
+            TextView txtFirstLanguageName = (TextView)v.findViewById(R.id.txtFirstLanguageName);
+            TextView txtSecondLanguageName = (TextView)v.findViewById(R.id.txtSecondLanguageName);
             TextView tvChoosedAmount = (TextView) v.findViewById(R.id.tvChoosedAmount);
             ImageButton chooseButton = (ImageButton) v.findViewById(R.id.chooseBtn);
             chooseButton.setTag(dish);
 
-            tvEnglishName.setText(dish.getEnglishName());
-            tvChineseName.setText(dish.getChineseName());
+            txtFirstLanguageName.setText(dish.getFirstLanguageName());
+            txtSecondLanguageName.setText(dish.getSecondLanguageName());
             for(ChoosedDish cd: mainActivity.getChoosedDishList()){
                 if (dish.getId() == cd.getDish().getId()){
                     tvChoosedAmount.setVisibility(View.VISIBLE);

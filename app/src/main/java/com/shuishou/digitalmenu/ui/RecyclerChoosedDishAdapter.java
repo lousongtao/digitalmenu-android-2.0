@@ -73,13 +73,13 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         ChoosedDish cd = choosedFoods.get(position);
         holder.tvAmount.setText(cd.getAmount()+InstantValue.NULLSTRING);
 
-        holder.tvAddtionalRequirements.setTxtEnglish(getAdditionalRequirementsEN(cd));
-        holder.tvAddtionalRequirements.setTxtChinese(getAdditionalRequirementsCN(cd));
+        holder.tvAddtionalRequirements.setTxtFirstLanguageName(getAdditionalRequirementsFirstLanguage(cd));
+        holder.tvAddtionalRequirements.setTxtSecondLanguageName(getAdditionalRequirementsSecondLanguage(cd));
         holder.tvAddtionalRequirements.show(mainActivity.getLanguage());
 //        holder.foodImage.setBackground(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cd.getDish().getPictureName()));
         holder.imgDishPicture.setImageDrawable(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL + cd.getDish().getPictureName()));
-        holder.tvFoodName.setTxtEnglish(cd.getName_en());
-        holder.tvFoodName.setTxtChinese(cd.getName_cn());
+        holder.tvFoodName.setTxtFirstLanguageName(cd.getFirstLanguageName());
+        holder.tvFoodName.setTxtSecondLanguageName(cd.getSecondLanguageName());
         holder.tvFoodName.show(mainActivity.getLanguage());
         holder.tvFoodPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, cd.getPrice()));
 
@@ -89,6 +89,7 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         holder.plusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.minusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.flavorImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
+        holder.flavorImage.setVisibility(cd.getDish().isAllowFlavor() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -96,31 +97,31 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         return choosedFoods.size();
     }
 
-    public String getAdditionalRequirementsEN(ChoosedDish cd){
+    public String getAdditionalRequirementsFirstLanguage(ChoosedDish cd){
         StringBuffer sb = new StringBuffer();
         if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
             for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getEnglishName() + InstantValue.SPACESTRING);
+                sb.append(si.getFirstLanguageName() + InstantValue.SPACESTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getEnglishName() + InstantValue.SPACESTRING);
+                sb.append(f.getFirstLanguageName() + InstantValue.SPACESTRING);
             }
         }
         return sb.toString();
     }
 
-    public String getAdditionalRequirementsCN(ChoosedDish cd){
+    public String getAdditionalRequirementsSecondLanguage(ChoosedDish cd){
         StringBuffer sb = new StringBuffer();
         if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
             for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getChineseName() + InstantValue.SPACESTRING);
+                sb.append(si.getSecondLanguageName() + InstantValue.SPACESTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getChineseName() + InstantValue.SPACESTRING);
+                sb.append(f.getSecondLanguageName() + InstantValue.SPACESTRING);
             }
         }
         return sb.toString();

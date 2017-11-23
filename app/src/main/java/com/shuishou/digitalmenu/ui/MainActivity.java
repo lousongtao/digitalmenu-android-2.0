@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -51,24 +52,25 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MainActivity.class.getSimpleName());
-    public final static byte LANGUAGE_ENGLISH = 1;
-    public final static byte LANGUAGE_CHINESE = 2;
+    public final static byte LANGUAGE_FIRSTLANGUAGE = 1;
+    public final static byte LANGUAGE_SECONDLANGUAGE = 2;
     private String TAG_UPLOADERRORLOG = "uploaderrorlog";
     private String TAG_EXITSYSTEM = "exitsystem";
     private String TAG_LOOKFOR = "lookfor";
     private String TAG_REFRESHDATA = "refreshdata";
     private String TAG_SERVERURL = "serverurl";
-    private String TAG_RBCHINESE = "rbchinese";
-    private String TAG_RBENGLISH = "rbenglish";
+    private String TAG_RBFIRSTLANGUAGE = "rbFirstLanguage";
+    private String TAG_RBSECONDLANGUAGE = "rbSecondLanguage";
     private String TAG_BTNORDER = "btnorder";
     private CategoryTabListView listViewCategorys;
-    private RadioButton rbChinese;
-    private RadioButton rbEnglish;
+    private RadioButton rbFirstLanguage;
+    private RadioButton rbSecondLanguage;
     private TextView tvChoosedItems;
     private TextView tvChoosedPrice;
     private TextView tvOrdersLabel;
@@ -151,8 +153,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         lvChoosedDish.setAdapter(choosedDishAdapter);
         tvChoosedItems = (TextView) findViewById(R.id.tvChoosedFoodItems);
         tvChoosedPrice  = (TextView) findViewById(R.id.tvChoosedFoodPrice);
-        rbChinese = (RadioButton) findViewById(R.id.rbChinese);
-        rbEnglish = (RadioButton) findViewById(R.id.rbEnglish);
+        rbFirstLanguage = (RadioButton) findViewById(R.id.rbFirstLanguage);
+        rbSecondLanguage = (RadioButton) findViewById(R.id.rbSecondLanguage);
         FrameLayout btnOrder = (FrameLayout) findViewById(R.id.checkoutButton);
         tvOrdersLabel = (TextView) findViewById(R.id.tvChoosedFoodLabel);
         TextView tvRefreshData = (TextView)findViewById(R.id.drawermenu_refreshdata);
@@ -168,16 +170,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnLookfor.setTag(TAG_LOOKFOR);
         tvRefreshData.setTag(TAG_REFRESHDATA);
         tvServerURL.setTag(TAG_SERVERURL);
-        rbChinese.setTag(TAG_RBCHINESE);
-        rbEnglish.setTag(TAG_RBENGLISH);
+        rbFirstLanguage.setTag(TAG_RBFIRSTLANGUAGE);
+        rbSecondLanguage.setTag(TAG_RBSECONDLANGUAGE);
         btnOrder.setTag(TAG_BTNORDER);
         tvUploadErrorLog.setOnClickListener(this);
         tvExit.setOnClickListener(this);
         btnLookfor.setOnClickListener(this);
         tvRefreshData.setOnClickListener(this);
         tvServerURL.setOnClickListener(this);
-        rbChinese.setOnClickListener(this);
-        rbEnglish.setOnClickListener(this);
+        rbFirstLanguage.setOnClickListener(this);
+        rbSecondLanguage.setOnClickListener(this);
         btnOrder.setOnClickListener(this);
 
         //init tool class, NoHttp
@@ -287,9 +289,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         for(ChoosedDish cf : choosedDishList){
                             if (cf.getDish().getId() == dishId){
                                 if (dish.isSoldOut()) {
-                                    String errormsg = "Dish " + dish.getEnglishName() + " is Sold Out already, please remove it from your selection.";
-                                    if (getLanguage() == LANGUAGE_CHINESE)
-                                        errormsg = "您选择的 " + dish.getChineseName() + " 已经售完, 请从列表中将其去除.";
+                                    String errormsg = "Dish " + dish.getFirstLanguageName() + " is Sold Out already, please remove it from your selection.";
+                                    /**
+                                     * this is just for Chinese restaurant use, this is not good code
+                                     */
+                                    if ((rbFirstLanguage.isChecked() && "中文".equals(rbFirstLanguage.getText()))
+                                        || (rbSecondLanguage.isChecked() && "中文".equals(rbSecondLanguage.getText())))
+                                        errormsg = "您选择的 " + dish.getFirstLanguageName() + " 已经售完, 请从列表中将其去除.";
                                     CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
                                 }
                             }
@@ -369,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        onChangeLanguage(getLanguage());
+        onChangeLanguage();
         progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
     }
 
@@ -436,7 +442,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ChooseDishSubitemDialog dlg = new ChooseDishSubitemDialog(this, dish);
             dlg.showDialog();
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOCHOOSE){
-            String msg = getLanguage() == LANGUAGE_CHINESE? dish.getChoosePopInfo().getPopInfoCN() : dish.getChoosePopInfo().getPopInfoEN();
+            String msg = (getLanguage() == LANGUAGE_FIRSTLANGUAGE) ? dish.getChoosePopInfo().getFirstLanguageName() : dish.getChoosePopInfo().getSecondLanguageName();
             new AlertDialog.Builder(this)
                     .setIcon(R.drawable.info)
                     .setTitle("Infomation")
@@ -449,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     })
                     .create().show();
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOQUIT){
-            String msg = getLanguage() == LANGUAGE_CHINESE? dish.getChoosePopInfo().getPopInfoCN() : dish.getChoosePopInfo().getPopInfoEN();
+            String msg = (getLanguage() == LANGUAGE_SECONDLANGUAGE) ? dish.getChoosePopInfo().getFirstLanguageName() : dish.getChoosePopInfo().getSecondLanguageName();
             new AlertDialog.Builder(this)
                     .setIcon(R.drawable.info)
                     .setTitle("Infomation")
@@ -560,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void flavorDish(int position){
         ChoosedDish cd = choosedDishList.get(position);
         dlgChooseFlavor.initValue(cd);
-        dlgChooseFlavor.showDialog(getLanguage());
+        dlgChooseFlavor.showDialog();
     }
 
     public void showDishDetailDialog(Dish dish){
@@ -601,6 +607,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void setConfigsMap(HashMap<String, String> configsMap) {
         this.configsMap = configsMap;
+
+        if ("1".equals(configsMap.get(InstantValue.CONFIGS_LANGUAGEAMOUNT))){
+            rbFirstLanguage.setVisibility(View.GONE);
+            rbSecondLanguage.setVisibility(View.GONE);
+        } else {
+            rbFirstLanguage.setText(configsMap.get(InstantValue.CONFIGS_FIRSTLANGUAGENAME));
+            rbSecondLanguage.setText(configsMap.get(InstantValue.CONFIGS_SECONDLANGUAGENAME));
+            rbFirstLanguage.setChecked(true);
+        }
     }
 
     /**
@@ -642,10 +657,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (TAG_SERVERURL.equals(v.getTag())){
             SaveServerURLDialog dlg = new SaveServerURLDialog(MainActivity.this);
             dlg.showDialog();
-        } else if (TAG_RBCHINESE.equals(v.getTag())){
-            onChangeLanguage(LANGUAGE_CHINESE);
-        } else if (TAG_RBENGLISH.equals(v.getTag())){
-            onChangeLanguage(LANGUAGE_ENGLISH);
+        } else if (TAG_RBFIRSTLANGUAGE.equals(v.getTag())){
+            onChangeLanguage();
+        } else if (TAG_RBSECONDLANGUAGE.equals(v.getTag())){
+            onChangeLanguage();
         } else if (TAG_BTNORDER.equals(v.getTag())){
             onStartOrder();
         } else if (TAG_EXITSYSTEM.equals(v.getTag())){
@@ -673,32 +688,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * while change language, there 2 types components
-     * 1. common components, need to change by code
-     * 2. ChangeLanguageTextView. for this type, look for them from the root window
-     * @param language
+     * while change language, use the root view to find deeply all his children.
+     * if the child is ChangeLanguageTextView, then add into a list;
+     * at last, loop this list to change its language.
+     * REMEMBER : the ListView need to special because for those items outside the window, they build until move into screen,
+     * so CategoryTabLayoutItem class add a method to check language.
      */
-    private void onChangeLanguage(byte language){
-        if (language == LANGUAGE_ENGLISH){
-            tvOrdersLabel.setText(R.string.choosed_food_label_en);
-        } else if (language == LANGUAGE_CHINESE){
-            tvOrdersLabel.setText(R.string.choosed_food_label_cn);
-        }
-        //find all ChangeLanguageTextView and invoke its change language text
+    private void onChangeLanguage(){
         ArrayList<ChangeLanguageTextView> tvs = lookforAllChangeLanguageTextView(this.getWindow().getDecorView());
         int fragCount = mapDishDisplayFragments.size();
         for (int i = 0; i< fragCount ; i++){
             DishDisplayFragment frag = mapDishDisplayFragments.valueAt(i);
             tvs.addAll(lookforAllChangeLanguageTextView(frag.getMyView()));
         }
-
         for(ChangeLanguageTextView tv : tvs){
             tv.show(getLanguage());
         }
     }
 
-    private ArrayList<ChangeLanguageTextView> lookforAllChangeLanguageTextView(View view){
-        ArrayList<ChangeLanguageTextView> list = new ArrayList<ChangeLanguageTextView>();
+    /**
+     * recursive call to find all children which type is ChangeLanguageTextView
+     * @param view
+     * @return
+     */
+    public ArrayList<ChangeLanguageTextView> lookforAllChangeLanguageTextView(View view){
+        ArrayList<ChangeLanguageTextView> list = new ArrayList<>();
+
         if (view instanceof ViewGroup){
             ViewGroup vg = (ViewGroup)view;
             for (int i = 0; i< vg.getChildCount(); i++){
@@ -713,9 +728,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public byte getLanguage(){
-        if (rbChinese.isChecked())
-            return LANGUAGE_CHINESE;
-        else return LANGUAGE_ENGLISH;
+        if (rbSecondLanguage.isChecked())
+             return LANGUAGE_SECONDLANGUAGE;
+        else return LANGUAGE_FIRSTLANGUAGE;
     }
 
     public void setMenu(ArrayList<Category1> category1s){

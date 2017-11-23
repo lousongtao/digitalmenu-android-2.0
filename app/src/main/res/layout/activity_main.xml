@@ -58,7 +58,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="bottom|right|end"
-                android:background="@drawable/logo2"
                 android:orientation="horizontal">
 
                 <RadioGroup
@@ -68,21 +67,20 @@
                     android:orientation="horizontal">
 
                     <RadioButton
-                        android:id="@+id/rbEnglish"
+                        android:id="@+id/rbFirstLanguage"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:text="@string/english_version"
+                        android:checked="true"
                         android:textColor="@color/colorWhite"
                         android:textColorLink="@color/colorWhite"
                         android:textSize="17sp"
                         android:textStyle="normal|bold" />
 
                     <RadioButton
-                        android:id="@+id/rbChinese"
+                        android:id="@+id/rbSecondLanguage"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:checked="true"
-                        android:text="@string/chinese_version"
+                        android:checked="false"
                         android:textColor="@color/color_OrangeTheme_Category1Font"
                         android:textSize="19sp"
                         android:textStyle="bold" />
@@ -102,7 +100,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/color_CategoryTabArea"
                     android:gravity="center"
-                    android:text="@string/choosed_food_label"
+                    android:text="ORDER"
                     android:textColor="@color/color_OrangeTheme_Category1Font"
                     android:textSize="24sp" />
 

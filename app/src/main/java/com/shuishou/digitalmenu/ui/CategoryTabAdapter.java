@@ -1,6 +1,7 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,11 @@ public class CategoryTabAdapter extends ArrayAdapter<Category1> {
             view.init(mainActivity, c1);
         } else {
             view = (CategoryTabLayoutItem)convertView;
+            /**
+             * here need to check the language before show, because the convertView is the object move out the screen and reused it,
+             * so the language is different if user changed language before it move into the screen.
+             */
+            view.showByLanguage();
         }
         return view;
     }

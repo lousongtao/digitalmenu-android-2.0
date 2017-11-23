@@ -21,11 +21,11 @@ public class Category1 implements Serializable{
     @PrimaryKey(value = AssignType.BY_MYSELF)
     private int id;
 
-    @Column("chinese_name")
-    private String chineseName;
+    @Column("first_language_name")
+    private String firstLanguageName;
 
-    @Column("english_name")
-    private String englishName;
+    @Column("second_language_name")
+    private String secondLanguageName;
 
     @Column("sequence")
     private int sequence;
@@ -38,10 +38,10 @@ public class Category1 implements Serializable{
 
     }
 
-    public Category1(int id, String chineseName, String englishName, int sequence){
+    public Category1(int id, String firstLanguageName, String secondLanguageName, int sequence){
         this.id = id;
-        this.chineseName = chineseName;
-        this.englishName = englishName;
+        this.firstLanguageName = firstLanguageName;
+        this.secondLanguageName = secondLanguageName;
         this.sequence = sequence;
     }
 
@@ -61,20 +61,20 @@ public class Category1 implements Serializable{
         this.id = id;
     }
 
-    public String getChineseName() {
-        return chineseName;
+    public String getFirstLanguageName() {
+        return firstLanguageName;
     }
 
-    public void setChineseName(String chineseName) {
-        this.chineseName = chineseName;
+    public void setFirstLanguageName(String firstLanguageName) {
+        this.firstLanguageName = firstLanguageName;
     }
 
-    public String getEnglishName() {
-        return englishName;
+    public String getSecondLanguageName() {
+        return secondLanguageName;
     }
 
-    public void setEnglishName(String englishName) {
-        this.englishName = englishName;
+    public void setSecondLanguageName(String secondLanguageName) {
+        this.secondLanguageName = secondLanguageName;
     }
 
     public int getSequence() {
@@ -90,9 +90,12 @@ public class Category1 implements Serializable{
             category2s = new ArrayList<Category2>();
         category2s.add(c2);
     }
+
     @Override
     public String toString() {
-        return "Category1 [chineseName=" + chineseName + ", englishName=" + englishName + "]";
+        return "Category1{" +
+                "firstLanguageName='" + firstLanguageName + '\'' +
+                '}';
     }
 
     @Override

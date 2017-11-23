@@ -42,8 +42,8 @@ class DishCellComponent{
         chooseButton.setTag(dish);
         chooseButton.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
 
-        foodNameText.setTxtChinese(dish.getChineseName());
-        foodNameText.setTxtEnglish(dish.getEnglishName());
+        foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
+        foodNameText.setTxtSecondLanguageName(dish.getSecondLanguageName());
         foodPriceText.setText(InstantValue.DOLLARSPACE + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, dish.getPrice()));
         foodNameText.show(mainActivity.getLanguage());
 

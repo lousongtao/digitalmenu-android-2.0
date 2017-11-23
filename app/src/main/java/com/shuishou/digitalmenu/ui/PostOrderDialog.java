@@ -260,12 +260,12 @@ public class PostOrderDialog {
             StringBuffer sbReq = new StringBuffer();
             if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
                 for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                    sbReq.append(si.getChineseName() + InstantValue.SPACESTRING);
+                    sbReq.append(si.getFirstLanguageName() + InstantValue.SPACESTRING);
                 }
             }
             if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
                 for (Flavor f: cd.getFlavorList()){
-                    sbReq.append(f.getChineseName()+ InstantValue.SPACESTRING);
+                    sbReq.append(f.getFirstLanguageName()+ InstantValue.SPACESTRING);
                 }
             }
             jo.put("additionalRequirements", sbReq.toString());

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 public class CategoryTabLayoutItem extends RelativeLayout {
     private final String logTag = "TestTime-TabLayoutItem";
-
+    private byte currentShowLanguage;
     private Boolean isAnimationRunning = false;
     private Boolean isOpened = false;
     private Integer duration;
@@ -56,6 +56,7 @@ public class CategoryTabLayoutItem extends RelativeLayout {
         this.mainActivity = mainActivity;
         category1 = c1;
         byte language = mainActivity.getLanguage();
+        currentShowLanguage = language;
         headerLayout = (FrameLayout) findViewById(R.id.view_header_category1);
         contentLayout = (LinearLayout) findViewById(R.id.view_content_category2);
         if (isInEditMode())
@@ -63,8 +64,8 @@ public class CategoryTabLayoutItem extends RelativeLayout {
 
         duration = getContext().getResources().getInteger(android.R.integer.config_shortAnimTime);
         ChangeLanguageTextView headerView = (ChangeLanguageTextView) headerLayout.findViewById(R.id.textview_header_category1);
-        headerView.setTxtChinese(c1.getChineseName());
-        headerView.setTxtEnglish(c1.getEnglishName());
+        headerView.setTxtFirstLanguageName(c1.getFirstLanguageName());
+        headerView.setTxtSecondLanguageName(c1.getSecondLanguageName());
         headerView.show(language);
 
         setTag(CategoryTabLayoutItem.class.getName());
@@ -73,8 +74,8 @@ public class CategoryTabLayoutItem extends RelativeLayout {
                 LinearLayout c2View = (LinearLayout) View.inflate(mainActivity, R.layout.category2tab_listitem_layout, null);
                 final ChangeLanguageTextView c2TextView = (ChangeLanguageTextView)c2View.findViewById(R.id.category2_textview);
                 final Category2 c2 = c1.getCategory2s().get(i);
-                c2TextView.setTxtChinese(c2.getChineseName());
-                c2TextView.setTxtEnglish(c2.getEnglishName());
+                c2TextView.setTxtFirstLanguageName(c2.getFirstLanguageName());
+                c2TextView.setTxtSecondLanguageName(c2.getSecondLanguageName());
                 c2TextView.show(language);
                 c2TextView.setOnClickListener(category2ClickListener);
                 c2TextView.setTag(c2.getId());
@@ -83,6 +84,17 @@ public class CategoryTabLayoutItem extends RelativeLayout {
             }
         }
         contentLayout.setVisibility(GONE);
+    }
+
+    public void showByLanguage(){
+        byte language = mainActivity.getLanguage();
+        if (currentShowLanguage == language)
+            return;
+        ArrayList<ChangeLanguageTextView> cts = mainActivity.lookforAllChangeLanguageTextView(this);
+        for(ChangeLanguageTextView ct : cts){
+            ct.show(language);
+        }
+        currentShowLanguage = language;
     }
 
     private void onClickCategory2Tab(ChangeLanguageTextView v){

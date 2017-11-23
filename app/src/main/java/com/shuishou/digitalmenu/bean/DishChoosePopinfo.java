@@ -14,12 +14,12 @@ public class DishChoosePopinfo implements Serializable{
 
 	@PrimaryKey(value = AssignType.BY_MYSELF)
 	private int id;
-	
-	@Column("popinfo_cn")
-	private String popInfoCN;
-	
-	@Column("popinfo_en")
-	private String popInfoEN;
+
+	@Column("first_language_name")
+	private String firstLanguageName;
+
+	@Column("second_language_name")
+	private String secondLanguageName;
 
 	@Column("dish_id")
 	@Mapping(Relation.OneToOne)
@@ -33,21 +33,20 @@ public class DishChoosePopinfo implements Serializable{
 		this.id = id;
 	}
 
-
-	public String getPopInfoCN() {
-		return popInfoCN;
+	public String getFirstLanguageName() {
+		return firstLanguageName;
 	}
 
-	public void setPopInfoCN(String popInfoCN) {
-		this.popInfoCN = popInfoCN;
+	public void setFirstLanguageName(String firstLanguageName) {
+		this.firstLanguageName = firstLanguageName;
 	}
 
-	public String getPopInfoEN() {
-		return popInfoEN;
+	public String getSecondLanguageName() {
+		return secondLanguageName;
 	}
 
-	public void setPopInfoEN(String popInfoEN) {
-		this.popInfoEN = popInfoEN;
+	public void setSecondLanguageName(String secondLanguageName) {
+		this.secondLanguageName = secondLanguageName;
 	}
 
 	public Dish getDish() {
@@ -60,7 +59,9 @@ public class DishChoosePopinfo implements Serializable{
 
 	@Override
 	public String toString() {
-		return "DishChoosePopinfo [id=" + id + ", dish=" + dish.getChineseName() + ", popInfoCN=" + popInfoCN + "]";
+		return "DishChoosePopinfo{" +
+				"firstLanguageName='" + firstLanguageName + '\'' +
+				'}';
 	}
 
 	@Override

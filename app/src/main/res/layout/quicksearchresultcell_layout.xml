@@ -13,7 +13,7 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/txtChineseName"
+            android:id="@+id/txtFirstLanguageName"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:ellipsize="end"
@@ -23,7 +23,7 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/txtEnglishName"
+            android:id="@+id/txtSecondLanguageName"
             android:layout_width="match_parent"
             android:layout_height="30dp"
             android:gravity="bottom"

@@ -67,6 +67,7 @@ public class DishDetailDialog {
                 choosedAmount++;
                 txtAmount.setVisibility(View.VISIBLE);
                 txtAmount.setText(String.valueOf(choosedAmount));
+                dlg.dismiss();
             }
         });
 
@@ -110,10 +111,10 @@ public class DishDetailDialog {
             default:
         }
         imgDishPicture.setImageDrawable(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN + dish.getPictureName()));
-        if (language == MainActivity.LANGUAGE_CHINESE){
-            txtName.setText(dish.getChineseName());
+        if (language == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+            txtName.setText(dish.getFirstLanguageName());
         } else {
-            txtName.setText(dish.getEnglishName());
+            txtName.setText(dish.getSecondLanguageName());
         }
         chooseButton.setTag(dish);
         dlg.show();

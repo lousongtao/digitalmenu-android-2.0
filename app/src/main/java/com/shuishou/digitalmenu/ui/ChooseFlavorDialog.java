@@ -73,10 +73,10 @@ public class ChooseFlavorDialog {
                 btn.setTag(f);
                 btn.setOnClickListener(chooseFlavorListener);
                 btn.setTextSize(fontSize);
-                if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
-                    btn.setText(f.getEnglishName());
+                if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+                    btn.setText(f.getFirstLanguageName());
                 } else {
-                    btn.setText(f.getChineseName());
+                    btn.setText(f.getSecondLanguageName());
                 }
                 frameAllFlavor.addView(btn);
             }
@@ -107,11 +107,11 @@ public class ChooseFlavorDialog {
             StringBuffer sbSubitem = new StringBuffer();
             for (int i = 0; i < choosedDish.getDishSubitemList().size(); i++) {
                 DishChooseSubitem si = choosedDish.getDishSubitemList().get(i);
-                if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
-                    sbSubitem.append(si.getEnglishName());
+                if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+                    sbSubitem.append(si.getFirstLanguageName());
                     sbSubitem.append(InstantValue.SPACESTRING);
                 } else {
-                    sbSubitem.append(si.getChineseName());
+                    sbSubitem.append(si.getSecondLanguageName());
                     sbSubitem.append(InstantValue.SPACESTRING);
                 }
             }
@@ -124,10 +124,10 @@ public class ChooseFlavorDialog {
             btn.setTag(f);
             btn.setOnClickListener(unchooseFlavorListener);
             btn.setTextSize(fontSize);
-            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
-                btn.setText(f.getEnglishName());
+            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+                btn.setText(f.getFirstLanguageName());
             } else {
-                btn.setText(f.getChineseName());
+                btn.setText(f.getSecondLanguageName());
             }
             frameChoosedFlavor.addView(btn);
         }
@@ -138,8 +138,8 @@ public class ChooseFlavorDialog {
             return;
         //create a virtual Flavor object
         Flavor f = new Flavor();
-        f.setChineseName(txtOtherFlavor.getText().toString());
-        f.setEnglishName(txtOtherFlavor.getText().toString());
+        f.setFirstLanguageName(txtOtherFlavor.getText().toString());
+        f.setSecondLanguageName(txtOtherFlavor.getText().toString());
         choosedDish.addFlavorList(f);
         final Button btn = new Button(mainActivity);
         btn.setTag(f);
@@ -150,14 +150,9 @@ public class ChooseFlavorDialog {
         frameChoosedFlavor.addView(btn);
         mainActivity.notifyChoosedDishFlavorChanged(choosedDish);
     }
-    public void showDialog(byte language){
-        if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
+    public void showDialog(){
             dlg.setTitle("Choose your flavor");
             btnConfirmFlavor.setText("ADD");
-        } else {
-            dlg.setTitle("挑选您喜欢的口味");
-            btnConfirmFlavor.setText("添加");
-        }
         dlg.show();
     }
 
@@ -177,10 +172,10 @@ public class ChooseFlavorDialog {
             btn.setTag(f);
             btn.setOnClickListener(unchooseFlavorListener);
             btn.setTextSize(fontSize);
-            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_ENGLISH){
-                btn.setText(f.getEnglishName());
+            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+                btn.setText(f.getFirstLanguageName());
             } else {
-                btn.setText(f.getChineseName());
+                btn.setText(f.getSecondLanguageName());
             }
             frameChoosedFlavor.addView(btn);
             mainActivity.notifyChoosedDishFlavorChanged(choosedDish);

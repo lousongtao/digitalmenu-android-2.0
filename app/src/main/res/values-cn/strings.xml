@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Menu</string>
     <string name="english_version">English</string>
-    <string name="chinese_version">中文</string>
     <string name="choosed_food_label">已选菜品</string>
 </resources>

@@ -20,11 +20,11 @@ public class Category2 implements Serializable{
     @PrimaryKey(value = AssignType.BY_MYSELF)
     private int id;
 
-    @Column("chinese_name")
-    private String chineseName;
+    @Column("first_language_name")
+    private String firstLanguageName;
 
-    @Column("english_name")
-    private String englishName;
+    @Column("second_language_name")
+    private String secondLanguageName;
 
     @Column("sequence")
     private int sequence;
@@ -41,10 +41,10 @@ public class Category2 implements Serializable{
 
     }
 
-    public Category2(int id, String chineseName, String englishName, int sequence, Category1 category1){
+    public Category2(int id, String firstLanguageName, String secondLanguageName, int sequence, Category1 category1){
         this.id = id;
-        this.chineseName = chineseName;
-        this.englishName = englishName;
+        this.firstLanguageName = firstLanguageName;
+        this.secondLanguageName = secondLanguageName;
         this.sequence = sequence;
         this.category1 = category1;
     }
@@ -57,11 +57,6 @@ public class Category2 implements Serializable{
         this.category1 = category1;
     }
 
-    @Override
-    public String toString() {
-        return "Category2 [chineseName=" + chineseName + ", englishName=" + englishName + "]";
-    }
-
     public int getId() {
         return id;
     }
@@ -70,20 +65,20 @@ public class Category2 implements Serializable{
         this.id = id;
     }
 
-    public String getChineseName() {
-        return chineseName;
+    public String getFirstLanguageName() {
+        return firstLanguageName;
     }
 
-    public void setChineseName(String chineseName) {
-        this.chineseName = chineseName;
+    public void setFirstLanguageName(String firstLanguageName) {
+        this.firstLanguageName = firstLanguageName;
     }
 
-    public String getEnglishName() {
-        return englishName;
+    public String getSecondLanguageName() {
+        return secondLanguageName;
     }
 
-    public void setEnglishName(String englishName) {
-        this.englishName = englishName;
+    public void setSecondLanguageName(String secondLanguageName) {
+        this.secondLanguageName = secondLanguageName;
     }
 
     public int getSequence() {
@@ -107,6 +102,14 @@ public class Category2 implements Serializable{
             dishes = new ArrayList<Dish>();
         dishes.add(dish);
     }
+
+    @Override
+    public String toString() {
+        return "Category2{" +
+                "firstLanguageName='" + firstLanguageName + '\'' +
+                '}';
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

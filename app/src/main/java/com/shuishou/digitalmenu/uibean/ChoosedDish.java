@@ -29,12 +29,12 @@ public class ChoosedDish {
         this.dish = dish;
     }
 
-    public String getName_cn() {
-        return dish.getChineseName();
+    public String getFirstLanguageName() {
+        return dish.getFirstLanguageName();
     }
 
-    public String getName_en() {
-        return dish.getEnglishName();
+    public String getSecondLanguageName() {
+        return dish.getSecondLanguageName();
     }
 
     public int getAmount() {

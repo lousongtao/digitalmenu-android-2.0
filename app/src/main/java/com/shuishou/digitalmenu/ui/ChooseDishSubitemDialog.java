@@ -68,10 +68,10 @@ public class ChooseDishSubitemDialog {
             tv.setEllipsize(TextUtils.TruncateAt.END);
             tv.setSingleLine();
             tv.setMaxWidth(250);
-            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_CHINESE){
-                tv.setText(subitems.get(i).getChineseName());
+            if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
+                tv.setText(subitems.get(i).getFirstLanguageName());
             } else {
-                tv.setText(subitems.get(i).getEnglishName());
+                tv.setText(subitems.get(i).getSecondLanguageName());
             }
             tableRow.addView(tv, trlp);
             tv.setOnClickListener(clickListener);
@@ -89,23 +89,13 @@ public class ChooseDishSubitemDialog {
         TextView tvInfo = (TextView)view.findViewById(R.id.txtInfoChoosed);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
-        if (mainActivity.getLanguage() == MainActivity.LANGUAGE_CHINESE){
-            tvInfo.setText("点选列表项可删除");
-            builder.setTitle("选择");
-            builder.setMessage("您选择的是 "+ dish.getChineseName() +" , 请选择 " + requireamount + " 项.");
-            //here cannot use listener on the positive button because the dialog will dismiss no matter
-            //the input value is valiable or not. I wish the dialog keep while input info is wrong.
-            builder.setPositiveButton("确认", null);
-            builder.setNegativeButton("取消", null);
-        } else {
             tvInfo.setText("Delete item by clicking");
             builder.setTitle("Flavor");
-            builder.setMessage("Please choose "+ requireamount + " flavor for " + dish.getEnglishName());
+            builder.setMessage("Please choose "+ requireamount + " flavor for " + dish.getFirstLanguageName());
             //here cannot use listener on the positive button because the dialog will dismiss no matter
             //the input value is valiable or not. I wish the dialog keep while input info is wrong.
             builder.setPositiveButton("Confirm", null);
             builder.setNegativeButton("Cancel", null);
-        }
 
 
         builder.setView(view);
