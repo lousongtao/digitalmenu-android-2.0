@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Timer refreshMenuTimer;
 
     private String logTag = "TestTime-MainActivity";
+    private int refreshMenuInterval = 60 * 1000;
 
     private SparseArray<DishDisplayFragment> mapDishDisplayFragments = new SparseArray<>();
     private SparseArray<DishCellComponent> mapDishCellComponents = new SparseArray<>();
@@ -202,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
         dlgDishDetail = DishDetailDialog.getInstance(this);
 
-        startRefreshMenuTimer();
         buildMenu();
     }
 
@@ -271,6 +271,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startRefreshMenuTimer();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (refreshMenuTimer != null){
+            refreshMenuTimer.cancel();
+            refreshMenuTimer.purge();
+            refreshMenuTimer = null;
+        }
+        refreshMenuHandler = null;
+    }
+
     /**
      * set a timer to load the server menu, just now, only focus on the SOLDOUT status.
      */
@@ -305,8 +322,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         //start timer
+
         refreshMenuTimer = new Timer();
-        int refreshMenuPeroid = 60 * 1000;
         refreshMenuTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -326,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     refreshMenuHandler.sendMessage(CommonTool.buildMessage(REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU, dishIdList));
                 }
             }
-        }, 1, refreshMenuPeroid
+        }, 1, refreshMenuInterval
         );
     }
 

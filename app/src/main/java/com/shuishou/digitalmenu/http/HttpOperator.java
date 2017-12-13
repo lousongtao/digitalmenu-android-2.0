@@ -403,10 +403,10 @@ public class HttpOperator {
                     MainActivity.LOG.error("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
                     sendErrorMessageToToast("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
                 }
-                HttpResult<ArrayList<Dish>> resultDish = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Dish>>>(){}.getType());
+                HttpResult<Dish> resultDish = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<Dish>>(){}.getType());
                 if (resultDish.success){
                     //TODO: only do SOLDOUT property at first stage
-                    Dish dish = resultDish.data.get(0);
+                    Dish dish = resultDish.data;
                     Dish dbDish = dbOpr.queryDishById(dish.getId());
                     dbDish.setSoldOut(dish.isSoldOut());
                     dbOpr.updateObject(dbDish);

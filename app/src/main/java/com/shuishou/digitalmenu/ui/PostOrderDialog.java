@@ -176,7 +176,9 @@ public class PostOrderDialog {
         new Thread(){
             @Override
             public void run() {
-                if (mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(txtCode.getText().toString())){
+                if (mainActivity.getConfigsMap() == null || mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE) == null){
+                    handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG, "confirm code is null"));
+                } else if (mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(txtCode.getText().toString())){
                     String deskstatus = httpOperator.checkDeskStatus(choosedDesk.getName());
                     if (InstantValue.CHECKDESK4MAKEORDER_OCCUPIED.equals(deskstatus)){
                         handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ASKTOADDDISHINORDER, choosedDesk.getId()));

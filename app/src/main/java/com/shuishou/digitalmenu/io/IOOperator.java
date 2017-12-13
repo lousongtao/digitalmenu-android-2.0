@@ -184,7 +184,7 @@ public class IOOperator {
                 mainActivity.startProgressDialog("upload", "prepare to upload error log files");
                 mainActivity.getHttpOperator().uploadErrorLog(logzip, macAddress);
             } else {
-                CommonTool.popupToast(mainActivity,"There is not error log now.", Toast.LENGTH_LONG);
+                CommonTool.popupToast(mainActivity,"There is no error log now.", Toast.LENGTH_LONG);
             }
         }
     }
