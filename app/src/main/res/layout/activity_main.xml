@@ -58,6 +58,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_gravity="bottom|right|end"
+                android:background="@drawable/haoszechuan_logo2"
                 android:orientation="horizontal">
 
                 <RadioGroup

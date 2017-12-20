@@ -17,8 +17,8 @@
         android:layout_height="60dp"
         android:layout_gravity="bottom"
         android:alpha="1"
-        android:baselineAligned="false"
         android:background="@color/color_OrangeTheme_FoodCellBackground"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -69,11 +69,11 @@
                 android:id="@+id/chooseBtn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="ChooseButton"
                 android:layout_gravity="end"
+                android:contentDescription="ChooseButton"
                 android:scaleType="centerInside"
                 android:src="@drawable/select_btn_icon_s" />
-<!--
+            <!--
             <TextView
                 android:id="@+id/tvChoosedAmount"
                 android:layout_width="20dp"

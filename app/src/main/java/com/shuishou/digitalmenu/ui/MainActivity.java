@@ -212,18 +212,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * one category2 = one fragment
      */
     private void initialDishCellComponents(){
+        int DISPLAY_DISH_COLUMN_NUMBER = 3; //菜单界面每行显示的数目/列数
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int screenWidth = displayMetrics.widthPixels;
+        int screenWidth = (int) (displayMetrics.widthPixels / displayMetrics.density);
         int leftMargin = (screenWidth - 180 -260 - 3 * InstantValue.DISPLAY_DISH_WIDTH) / 4;
+        if (leftMargin < 0){
+            DISPLAY_DISH_COLUMN_NUMBER = 2; //for small screen, show 2 columns
+        }
         if (leftMargin < 7)
             leftMargin = 7;
         if (category1s != null){
             TableRow.LayoutParams trlp = new TableRow.LayoutParams();
             trlp.topMargin = 7;
-            trlp.leftMargin = leftMargin;
-            trlp.width = InstantValue.DISPLAY_DISH_WIDTH;
-            trlp.height = InstantValue.DISPLAY_DISH_HEIGHT;
+            trlp.leftMargin = (int)(leftMargin * displayMetrics.density);
+//            trlp.width = InstantValue.DISPLAY_DISH_WIDTH;
+//            trlp.height = InstantValue.DISPLAY_DISH_HEIGHT;
             Bundle bundle = new Bundle();
             ActionBar.LayoutParams ablp = new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             for (Category1 c1 : category1s){
@@ -245,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                             for(int i = 0; i< dishes.size(); i++){
                                 Dish dish = dishes.get(i);
-                                if (i % InstantValue.DISPLAY_DISH_COLUMN_NUMBER == 0){
+                                if (i % DISPLAY_DISH_COLUMN_NUMBER == 0){
                                     tr = new TableRow(this);
                                     tl.addView(tr);
                                 }

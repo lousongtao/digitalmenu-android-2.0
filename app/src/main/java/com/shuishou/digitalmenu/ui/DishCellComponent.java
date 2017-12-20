@@ -1,13 +1,16 @@
 package com.shuishou.digitalmenu.ui;
 
+import android.app.ActionBar;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
@@ -20,7 +23,7 @@ import com.shuishou.digitalmenu.bean.Dish;
 
 class DishCellComponent{
     private TextView tvChoosedAmount;
-    private static FrameLayout.LayoutParams choosedAmountParam = new FrameLayout.LayoutParams(20, 20);
+    private static FrameLayout.LayoutParams choosedAmountParam = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     private final FrameLayout chooseButtonLayout;
     private final ImageView imgDishPicture;
     private final View foodCellView;
