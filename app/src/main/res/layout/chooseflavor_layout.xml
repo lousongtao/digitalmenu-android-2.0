@@ -17,12 +17,12 @@
         android:background="@color/color_OrangeTheme_FoodDisplayFragmentBackground"
         android:orientation="horizontal"></LinearLayout>
 
-    <LinearLayout
+    <TableLayout
         android:id="@+id/frame_flavors"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="200dp"
         android:background="@color/color_OrangeTheme_ChoosedFoodBackgroundArea"
-        android:orientation="horizontal"></LinearLayout>
+        android:orientation="horizontal"></TableLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

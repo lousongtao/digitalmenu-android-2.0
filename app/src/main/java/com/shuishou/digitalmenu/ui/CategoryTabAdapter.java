@@ -2,6 +2,7 @@ package com.shuishou.digitalmenu.ui;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ public class CategoryTabAdapter extends ArrayAdapter<Category1> {
 //    private ArrayList<Category1> category1List;
 //    private ChangeLanguageTextView tvName;
     private MainActivity mainActivity;
+    private SparseArray<CategoryTabLayoutItem> mapCategory1LayoutItem = new SparseArray<>();
 
     public CategoryTabAdapter(MainActivity mainActivity, int resource, ArrayList<Category1> objects){
         super(mainActivity, resource, objects);
@@ -31,18 +33,15 @@ public class CategoryTabAdapter extends ArrayAdapter<Category1> {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         Category1 c1 = getItem(position);
-        CategoryTabLayoutItem view;
-        if (convertView == null){
-            view = (CategoryTabLayoutItem)LayoutInflater.from(mainActivity).inflate(resourceId, null);
+
+//        CategoryTabLayoutItem view = (CategoryTabLayoutItem)LayoutInflater.from(mainActivity).inflate(resourceId, null);
+//        view.init(mainActivity, c1);
+//        return view;
+        if (mapCategory1LayoutItem.get(c1.getId()) == null){
+            CategoryTabLayoutItem view = (CategoryTabLayoutItem)LayoutInflater.from(mainActivity).inflate(resourceId, null);
             view.init(mainActivity, c1);
-        } else {
-            view = (CategoryTabLayoutItem)convertView;
-            /**
-             * here need to check the language before show, because the convertView is the object move out the screen and reused it,
-             * so the language is different if user changed language before it move into the screen.
-             */
-            view.showByLanguage();
+            mapCategory1LayoutItem.put(c1.getId(), view);
         }
-        return view;
+        return mapCategory1LayoutItem.get(c1.getId());
     }
 }

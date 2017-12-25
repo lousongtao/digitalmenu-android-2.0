@@ -51,6 +51,8 @@ import com.yanzhenjie.nohttp.NoHttp;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -204,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dlgDishDetail = DishDetailDialog.getInstance(this);
 
         buildMenu();
+        startRefreshMenuTimer();
     }
 
     /**
@@ -275,22 +278,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        startRefreshMenuTimer();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (refreshMenuTimer != null){
-            refreshMenuTimer.cancel();
-            refreshMenuTimer.purge();
-            refreshMenuTimer = null;
-        }
-        refreshMenuHandler = null;
-    }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        startRefreshMenuTimer();
+//    }
+//
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        if (refreshMenuTimer != null){
+//            refreshMenuTimer.cancel();
+//            refreshMenuTimer.purge();
+//            refreshMenuTimer = null;
+//        }
+//        refreshMenuHandler = null;
+//    }
 
     /**
      * set a timer to load the server menu, just now, only focus on the SOLDOUT status.
@@ -378,13 +381,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setIcon(R.drawable.info);
+        builder.setIcon(R.drawable.success);
         builder.setNegativeButton("OK", null);
         builder.create().show();
     }
 
     public void buildMenu(){
         category1s = dbOperator.queryAllMenu();
+        Collections.sort(category1s, new Comparator<Category1>() {
+            @Override
+            public int compare(Category1 category1, Category1 t1) {
+                return category1.getSequence() - t1.getSequence();
+            }
+        });
         initialDishCellComponents();
 
         CategoryTabAdapter categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
@@ -640,12 +649,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
+     * 1. stop the refresh timer
      * 1. clear local database
      * 2. clear local dish pictures
      * 3. load data from server, including desk, menu, menuversion, dish picture files
      * 4. after loading finish, redraw the UI
      */
     public void onRefreshData(){
+        if (refreshMenuTimer != null){
+            refreshMenuTimer.cancel();
+            refreshMenuTimer.purge();
+            refreshMenuTimer = null;
+        }
+        refreshMenuHandler = null;
         //clear all data and picture files
         IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG);
         IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL);

@@ -2,6 +2,7 @@ package com.shuishou.digitalmenu.ui;
 
 import android.content.DialogInterface;
 import android.content.IntentFilter;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +13,9 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
@@ -30,11 +34,12 @@ import java.util.ArrayList;
 
 public class ChooseFlavorDialog {
     private static ChooseFlavorDialog instance;
+    private static final int DISPLAYAMOUNT_PERROW = 10;
     private float fontSize = 15;
     private MainActivity mainActivity;
     private ChoosedDish choosedDish;
     private LinearLayout frameChoosedFlavor;
-    private LinearLayout frameAllFlavor;
+    private TableLayout frameAllFlavor;
     private EditText txtOtherFlavor;
     private TextView txtDishSubitem;
     private Button btnConfirmFlavor;
@@ -54,7 +59,7 @@ public class ChooseFlavorDialog {
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.chooseflavor_layout, null);
-        frameAllFlavor = (LinearLayout)view.findViewById(R.id.frame_flavors);
+        frameAllFlavor = (TableLayout)view.findViewById(R.id.frame_flavors);
         frameChoosedFlavor = (LinearLayout)view.findViewById(R.id.frame_choosedflavor);
         txtDishSubitem = (TextView) view.findViewById(R.id.txtDishSubitem);
         txtOtherFlavor = (EditText)view.findViewById(R.id.txtOtherFlavor);
@@ -67,6 +72,8 @@ public class ChooseFlavorDialog {
         });
         ArrayList<Flavor> flavors = mainActivity.getFlavors();
         if (flavors != null && !flavors.isEmpty()){
+            int col = 0;
+            TableRow tr = null;
             for (int i = 0; i < flavors.size(); i++) {
                 Flavor f = flavors.get(i);
                 Button btn = new Button(mainActivity);
@@ -78,7 +85,11 @@ public class ChooseFlavorDialog {
                 } else {
                     btn.setText(f.getSecondLanguageName());
                 }
-                frameAllFlavor.addView(btn);
+                if (i % DISPLAYAMOUNT_PERROW == 0){
+                    tr = new TableRow(mainActivity);
+                    frameAllFlavor.addView(tr);
+                }
+                tr.addView(btn);
             }
         }
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
