@@ -416,6 +416,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void startProgressDialog(String title, String message){
         progressDlg = ProgressDialog.show(this, title, message);
     }
+
+    public void stopProgressDialog(){
+        progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
+    }
     public DBOperator getDbOperator(){
         return dbOperator;
     }
@@ -650,10 +654,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     /**
      * 1. stop the refresh timer
-     * 1. clear local database
-     * 2. clear local dish pictures
-     * 3. load data from server, including desk, menu, menuversion, dish picture files
-     * 4. after loading finish, redraw the UI
+     * 2. clear local database
+     * 3. clear local dish pictures
+     * 4. load data from server, including desk, menu, menuversion, dish picture files
+     * 5. after loading finish, redraw the UI
      */
     public void onRefreshData(){
         if (refreshMenuTimer != null){

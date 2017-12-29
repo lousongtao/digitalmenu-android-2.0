@@ -4,8 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/android-menu.iml" filepath="$PROJECT_DIR$/android-menu.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://D:\workspace-digitalmenu\android-menu\digitalmenu-android-2.0.iml" filepath="D:\workspace-digitalmenu\android-menu\digitalmenu-android-2.0.iml" />
-      <module fileurl="file://D:\workspace-digitalmenu\android-menu\digitalmenu-android2.0.iml" filepath="D:\workspace-digitalmenu\android-menu\digitalmenu-android2.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/digitalmenu-android-2.0.iml" filepath="$PROJECT_DIR$/digitalmenu-android-2.0.iml" />
+      <module fileurl="file://D:/workspace-digitalmenu/android-menu/digitalmenu-android-2.0.iml" filepath="D:/workspace-digitalmenu/android-menu/digitalmenu-android-2.0.iml" />
+      <module fileurl="file://D:/workspace-digitalmenu/android-menu/digitalmenu-android2.0.iml" filepath="D:/workspace-digitalmenu/android-menu/digitalmenu-android2.0.iml" />
     </modules>
   </component>
 </project>

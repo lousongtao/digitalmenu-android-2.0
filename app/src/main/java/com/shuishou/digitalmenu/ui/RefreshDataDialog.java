@@ -92,6 +92,7 @@ class RefreshDataDialog {
                         dlg.dismiss();
                     } else {
                         msgHandler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_HTTPERROR, "confirm code is wrong"));
+                        mainActivity.stopProgressDialog();
                     }
                 }
             }.start();
