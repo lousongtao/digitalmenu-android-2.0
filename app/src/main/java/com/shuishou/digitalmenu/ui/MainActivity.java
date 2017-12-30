@@ -409,6 +409,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
     }
 
+    public void popRestartDialog(String msg){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(msg)
+                .setIcon(R.drawable.info)
+                .setPositiveButton("Restart", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    }
+                });
+        AlertDialog dlg = builder.create();
+        dlg.setCancelable(false);
+        dlg.setCanceledOnTouchOutside(false);
+        dlg.show();
+    }
+
     public Handler getProgressDlgHandler(){
         return progressDlgHandler;
     }

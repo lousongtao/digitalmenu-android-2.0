@@ -82,6 +82,7 @@ class SaveServerURLDialog {
             IOOperator.saveServerURL(InstantValue.FILE_SERVERURL, url);
             InstantValue.URL_TOMCAT = url;
             dlg.dismiss();
+            mainActivity.popRestartDialog("Success to configure server URL, Please restart app");
         } else {
             Toast.makeText(mainActivity, "Confirm code is wrong.", Toast.LENGTH_LONG).show();
         }
@@ -94,4 +95,5 @@ class SaveServerURLDialog {
     public void dismiss(){
         dlg.dismiss();
     }
+
 }

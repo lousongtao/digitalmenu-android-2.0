@@ -76,7 +76,8 @@ public class DownloadDishImageListener implements DownloadListener {
         //while all download finish, start to build menu
         if (left == 0){
             handler.sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH, "start to rebuild menu"));
-            mainActivity.buildMenu();
+//            mainActivity.buildMenu();
+            mainActivity.popRestartDialog("Data refresh finish successfully. Please restart the app.");
         }
     }
 
