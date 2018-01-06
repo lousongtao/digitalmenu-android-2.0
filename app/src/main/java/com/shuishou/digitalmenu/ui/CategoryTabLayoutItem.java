@@ -118,7 +118,7 @@ public class CategoryTabLayoutItem extends RelativeLayout {
         FragmentManager fragMgr = mainActivity.getSupportFragmentManager();
         FragmentTransaction trans = fragMgr.beginTransaction();
         trans.replace(R.id.dishdisplayarea_layout, frag);
-        trans.commit();
+        trans.commitAllowingStateLoss();//there is a bug for android version > 11, if use 'trans.commit()', sometimes occur an exception 'java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState'
     }
 
     private void expand(final View v) {
