@@ -408,6 +408,10 @@ public class HttpOperator {
                     //TODO: only do SOLDOUT property at first stage
                     Dish dish = resultDish.data;
                     Dish dbDish = dbOpr.queryDishById(dish.getId());
+                    if (dbDish == null){
+                        sendErrorMessageToToast("find unrecognized dish '"+dish.getFirstLanguageName()+"', please refresh data on this device.");
+                        return null;
+                    }
                     dbDish.setSoldOut(dish.isSoldOut());
                     dbOpr.updateObject(dbDish);
                 }
