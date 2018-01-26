@@ -225,6 +225,10 @@ public class PostOrderDialog {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        if (choosedFoodList == null || choosedFoodList.isEmpty()) {
+                            Toast.makeText(mainActivity, "There are error to build JSON Object, please !", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         JSONArray os = null;
                         try {
                             os = generateOrderJson();
