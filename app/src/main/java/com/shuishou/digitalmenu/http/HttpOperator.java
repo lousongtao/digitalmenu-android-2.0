@@ -385,49 +385,75 @@ public class HttpOperator {
             DBOperator dbOpr = mainActivity.getDbOperator();
             //collect all change into a set to remove the duplicate dishid
             Set<Integer> dishIdSet = new HashSet<>();
-            int newVersion = 0;
+            int maxVersion = 0;//get the biggest version number in this update
             for (int i = 0; i < result.data.size(); i++) {
                 dishIdSet.add(result.data.get(i).dishId);
-                if (result.data.get(i).id > newVersion)
-                    newVersion = result.data.get(i).id;
+                if (result.data.get(i).id > maxVersion)
+                    maxVersion = result.data.get(i).id;
             }
             //reload info about dishes in dishIdSet
-            ArrayList<Integer> dishIdList = new ArrayList<Integer>();
+            ArrayList<Integer> dishIdList = new ArrayList<>();
             dishIdList.addAll(dishIdSet);
-            for (int i = 0; i < dishIdList.size(); i++) {
-                Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyid", RequestMethod.POST);
-                reqDish.add("dishId", dishIdList.get(i));
-                Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
-                if (respDish.getException() != null){
-                    Log.e(logTag, "get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
-                    MainActivity.LOG.error("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
-                    sendErrorMessageToToast("get Exception while call menu/querydishbyid for dishid = "+ dishIdList.get(i)+", Exception is "+ respDish.getException());
-                }
-                HttpResult<Dish> resultDish = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<Dish>>(){}.getType());
-                if (resultDish.success){
-                    //TODO: only do SOLDOUT property at first stage
-                    Dish dish = resultDish.data;
-                    Dish dbDish = dbOpr.queryDishById(dish.getId());
-                    if (dbDish == null){
-                        sendErrorMessageToToast("find unrecognized dish '"+dish.getFirstLanguageName()+"', please refresh data on this device.");
-                        return null;
-                    }
-                    dbDish.setSoldOut(dish.isSoldOut());
-                    dbOpr.updateObject(dbDish);
-                }
+            boolean bSyncDishes = synchronizeDishes(dishIdList);
+            if (bSyncDishes){//only persist the maxVersion while sync the dishes successfully
+                dbOpr.deleteAllData(MenuVersion.class);
+                MenuVersion mv = new MenuVersion(1, maxVersion);
+                dbOpr.saveObjectByCascade(mv);
+                return dishIdList;
             }
-            //update menu version.
-            dbOpr.deleteAllData(MenuVersion.class);
-            MenuVersion mv = new MenuVersion(1, newVersion);
-            dbOpr.saveObjectByCascade(mv);
-
-            return dishIdList;
         } else {
             Log.e(logTag, "get false from server while Check Menu Version");
             MainActivity.LOG.error("get false from server while Check Menu Version");
             sendErrorMessageToToast("get false from server while Check Menu Version");
         }
         return null;
+    }
+
+    /**
+     * load dishes data from server by the id list;
+     * compare the SOLDOUT and PROMOTION value with the local data, if different, modify local data
+     * @param dishIdList
+     * @return false while exception occur.
+     */
+    private boolean synchronizeDishes(ArrayList<Integer> dishIdList){
+        String sIds = dishIdList.toString().replace("[","").replace("]","").replace(" ","");
+        Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyidlist", RequestMethod.POST);
+        reqDish.add("dishIdList", sIds);
+        Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
+        if (respDish.getException() != null){
+            Log.e(logTag, "get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            return false;
+        }
+        HttpResult<ArrayList<Dish>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Dish>>>(){}.getType());
+        if (!result.success){
+            Log.e(logTag, "get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            return false;
+        }
+        ArrayList<Dish> dishes = result.data;
+        DBOperator dbOpr = mainActivity.getDbOperator();
+        for (int i = 0; i < dishes.size(); i++) {
+            Dish dish = dishes.get(i);
+            Dish dbDish = dbOpr.queryDishById(dish.getId());
+            if (dbDish == null){
+                sendErrorMessageToToast("find unrecognized dish '"+dish.getFirstLanguageName()+"', please refresh data on this device.");
+                return false;
+            }
+            if (dish.isSoldOut() != dbDish.isSoldOut()) {
+                dbDish.setSoldOut(dish.isSoldOut());
+                dbOpr.updateObject(dbDish);
+            }
+            if (dish.isPromotion() != dbDish.isPromotion()){
+                dbDish.setPromotion(dish.isPromotion());
+                dbDish.setOriginPrice(dish.getOriginPrice());
+                dbDish.setPrice(dish.getPrice());
+                dbOpr.updateObject(dbDish);
+            }
+        }
+        return true;
     }
 
     private void sendErrorMessageToToast(String sMsg){
@@ -443,16 +469,6 @@ public class HttpOperator {
         request.add("machineCode", machineCode);
         listener.addFiletoList(key, file.getAbsolutePath());
         requestQueue.add(key, request, listener);
-//        for(File file : files){
-//            Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/uploaderrorlog", RequestMethod.POST);
-//            FileBinary bin1 = new FileBinary(file);
-//            request.add("logfile", bin1);
-//            request.add("machineCode", machineCode);
-//            key++;
-//            listener.addFiletoList(key, file.getAbsolutePath());
-//            requestQueue.add(key, request, listener);
-//        }
-//        listener.setTotalFileAmount(key);
     }
 
     private void loadDishPictureFromServer(){

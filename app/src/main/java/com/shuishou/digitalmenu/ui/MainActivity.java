@@ -308,21 +308,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     //loop to find Dish Object depending on the id, reload the data from database
                     for(Integer dishId : dishIdList){
                         Dish dish = dbOperator.queryDishById(dishId);
-                        mapDishCellComponents.get(dish.getId()).setSoldOutVisibility(dish.isSoldOut());
-                        //remind clients if the sold out dish are selected
-                        for(ChoosedDish cf : choosedDishList){
-                            if (cf.getDish().getId() == dishId){
-                                if (dish.isSoldOut()) {
-                                    String errormsg = "Dish " + dish.getFirstLanguageName() + " is Sold Out already, please remove it from your selection.";
-                                    /**
-                                     * this is just for Chinese restaurant use, this is not good code
-                                     */
-                                    if ((rbFirstLanguage.isChecked() && "中文".equals(rbFirstLanguage.getText()))
-                                        || (rbSecondLanguage.isChecked() && "中文".equals(rbSecondLanguage.getText())))
-                                        errormsg = "您选择的 " + dish.getFirstLanguageName() + " 已经售完, 请从列表中将其去除.";
-                                    CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
+                        DishCellComponent dishCell = mapDishCellComponents.get(dish.getId());
+                        Dish oldDish = dishCell.getDish();
+                        if (dish.isSoldOut() != oldDish.isSoldOut()){
+                            dishCell.setSoldOutVisibility(dish.isSoldOut());
+                            //remind clients if the sold out dish are selected
+                            for(ChoosedDish cf : choosedDishList){
+                                if (cf.getDish().getId() == dishId){
+                                    if (dish.isSoldOut()) {
+                                        String errormsg = "Dish " + dish.getFirstLanguageName() + " is Sold Out already, please remove it from your selection.";
+                                        CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
+                                    }
                                 }
                             }
+                        }
+                        if (dish.isPromotion() != oldDish.isPromotion()) {
+                            dishCell.setDish(dish);
+                            dishCell.setInPromotionVisibility(dish.isPromotion());
                         }
                     }
                 }

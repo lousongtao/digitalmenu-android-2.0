@@ -77,8 +77,51 @@ public class Dish implements Serializable{
     @Column("allowFlavor")
     private boolean allowFlavor;
 
+    @Column("description_1stlang")
+    private String description_1stlang;
+    @Column("description_2ndlang")
+    private String description_2ndlang;
+
+    @Column("isPromotion")
+    private boolean isPromotion = false;
+
+    @Column("originPrice")
+    private double originPrice;
+
     public Dish(){
 
+    }
+
+    public boolean isPromotion() {
+        return isPromotion;
+    }
+
+    public void setPromotion(boolean promotion) {
+        isPromotion = promotion;
+    }
+
+    public double getOriginPrice() {
+        return originPrice;
+    }
+
+    public void setOriginPrice(double originPrice) {
+        this.originPrice = originPrice;
+    }
+
+    public String getDescription_1stlang() {
+        return description_1stlang;
+    }
+
+    public void setDescription_1stlang(String description_1stlang) {
+        this.description_1stlang = description_1stlang;
+    }
+
+    public String getDescription_2ndlang() {
+        return description_2ndlang;
+    }
+
+    public void setDescription_2ndlang(String description_2ndlang) {
+        this.description_2ndlang = description_2ndlang;
     }
 
     public int getPurchaseType() {

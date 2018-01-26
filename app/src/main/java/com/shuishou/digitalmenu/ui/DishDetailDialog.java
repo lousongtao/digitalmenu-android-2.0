@@ -36,6 +36,7 @@ public class DishDetailDialog {
     private TextView txtName;
     private TextView txtPrice;
     private TextView txtAmount;
+    private TextView txtDescription;
     private Dish dish;
     private int choosedAmount;
     private MainActivity mainActivity;
@@ -59,6 +60,7 @@ public class DishDetailDialog {
         txtName = (TextView) view.findViewById(R.id.foodNameText);
         txtPrice = (TextView) view.findViewById(R.id.foodPriceText);
         txtAmount = (TextView) view.findViewById(R.id.txtAmount);
+        txtDescription = (TextView) view.findViewById(R.id.txtDishDescription);
         txtAmount.setVisibility(View.INVISIBLE);
         chooseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,9 +115,12 @@ public class DishDetailDialog {
         imgDishPicture.setImageDrawable(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN + dish.getPictureName()));
         if (language == MainActivity.LANGUAGE_FIRSTLANGUAGE){
             txtName.setText(dish.getFirstLanguageName());
+            txtDescription.setText(dish.getDescription_1stlang());
         } else {
             txtName.setText(dish.getSecondLanguageName());
+            txtDescription.setText(dish.getDescription_2ndlang());
         }
+
         chooseButton.setTag(dish);
         dlg.show();
     }
