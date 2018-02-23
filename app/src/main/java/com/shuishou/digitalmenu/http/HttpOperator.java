@@ -11,6 +11,7 @@ import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.bean.Indent;
@@ -20,8 +21,10 @@ import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.ui.MainActivity;
 import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.FileBinary;
+import com.yanzhenjie.nohttp.Headers;
 import com.yanzhenjie.nohttp.NoHttp;
 import com.yanzhenjie.nohttp.RequestMethod;
+import com.yanzhenjie.nohttp.download.DownloadListener;
 import com.yanzhenjie.nohttp.download.DownloadQueue;
 import com.yanzhenjie.nohttp.download.DownloadRequest;
 import com.yanzhenjie.nohttp.rest.OnResponseListener;
@@ -96,6 +99,7 @@ public class HttpOperator {
                     break;
                 case WHAT_VALUE_QUERYCONFIGSMAP:
                     msg = "Failed to load ConfigsMap. Please restart app!";
+                    mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
                     break;
                 case WHAT_VALUE_QUERYDESK :
                     msg = "Failed to load Desk data. Please restart app!";
@@ -137,11 +141,16 @@ public class HttpOperator {
         }
     }
 
+    /**
+     * app启动时, 要加载config, 尤其要保证能加载到confirmcode. 如果没有confirmcode, 系统依然可以运行, 但是用户点菜后将无法下单, 必须重新restart,
+     * 然后要求客户重新点菜, 此举会导致用户的不愉快, 所以这里要保证confirmcode取到再成功运行, 否则提示重启;
+     */
     private void doResponseQueryConfigsMap(Response<JSONObject> response){
         if (response.getException() != null){
             Log.e(logTag, "doResponseQueryConfigsMap: " + response.getException().getMessage() );
             MainActivity.LOG.error("doResponseQueryConfigsMap: " + response.getException().getMessage());
             sendErrorMessageToToast("Http:doResponseQueryConfigsMap: " + response.getException().getMessage());
+            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
             return;
         }
         HttpResult<HashMap<String, String>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<HashMap<String, String>>>(){}.getType());
@@ -150,6 +159,7 @@ public class HttpOperator {
         } else {
             Log.e(logTag, "doResponseQueryConfigsMap: get FALSE for query confirm code");
             MainActivity.LOG.error("doResponseQueryConfigsMap: get FALSE for query confirm code");
+            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
         }
     }
 
@@ -366,9 +376,9 @@ public class HttpOperator {
     /**
      * check the menu version difference between client and server
      * @param localVersion
-     * @return if same return null, otherwise return the List of Changed DishId
+     * @return if same return null, otherwise return a map including changed dishes and dishconfigs
      */
-    public ArrayList<Integer> chechMenuVersion(int localVersion){
+    public HashMap<String, ArrayList<Integer>> checkMenuVersion(int localVersion){
         Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/checkmenuversion", RequestMethod.POST);
         request.add("versionId", localVersion);
         Response<JSONObject> response = NoHttp.startRequestSync(request);
@@ -385,21 +395,33 @@ public class HttpOperator {
             DBOperator dbOpr = mainActivity.getDbOperator();
             //collect all change into a set to remove the duplicate dishid
             Set<Integer> dishIdSet = new HashSet<>();
+            Set<Integer> dishConfigIdSet = new HashSet<>();
             int maxVersion = 0;//get the biggest version number in this update
             for (int i = 0; i < result.data.size(); i++) {
-                dishIdSet.add(result.data.get(i).dishId);
-                if (result.data.get(i).id > maxVersion)
-                    maxVersion = result.data.get(i).id;
+                MenuVersionInfo mvi = result.data.get(i);
+                if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHCONFIGSOLDOUT){
+                    dishConfigIdSet.add(mvi.objectId);
+                } else if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHSOLDOUT) {
+                    dishIdSet.add(mvi.objectId);
+                }
+                if (mvi.id > maxVersion)
+                    maxVersion = mvi.id;
             }
             //reload info about dishes in dishIdSet
             ArrayList<Integer> dishIdList = new ArrayList<>();
             dishIdList.addAll(dishIdSet);
+            ArrayList<Integer> dishConfigIdList = new ArrayList<>();
+            dishConfigIdList.addAll(dishConfigIdSet);
             boolean bSyncDishes = synchronizeDishes(dishIdList);
-            if (bSyncDishes){//only persist the maxVersion while sync the dishes successfully
+            boolean bSyncDishConfigs = synchronizeDishConfig(dishConfigIdList);
+            if (bSyncDishes & bSyncDishConfigs){//only persist the maxVersion while sync the dishes successfully
                 dbOpr.deleteAllData(MenuVersion.class);
                 MenuVersion mv = new MenuVersion(1, maxVersion);
                 dbOpr.saveObjectByCascade(mv);
-                return dishIdList;
+                HashMap<String, ArrayList<Integer>> map = new HashMap<>();
+                map.put("dish", dishIdList);
+                map.put("dishConfig", dishConfigIdList);
+                return map;
             }
         } else {
             Log.e(logTag, "get false from server while Check Menu Version");
@@ -416,6 +438,8 @@ public class HttpOperator {
      * @return false while exception occur.
      */
     private boolean synchronizeDishes(ArrayList<Integer> dishIdList){
+        if (dishIdList.isEmpty())
+            return true;
         String sIds = dishIdList.toString().replace("[","").replace("]","").replace(" ","");
         Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyidlist", RequestMethod.POST);
         reqDish.add("dishIdList", sIds);
@@ -451,6 +475,49 @@ public class HttpOperator {
                 dbDish.setOriginPrice(dish.getOriginPrice());
                 dbDish.setPrice(dish.getPrice());
                 dbOpr.updateObject(dbDish);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * load dishes data from server by the id list;
+     * compare the SOLDOUT and PROMOTION value with the local data, if different, modify local data
+     * @param dishConfigIdList
+     * @return false while exception occur.
+     */
+    private boolean synchronizeDishConfig(ArrayList<Integer> dishConfigIdList){
+        if (dishConfigIdList.isEmpty())
+            return true;
+        String sIds = dishConfigIdList.toString().replace("[","").replace("]","").replace(" ","");
+        Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishconfigbyidlist", RequestMethod.POST);
+        reqDish.add("dishConfigIdList", sIds);
+        Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
+        if (respDish.getException() != null){
+            Log.e(logTag, "get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            return false;
+        }
+        HttpResult<ArrayList<DishConfig>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<DishConfig>>>(){}.getType());
+        if (!result.success){
+            Log.e(logTag, "get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            return false;
+        }
+        ArrayList<DishConfig> dishConfigs = result.data;
+        DBOperator dbOpr = mainActivity.getDbOperator();
+        for (int i = 0; i < dishConfigs.size(); i++) {
+            DishConfig dishConfig = dishConfigs.get(i);
+            DishConfig dbDishConfig = (DishConfig) dbOpr.queryObjectById(dishConfig.getId(), DishConfig.class);
+            if (dbDishConfig == null){
+                sendErrorMessageToToast("find unrecognized dishConfig '"+dishConfig.getFirstLanguageName()+"', please refresh data on this device.");
+                return false;
+            }
+            if (dishConfig.isSoldOut() != dbDishConfig.isSoldOut()) {
+                dbDishConfig.setSoldOut(dishConfig.isSoldOut());
+                dbOpr.updateObject(dbDishConfig);
             }
         }
         return true;
@@ -504,7 +571,35 @@ public class HttpOperator {
             }
         }
         listener.setTotalFileAmount(key);
+        if (key == 0){
+            //如果所有的dish都没有图片, 给handle一个message来停止等待框
+            mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH, "start to rebuild menu"));
+            mainActivity.popRestartDialog("Data refresh finish successfully. Please restart the app.");
+        }
     }
 
+    /**
+     * 下载logo文件, 该方法只管下载到本地, 不做额外操作, 所以使用DownloadListener即可, 所有需要实现的方法都是空方法
+     */
+    public void loadLogoPictureFromServer(){
+        DownloadListener listener = new DownloadListener(){
+            public void onDownloadError(int what, Exception exception) {}
+            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {}
+            public void onProgress(int what, int progress, long fileCount, long speed) {}
+            public void onFinish(int what, String filePath) {}
+            public void onCancel(int what) {}
+        };
+        DownloadQueue queue = NoHttp.newDownloadQueue();
+        String filename = "leftbottom.jpg";
+        DownloadRequest request = NoHttp.createDownloadRequest(InstantValue.URL_TOMCAT + "/../logofile/" + filename, RequestMethod.GET, InstantValue.LOGO_PATH, filename, true, true);
+        queue.add(0, request, listener);
 
+        filename = "rightup.jpg";
+        request = NoHttp.createDownloadRequest(InstantValue.URL_TOMCAT + "/../logofile/" + filename, RequestMethod.GET, InstantValue.LOGO_PATH, filename, true, true);
+        queue.add(0, request, listener);
+
+        filename = "rightbottom.jpg";
+        request = NoHttp.createDownloadRequest(InstantValue.URL_TOMCAT + "/../logofile/" + filename, RequestMethod.GET, InstantValue.LOGO_PATH, filename, true, true);
+        queue.add(0, request, listener);
+    }
 }

@@ -88,8 +88,19 @@ public class Dish implements Serializable{
     @Column("originPrice")
     private double originPrice;
 
+    @Mapping(Relation.ManyToMany)
+    private ArrayList<DishConfigGroup> configGroups = new ArrayList<>();
+
     public Dish(){
 
+    }
+
+    public ArrayList<DishConfigGroup> getConfigGroups() {
+        return configGroups;
+    }
+
+    public void setConfigGroups(ArrayList<DishConfigGroup> configGroups) {
+        this.configGroups = configGroups;
     }
 
     public boolean isPromotion() {

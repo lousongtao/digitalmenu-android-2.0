@@ -30,13 +30,13 @@
             android:paddingRight="5dp"
             android:paddingStart="5dp">
 
-            <com.shuishou.digitalmenu.ui.ChangeLanguageTextView
+            <com.shuishou.digitalmenu.ui.components.DishNameTextView
                 android:id="@+id/foodNameText"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:ellipsize="end"
                 android:gravity="top"
-                android:singleLine="true"
+
                 android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
                 android:textSize="20sp"
                 android:textStyle="bold" />

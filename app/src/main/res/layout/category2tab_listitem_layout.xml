@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <com.shuishou.digitalmenu.ui.ChangeLanguageTextView
+    <com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView
         android:id="@+id/category2_textview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

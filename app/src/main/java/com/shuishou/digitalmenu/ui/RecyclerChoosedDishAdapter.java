@@ -4,15 +4,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
-import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.io.IOOperator;
+import com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
 import java.util.ArrayList;
@@ -90,6 +90,8 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         holder.minusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.flavorImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
         holder.flavorImage.setVisibility(cd.getDish().isAllowFlavor() ? View.VISIBLE : View.GONE);
+//        //如果dish不可以自动合并, 隐藏掉加号
+//        holder.plusImage.setVisibility(cd.getDish().isAutoMergeWhileChoose() ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -99,14 +101,14 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
 
     public String getAdditionalRequirementsFirstLanguage(ChoosedDish cd){
         StringBuffer sb = new StringBuffer();
-        if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
-            for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getFirstLanguageName() + InstantValue.SPACESTRING);
+        if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
+            for ( DishConfig si: cd.getDishConfigList()) {
+                sb.append(si.getFirstLanguageName() + InstantValue.SLLASHSTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getFirstLanguageName() + InstantValue.SPACESTRING);
+                sb.append(f.getFirstLanguageName() + InstantValue.SLLASHSTRING);
             }
         }
         return sb.toString();
@@ -114,14 +116,14 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
 
     public String getAdditionalRequirementsSecondLanguage(ChoosedDish cd){
         StringBuffer sb = new StringBuffer();
-        if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
-            for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                sb.append(si.getSecondLanguageName() + InstantValue.SPACESTRING);
+        if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
+            for ( DishConfig si: cd.getDishConfigList()) {
+                sb.append(si.getSecondLanguageName() + InstantValue.SLLASHSTRING);
             }
         }
         if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
             for (Flavor f: cd.getFlavorList()){
-                sb.append(f.getSecondLanguageName() + InstantValue.SPACESTRING);
+                sb.append(f.getSecondLanguageName() + InstantValue.SLLASHSTRING);
             }
         }
         return sb.toString();

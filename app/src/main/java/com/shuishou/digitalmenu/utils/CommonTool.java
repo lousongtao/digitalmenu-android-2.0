@@ -5,6 +5,8 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.widget.Toast;
 
+import com.shuishou.digitalmenu.InstantValue;
+
 /**
  * Created by Administrator on 2017/10/5.
  */
@@ -43,5 +45,29 @@ public class CommonTool {
                 .setMessage(msg)
                 .setNegativeButton("OK", null)
                 .create().show();
+    }
+
+    public static String transferDouble2Scale(double d){
+        return String.format(InstantValue.FORMAT_DOUBLE, d);
+    }
+
+    /**
+     * if d is positive, return d with 2 decimal
+     * if d is negative, return -d with 2 decimal, surrounding the bracket()
+     * @param d
+     * @return
+     */
+    public static String transferNumberByPM(double d, String currencyIcon){
+        if (d >= 0){
+            if (currencyIcon != null)
+                return transferDouble2Scale(d);
+            else
+                return currencyIcon + transferDouble2Scale(d);
+        } else {
+            if (currencyIcon != null)
+                return "(" + currencyIcon + transferDouble2Scale(d * (-1)) + ")";
+            else
+                return "(" + transferDouble2Scale(d * (-1)) + ")";
+        }
     }
 }

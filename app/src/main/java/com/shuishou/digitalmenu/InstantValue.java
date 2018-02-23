@@ -9,6 +9,10 @@ public final class InstantValue {
     public static final String DOLLARSPACE = "$ ";
     public static final String NULLSTRING = "";
     public static final String SPACESTRING = " ";
+    public static final String SLLASHSTRING = " ";
+
+    public static final String FORMAT_DOUBLE = "%.2f";
+
     public static final String RESULT_SUCCESS = "SUCCESS";
     public static final String RESULT_FAIL = "FAIL";
     public static final String CHECKDESK4MAKEORDER_AVAILABLE = "AVAILABLE";
@@ -43,6 +47,7 @@ public final class InstantValue {
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
     public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
+    public static final String LOGO_PATH = "/data/data/com.shuishou.digitalmenu/logo_path/";
 
     public static final String CONFIGS_CONFIRMCODE = "CONFIRMCODE";
     public static final String CONFIGS_OPENCASHDRAWERCODE = "OPENCASHDRAWERCODE";
@@ -51,4 +56,8 @@ public final class InstantValue {
     public static final String CONFIGS_FIRSTLANGUAGEABBR = "FIRSTLANGUAGEABBR";
     public static final String CONFIGS_SECONDLANGUAGENAME= "SECONDLANGUAGENAME";
     public static final String CONFIGS_SECONDLANGUAGEABBR = "SECONDLANGUAGEABBR";
+
+    public static final byte MENUCHANGE_TYPE_DISHSOLDOUT = 0;//设置soldout或取消soldout
+    public static final byte MENUCHANGE_TYPE_CHANGEPROMOTION = 1;//设置promotion或取消promotion
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGSOLDOUT = 2;//设置soldout或取消soldout
 }
