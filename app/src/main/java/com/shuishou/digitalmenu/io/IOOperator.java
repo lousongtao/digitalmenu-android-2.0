@@ -105,7 +105,7 @@ public class IOOperator {
      * delete all files under the catalog
      * @param directoryName
      */
-    public static void deleteDishPicture(String directoryName){
+    public static void deleteLocalFiles(String directoryName){
         File dir = new File(directoryName);
         if (dir.exists() && dir.isDirectory()){
             File[] files = dir.listFiles();

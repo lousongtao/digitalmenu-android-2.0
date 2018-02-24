@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="250dp"
-    android:layout_height="120dp"
+    android:layout_height="wrap_content"
     android:baselineAligned="false"
     android:orientation="horizontal">
 
@@ -30,10 +30,10 @@
 
     <LinearLayout
         android:layout_width="130dp"
-        android:layout_height="120dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.shuishou.digitalmenu.ui.ChangeLanguageTextView
+        <com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView
             android:id="@+id/choosedfood_name"
             android:layout_width="match_parent"
             android:layout_height="25dp"
@@ -55,14 +55,13 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <com.shuishou.digitalmenu.ui.ChangeLanguageTextView
+        <com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView
             android:id="@+id/choosedfood_addtionrequirements"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="center_vertical"
-            android:maxLines="1"
-            android:singleLine="true"
+            android:maxLines="5"
             android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
             android:textSize="14sp"
             android:textStyle="bold" />

@@ -1,7 +1,7 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.app.ActionBar;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,12 +10,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Dish;
+import com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView;
+import com.shuishou.digitalmenu.ui.components.DishNameTextView;
 
 /**
  * Created by Administrator on 2016/12/31.
@@ -37,7 +38,7 @@ class DishCellComponent{
         this.mainActivity = mainActivity;
         this.dish = _dish;
         foodCellView = LayoutInflater.from(mainActivity).inflate(R.layout.dishcell_layout, null);
-        ChangeLanguageTextView foodNameText = (ChangeLanguageTextView) foodCellView.findViewById(R.id.foodNameText);
+        DishNameTextView foodNameText = (DishNameTextView) foodCellView.findViewById(R.id.foodNameText);
         chooseButtonLayout = (FrameLayout) foodCellView.findViewById(R.id.chooseButtonLayout);
         foodPriceText = (TextView) foodCellView.findViewById(R.id.foodPriceText);
         foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
@@ -92,7 +93,8 @@ class DishCellComponent{
                 foodcellPriceLayout.addView(tvOldPrice);
             }
             tvOldPrice.setVisibility(View.VISIBLE);
-            tvOldPrice.setText("was "+ InstantValue.DOLLARSPACE + dish.getOriginPrice());
+            tvOldPrice.setText("was"+ InstantValue.DOLLAR + dish.getOriginPrice());
+            tvOldPrice.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
             foodPriceText.setTextColor(mainActivity.getResources().getColor(R.color.red));
         } else {
             tvOldPrice.setVisibility(View.INVISIBLE);

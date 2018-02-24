@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class ChoosedDish {
     private Drawable image;
 //    private String additionalRequirements = InstantValue.NULLSTRING;
     private int amount = 1; //default value
-    private ArrayList<DishChooseSubitem> dishSubitemList = new ArrayList<>();
+    private ArrayList<DishConfig> dishConfigList = new ArrayList<>();
     private ArrayList<Flavor> flavorList = new ArrayList<>();
 
     public ChoosedDish() {
@@ -46,31 +47,33 @@ public class ChoosedDish {
     }
 
     public double getPrice() {
-        return dish.getPrice();
+        return dish.getPrice() + getAdjustPrice();
+    }
+
+    public double getAdjustPrice(){
+        if (dishConfigList == null || dishConfigList.isEmpty())
+            return 0;
+        double ap = 0;
+        for (int i = 0; i < dishConfigList.size(); i++) {
+            ap += dishConfigList.get(i).getPrice();
+        }
+        return ap;
     }
 
     public Dish getDish() {
         return dish;
     }
 
-//    public String getAdditionalRequirements() {
-//        return additionalRequirements;
-//    }
-//
-//    public void setAdditionalRequirements(String additionalRequirements) {
-//        this.additionalRequirements = additionalRequirements;
-//    }
-
-    public ArrayList<DishChooseSubitem> getDishSubitemList() {
-        return dishSubitemList;
+    public ArrayList<DishConfig> getDishConfigList() {
+        return dishConfigList;
     }
 
-    public void setDishSubitemList(ArrayList<DishChooseSubitem> dishSubitemList) {
-        this.dishSubitemList = dishSubitemList;
+    public void setDishConfigList(ArrayList<DishConfig> dishConfigList) {
+        this.dishConfigList = dishConfigList;
     }
 
-    public void addDishSubitemList(DishChooseSubitem dishSubitem) {
-        this.dishSubitemList.add(dishSubitem);
+    public void addDishConfig(DishConfig dishConfig) {
+        this.dishConfigList.add(dishConfig);
     }
 
     public ArrayList<Flavor> getFlavorList() {

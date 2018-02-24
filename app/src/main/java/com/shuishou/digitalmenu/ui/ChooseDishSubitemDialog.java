@@ -135,8 +135,8 @@ public class ChooseDishSubitemDialog {
         for (int i = 0; i < requireamount; i++) {
             subitems.add((DishChooseSubitem)choosedSubitem.get(i).get(ENTITY));
         }
-        mainActivity.addDishInChoosedList(dish, subitems);
-        dlg.dismiss();
+//        mainActivity.addDishInChoosedList(dish, subitems);
+//        dlg.dismiss();
     }
 
     public void dismiss(){

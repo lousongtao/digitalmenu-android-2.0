@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
+import com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView;
 
 import java.util.ArrayList;
 

@@ -22,7 +22,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -38,11 +37,15 @@ import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.bean.DishChoosePopinfo;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.DishConfig;
+import com.shuishou.digitalmenu.bean.DishConfigGroup;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.MenuVersion;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.io.IOOperator;
+import com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView;
+import com.shuishou.digitalmenu.ui.dishconfig.DishConfigDialogBuilder;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.Logger;
@@ -54,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -76,6 +78,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TextView tvChoosedItems;
     private TextView tvChoosedPrice;
     private TextView tvOrdersLabel;
+    private FrameLayout displayFragmentsLayout;
+    private View leftBottomPanel;
+    private View rightUpPanel;
+    private View rightBottomPanel;
 
     private ArrayList<Desk> desks;
     private ArrayList<Flavor> flavors;
@@ -90,7 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ChooseFlavorDialog dlgChooseFlavor;
     private DishDetailDialog dlgDishDetail;
 
-    public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU = 1;
+    public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH = 1;
+    public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHDISHCONFIG = 2;
     private Handler refreshMenuHandler;
     private Timer refreshMenuTimer;
 
@@ -165,8 +172,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView tvUploadErrorLog = (TextView)findViewById(R.id.drawermenu_uploaderrorlog);
         TextView tvExit = (TextView)findViewById(R.id.drawermenu_exit);
         listViewCategorys = (CategoryTabListView) findViewById(R.id.categorytab_listview);
-//        displayFragmentsLayout = (FrameLayout) findViewById(R.id.dishdisplayarea_layout);
+        displayFragmentsLayout = (FrameLayout) findViewById(R.id.dishdisplayarea_layout);
         ImageButton btnLookfor = (ImageButton)findViewById(R.id.btnLookforDish);
+        leftBottomPanel = findViewById(R.id.leftBottomPanel);
+        rightUpPanel = findViewById(R.id.rightUpPanel);
+        rightBottomPanel = findViewById(R.id.rightBottomPanel);
 
         tvUploadErrorLog.setTag(TAG_UPLOADERRORLOG);
         tvExit.setTag(TAG_EXITSYSTEM);
@@ -194,8 +204,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         httpOperator = new HttpOperator(this);
         dbOperator = new DBOperator(this);
 
-        if (InstantValue.URL_TOMCAT != null && InstantValue.URL_TOMCAT.length() > 0)
+        if (InstantValue.URL_TOMCAT != null && InstantValue.URL_TOMCAT.length() > 0) {
             httpOperator.queryConfigsMap();
+        }
 
         //read local database to memory
         desks = dbOperator.queryDesks();
@@ -207,6 +218,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         buildMenu();
         startRefreshMenuTimer();
+        loadLogoFile();
+    }
+
+    //每次启动APP, 先检查是否有本地logo图片, 如果没有, 需要通过Refresh Data操作来同步logo
+    private void loadLogoFile(){
+        Drawable d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOGO_PATH + "leftbottom.jpg");
+        if (d != null){
+            leftBottomPanel.setBackground(d);
+        }
+        d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOGO_PATH + "rightup.jpg");
+        if (d != null){
+            rightUpPanel.setBackground(d);
+        }
+        d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOGO_PATH + "rightbottom.jpg");
+        if (d != null){
+            rightBottomPanel.setBackground(d);
+        }
+    }
+
+    public void showLeftBottomLogo(Drawable d){
+        leftBottomPanel.setBackground(d);
+    }
+
+    public void showRightBottomLogo(Drawable d){
+        rightBottomPanel.setBackground(d);
+    }
+
+    public void showRightUpLogo(Drawable d){
+        rightUpPanel.setBackground(d);
     }
 
     /**
@@ -278,22 +318,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        startRefreshMenuTimer();
-//    }
-//
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        if (refreshMenuTimer != null){
-//            refreshMenuTimer.cancel();
-//            refreshMenuTimer.purge();
-//            refreshMenuTimer = null;
-//        }
-//        refreshMenuHandler = null;
-//    }
 
     /**
      * set a timer to load the server menu, just now, only focus on the SOLDOUT status.
@@ -303,57 +327,98 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU){
+                if (msg.what == REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH){
                     ArrayList<Integer> dishIdList = (ArrayList<Integer>) msg.obj;
-                    //loop to find Dish Object depending on the id, reload the data from database
-                    for(Integer dishId : dishIdList){
-                        Dish dish = dbOperator.queryDishById(dishId);
-                        DishCellComponent dishCell = mapDishCellComponents.get(dish.getId());
-                        Dish oldDish = dishCell.getDish();
-                        if (dish.isSoldOut() != oldDish.isSoldOut()){
-                            dishCell.setSoldOutVisibility(dish.isSoldOut());
-                            //remind clients if the sold out dish are selected
-                            for(ChoosedDish cf : choosedDishList){
-                                if (cf.getDish().getId() == dishId){
-                                    if (dish.isSoldOut()) {
-                                        String errormsg = "Dish " + dish.getFirstLanguageName() + " is Sold Out already, please remove it from your selection.";
-                                        CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
-                                    }
-                                }
-                            }
-                        }
-                        if (dish.isPromotion() != oldDish.isPromotion()) {
-                            dishCell.setDish(dish);
-                            dishCell.setInPromotionVisibility(dish.isPromotion());
-                        }
-                    }
+                    doRefreshDish(dishIdList);
+                } else if (msg.what == REFRESHMENUHANDLER_MSGWHAT_REFRESHDISHCONFIG){
+                    ArrayList<Integer> dishConfigIdList = (ArrayList<Integer>) msg.obj;
+                    doRefreshDishConfig(dishConfigIdList);
                 }
             }
         };
         //start timer
-
         refreshMenuTimer = new Timer();
         refreshMenuTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                if(InstantValue.URL_TOMCAT == null || InstantValue.URL_TOMCAT.length() == 0)
-                    return;
-                //if local database is null, stop check
-                if (category1s == null || category1s.isEmpty())
-                    return;
-                MenuVersion mv = (MenuVersion) dbOperator.queryObjectById(1, MenuVersion.class);
-                int localVersion = 0;
-                if (mv != null) {
-                    localVersion = mv.getVersion();
-                }
+                doRefreshMenuTimerAction();
+            }
+        }, 1, refreshMenuInterval);
+    }
 
-                ArrayList<Integer> dishIdList = httpOperator.chechMenuVersion(localVersion);
-                if (dishIdList != null && !dishIdList.isEmpty()){
-                    refreshMenuHandler.sendMessage(CommonTool.buildMessage(REFRESHMENUHANDLER_MSGWHAT_REFRESHMENU, dishIdList));
+    private void doRefreshDishConfig(ArrayList<Integer> dishConfigIdList){
+        for (Integer dishConfigId : dishConfigIdList){
+            DishConfig dbConfig = (DishConfig) dbOperator.queryObjectById(dishConfigId, DishConfig.class);
+            for (Category1 c1 : category1s) {
+                if (c1.getCategory2s() != null) {
+                    for (Category2 c2 : c1.getCategory2s()) {
+                        if (c2.getDishes() != null){
+                            for (Dish dish : c2.getDishes()){
+                                if (dish.getConfigGroups() != null){
+                                    for (DishConfigGroup group : dish.getConfigGroups()){
+                                        if (group.getDishConfigs() != null){
+                                            for (DishConfig config : group.getDishConfigs()){
+                                                if (config.getId() == dishConfigId){
+                                                    config.setSoldOut(dbConfig.isSoldOut());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        }, 1, refreshMenuInterval
-        );
+        }
+    }
+
+    private void doRefreshDish(ArrayList<Integer> dishIdList){
+        //loop to find Dish Object depending on the id, reload the data from database
+        for(Integer dishId : dishIdList){
+            Dish dish = dbOperator.queryDishById(dishId);
+            DishCellComponent dishCell = mapDishCellComponents.get(dish.getId());
+            Dish oldDish = dishCell.getDish();
+            if (dish.isSoldOut() != oldDish.isSoldOut()){
+                dishCell.setSoldOutVisibility(dish.isSoldOut());
+                //remind clients if the sold out dish are selected
+                for(ChoosedDish cf : choosedDishList){
+                    if (cf.getDish().getId() == dishId){
+                        if (dish.isSoldOut()) {
+                            String errormsg = "Dish " + dish.getFirstLanguageName() + " is Sold Out already, please remove it from your selection.";
+                            CommonTool.popupWarnDialog(MainActivity.this, R.drawable.error, "Warning", errormsg);
+                        }
+                    }
+                }
+            }
+            if (dish.isPromotion() != oldDish.isPromotion()) {
+                dishCell.setDish(dish);
+                dishCell.setInPromotionVisibility(dish.isPromotion());
+            }
+        }
+    }
+
+    private void doRefreshMenuTimerAction(){
+        if(InstantValue.URL_TOMCAT == null || InstantValue.URL_TOMCAT.length() == 0)
+            return;
+        //if local database is null, stop check
+        if (category1s == null || category1s.isEmpty())
+            return;
+        MenuVersion mv = (MenuVersion) dbOperator.queryObjectById(1, MenuVersion.class);
+        int localVersion = 0;
+        if (mv != null) {
+            localVersion = mv.getVersion();
+        }
+
+        HashMap<String, ArrayList<Integer>> resultMap = httpOperator.checkMenuVersion(localVersion);
+        if (resultMap != null && !resultMap.isEmpty()){
+            ArrayList<Integer> dishIdList = resultMap.get("dish");
+            ArrayList<Integer> dishConfigIdList = resultMap.get("dishConfig");
+            if (dishIdList != null && !dishIdList.isEmpty())
+                refreshMenuHandler.sendMessage(CommonTool.buildMessage(REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH, dishIdList));
+            if (dishConfigIdList != null && !dishConfigIdList.isEmpty())
+                refreshMenuHandler.sendMessage(CommonTool.buildMessage(REFRESHMENUHANDLER_MSGWHAT_REFRESHDISHCONFIG, dishConfigIdList));
+        }
     }
 
     public PostOrderDialog getPostOrderDialog(){
@@ -462,6 +527,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbOperator.saveObjectsByCascade(flavors);
     }
 
+
     /**
      * execute while click the dish add button.
      *
@@ -489,8 +555,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "This dish is sold out now.", Toast.LENGTH_LONG).show();
             return;
         }
-        if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_DEFAULT){
-            addDishInChoosedList(dish);
+        if (dish.getConfigGroups() != null && !dish.getConfigGroups().isEmpty()){
+            new DishConfigDialogBuilder(this).showConfigDialog(dish);
+        } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_DEFAULT){
+            addDishInChoosedList(dish, null);
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_SUBITEM){
             ChooseDishSubitemDialog dlg = new ChooseDishSubitemDialog(this, dish);
             dlg.showDialog();
@@ -500,10 +568,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setIcon(R.drawable.info)
                     .setTitle("Infomation")
                     .setMessage(msg)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("  OK  ", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            addDishInChoosedList(dish);
+                            addDishInChoosedList(dish, null);
                         }
                     })
                     .create().show();
@@ -531,12 +599,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      *      show PLUS & MINUS buttons in the choosed list, customer can add/reduce the dish's amount;
      *      recalculate all choosed list price;
      *      refresh the dish's choosed amount and show it using a small icon
+     *      自动隐藏掉选择列表中的加号, 因为不合并的不需要再添加, 但是可以减少
      *
      * otherwise, add a new item into list no matter whether the same dish exist or not.
      * @param dish
      * @param
      */
-    public void addDishInChoosedList(Dish dish, ArrayList<DishChooseSubitem> subItems) {
+    public void addDishInChoosedList(Dish dish, ArrayList<DishConfig> configs) {
         ChoosedDish choosedDish = null;
         if (dish.isAutoMergeWhileChoose()){
             //first check if the dish is exist in the list already
@@ -557,18 +626,66 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             choosedDish = new ChoosedDish(dish);
             choosedDishList.add(choosedDish);
         }
-        if (subItems != null && !subItems.isEmpty()) {
-            choosedDish.setDishSubitemList(subItems);
+        if (configs != null && !configs.isEmpty()) {
+            choosedDish.setDishConfigList(configs);
         }
         choosedDishAdapter.notifyDataSetChanged();
         calculateDishPrice();
         refreshChooseAmountOnDishCell(dish);
     }
 
-    public void addDishInChoosedList(Dish dish) {
-        addDishInChoosedList(dish, null);
-    }
+    /**
+     * add dish into choosed list
+     * 1. dish.automerge = true(default value),
+     *      add this dish to the choosed list. If the dish already exists, merge them into one item, just make amount plus one;
+     *      show PLUS & MINUS buttons in the choosed list, customer can add/reduce the dish's amount;
+     *      recalculate all choosed list price;
+     *      refresh the dish's choosed amount and show it using a small icon.
+     *
+     * 2. dish.automerge = false;
+     *      add a new item into list no matter whether the same dish exist or not. the amount always keep ONE;
+     *      show PLUS & MINUS buttons in the choosed list, customer can add/reduce the dish's amount;
+     *      recalculate all choosed list price;
+     *      refresh the dish's choosed amount and show it using a small icon
+     *      自动隐藏掉选择列表中的加号, 因为不合并的不需要再添加, 但是可以减少
+     *
+     * otherwise, add a new item into list no matter whether the same dish exist or not.
+     * @param dish
+     * @param
+     */
+//    public void addDishInChoosedList(Dish dish, ArrayList<DishChooseSubitem> subItems) {
+//        ChoosedDish choosedDish = null;
+//        if (dish.isAutoMergeWhileChoose()){
+//            //first check if the dish is exist in the list already
+//            for (ChoosedDish cf : choosedDishList) {
+//                if (cf.getDish().getId() == dish.getId()) {
+//                    choosedDish = cf;
+//                    break;
+//                }
+//            }
+//            if (choosedDish != null) {
+//                choosedDish.setAmount(choosedDish.getAmount() + 1);
+//            } else {
+//                choosedDish = new ChoosedDish(dish);
+//                choosedDishList.add(choosedDish);
+//            }
+//
+//        } else {
+//            choosedDish = new ChoosedDish(dish);
+//            choosedDishList.add(choosedDish);
+//        }
+//        if (subItems != null && !subItems.isEmpty()) {
+//            choosedDish.setDishSubitemList(subItems);
+//        }
+//        choosedDishAdapter.notifyDataSetChanged();
+//        calculateDishPrice();
+//        refreshChooseAmountOnDishCell(dish);
+//    }
 
+    /**
+     * 在dish的选择按钮上添加一个数字角标, 标记这道菜已经点过, 以免用户误操作
+     * @param dish
+     */
     private void refreshChooseAmountOnDishCell(Dish dish){
         DishCellComponent fc = mapDishCellComponents.get(dish.getId());
         int amount = 0;
@@ -599,7 +716,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void minusDish(int position) {
         if (position >= choosedDishList.size()){
-            return; //点击太快可以导致同时触发多次事件, 前面的时间把列表清空后, 后面的就出发OutofBounds异常
+            return; //点击太快可以导致同时触发多次事件, 前面的事件把列表清空后, 后面的就触发OutofBounds异常
         }
         Dish dish = choosedDishList.get(position).getDish();
         int oldAmount = choosedDishList.get(position).getAmount();
@@ -686,9 +803,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         refreshMenuHandler = null;
         //clear all data and picture files
-        IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG);
-        IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL);
-        IOOperator.deleteDishPicture(InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN);
+        IOOperator.deleteLocalFiles(InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG);
+        IOOperator.deleteLocalFiles(InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL);
+        IOOperator.deleteLocalFiles(InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN);
+        IOOperator.deleteLocalFiles(InstantValue.LOGO_PATH);
         dbOperator.deleteAllData(Desk.class);
         dbOperator.deleteAllData(MenuVersion.class);
         dbOperator.deleteAllData(Flavor.class);
@@ -702,6 +820,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         httpOperator.loadFlavorData();
         httpOperator.loadMenuVersionData();
         httpOperator.loadMenuData();
+        httpOperator.loadLogoPictureFromServer();
     }
 
     @Override

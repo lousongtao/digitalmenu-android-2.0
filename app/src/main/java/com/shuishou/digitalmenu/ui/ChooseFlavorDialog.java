@@ -21,6 +21,7 @@ import android.widget.TextView;
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
@@ -111,13 +112,13 @@ public class ChooseFlavorDialog {
     public void initValue(ChoosedDish choosedDish){
         this.choosedDish = choosedDish;
         frameChoosedFlavor.removeAllViews();
-        if (choosedDish.getDishSubitemList().isEmpty()){
+        if (choosedDish.getDishConfigList().isEmpty()){
             txtDishSubitem.setVisibility(View.GONE);
         } else {
             txtDishSubitem.setVisibility(View.VISIBLE);
             StringBuffer sbSubitem = new StringBuffer();
-            for (int i = 0; i < choosedDish.getDishSubitemList().size(); i++) {
-                DishChooseSubitem si = choosedDish.getDishSubitemList().get(i);
+            for (int i = 0; i < choosedDish.getDishConfigList().size(); i++) {
+                DishConfig si = choosedDish.getDishConfigList().get(i);
                 if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
                     sbSubitem.append(si.getFirstLanguageName());
                     sbSubitem.append(InstantValue.SPACESTRING);

@@ -23,6 +23,7 @@ import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
+import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.http.HttpOperator;
@@ -120,13 +121,6 @@ public class PostOrderDialog {
     public void showDialog(HttpOperator httpOperator, ArrayList<ChoosedDish> choosedFoodList){
         this.choosedFoodList = choosedFoodList;
         this.httpOperator = httpOperator;
-        Window window = dlg.getWindow();
-        WindowManager.LayoutParams param = window.getAttributes();
-        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
-        param.y = 0;
-        param.width = WindowManager.LayoutParams.MATCH_PARENT;
-        param.height = 330;
-        window.setAttributes(param);
         dlg.show();
 
     }
@@ -222,7 +216,7 @@ public class PostOrderDialog {
                 .setTitle("Add Order")
                 .setMessage("There is an order on this table already. \n\nWill you add these dishes in the order?")
                 .setNegativeButton("No", null)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton("  Yes  ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (choosedFoodList == null || choosedFoodList.isEmpty()) {
@@ -263,10 +257,11 @@ public class PostOrderDialog {
             JSONObject jo = new JSONObject();
             jo.put("id", cd.getDish().getId());
             jo.put("amount", cd.getAmount());
+            jo.put("dishPrice", cd.getDish().getPrice() + cd.getAdjustPrice());
             StringBuffer sbReq = new StringBuffer();
-            if (cd.getDishSubitemList() != null && !cd.getDishSubitemList().isEmpty()){
-                for ( DishChooseSubitem si: cd.getDishSubitemList()) {
-                    sbReq.append(si.getFirstLanguageName() + InstantValue.SPACESTRING);
+            if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
+                for ( DishConfig config: cd.getDishConfigList()) {
+                    sbReq.append(config.getFirstLanguageName() + (config.getPrice() == 0 ? "" : InstantValue.DOLLAR + config.getPrice()) + InstantValue.SPACESTRING);
                 }
             }
             if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){

@@ -40,7 +40,7 @@ class SaveServerURLDialog {
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
         builder.setTitle("Configure Server URL")
                 .setIcon(R.drawable.info)
-                .setPositiveButton("Save", null)
+                .setPositiveButton(" Save ", null)
                 .setNegativeButton("Cancel", null)
                 .setView(view);
         dlg = builder.create();
