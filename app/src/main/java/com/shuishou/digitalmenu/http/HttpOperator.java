@@ -99,7 +99,7 @@ public class HttpOperator {
                     break;
                 case WHAT_VALUE_QUERYCONFIGSMAP:
                     msg = "Failed to load ConfigsMap. Please restart app!";
-                    mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
+//                    mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
                     break;
                 case WHAT_VALUE_QUERYDESK :
                     msg = "Failed to load Desk data. Please restart app!";
@@ -150,7 +150,7 @@ public class HttpOperator {
             Log.e(logTag, "doResponseQueryConfigsMap: " + response.getException().getMessage() );
             MainActivity.LOG.error("doResponseQueryConfigsMap: " + response.getException().getMessage());
             sendErrorMessageToToast("Http:doResponseQueryConfigsMap: " + response.getException().getMessage());
-            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
+//            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
             return;
         }
         HttpResult<HashMap<String, String>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<HashMap<String, String>>>(){}.getType());
@@ -159,7 +159,7 @@ public class HttpOperator {
         } else {
             Log.e(logTag, "doResponseQueryConfigsMap: get FALSE for query confirm code");
             MainActivity.LOG.error("doResponseQueryConfigsMap: get FALSE for query confirm code");
-            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
+//            mainActivity.popRestartDialog("cannot load confirm code, please try to restart this app");
         }
     }
 

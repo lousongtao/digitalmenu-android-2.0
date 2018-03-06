@@ -237,18 +237,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void showLeftBottomLogo(Drawable d){
-        leftBottomPanel.setBackground(d);
-    }
-
-    public void showRightBottomLogo(Drawable d){
-        rightBottomPanel.setBackground(d);
-    }
-
-    public void showRightUpLogo(Drawable d){
-        rightUpPanel.setBackground(d);
-    }
-
     /**
      * For reduce the time of switch different fragments, build all fragments at the start time and store
      * them in a SparseArray. While need to display one fragment, just get it from the list.
