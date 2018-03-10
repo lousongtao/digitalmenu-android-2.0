@@ -885,7 +885,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             ViewGroup vg = (ViewGroup)view;
             for (int i = 0; i< vg.getChildCount(); i++){
                 View child = vg.getChildAt(i);
-                if (child.getClass().equals(ChangeLanguageTextView.class)){
+                if (child instanceof ChangeLanguageTextView){
                     list.add((ChangeLanguageTextView)child);
                 }
                 list.addAll(lookforAllChangeLanguageTextView(child));

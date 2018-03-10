@@ -20,6 +20,8 @@ import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.bean.DishChooseSubitem;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.io.IOOperator;
+import com.shuishou.digitalmenu.ui.components.DishDetailNameTextView;
+import com.shuishou.digitalmenu.ui.components.DishNameTextView;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class DishDetailDialog {
     private ImageButton chooseButton;
     private ImageView imgHotLevel;
     private ImageView imgDishPicture;
-    private TextView txtName;
+    private DishDetailNameTextView txtName;
     private TextView txtPrice;
     private TextView txtAmount;
     private TextView txtDescription;
@@ -57,7 +59,7 @@ public class DishDetailDialog {
         chooseButton = (ImageButton) view.findViewById(R.id.btnChoose_dishdetail);
         imgHotLevel = (ImageView) view.findViewById(R.id.imgHotLevel);
         imgDishPicture = (ImageView) view.findViewById(R.id.imgPicture);
-        txtName = (TextView) view.findViewById(R.id.foodNameText);
+        txtName = (DishDetailNameTextView) view.findViewById(R.id.foodNameText);
         txtPrice = (TextView) view.findViewById(R.id.foodPriceText);
         txtAmount = (TextView) view.findViewById(R.id.txtAmount);
         txtDescription = (TextView) view.findViewById(R.id.txtDishDescription);
@@ -114,12 +116,14 @@ public class DishDetailDialog {
         }
         imgDishPicture.setImageDrawable(IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN + dish.getPictureName()));
         if (language == MainActivity.LANGUAGE_FIRSTLANGUAGE){
-            txtName.setText(dish.getFirstLanguageName());
             txtDescription.setText(dish.getDescription_1stlang());
         } else {
-            txtName.setText(dish.getSecondLanguageName());
             txtDescription.setText(dish.getDescription_2ndlang());
         }
+
+        txtName.setTxtFirstLanguageName(dish.getFirstLanguageName());
+        txtName.setTxtSecondLanguageName(dish.getSecondLanguageName());
+        txtName.show(language);
 
         chooseButton.setTag(dish);
         dlg.show();

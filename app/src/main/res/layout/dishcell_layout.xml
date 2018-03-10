@@ -36,7 +36,6 @@
                 android:layout_height="30dp"
                 android:ellipsize="end"
                 android:gravity="top"
-
                 android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
                 android:textSize="20sp"
                 android:textStyle="bold" />
