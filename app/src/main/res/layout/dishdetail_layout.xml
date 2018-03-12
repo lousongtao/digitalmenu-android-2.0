@@ -21,13 +21,12 @@
         android:baselineAligned="false"
         android:orientation="horizontal">
 
-        <TextView
+        <com.shuishou.digitalmenu.ui.components.DishDetailNameTextView
             android:id="@+id/foodNameText"
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:gravity="top"
-            android:singleLine="true"
             android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
             android:textSize="32sp"
             android:textStyle="bold" />
