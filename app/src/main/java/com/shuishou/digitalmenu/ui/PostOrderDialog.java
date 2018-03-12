@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.ui;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
@@ -70,6 +71,23 @@ public class PostOrderDialog {
         public void handleMessage(Message msg) {
             dealHandlerMessage(msg);
             super.handleMessage(msg);
+        }
+    };
+
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS = 1;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG = 0;
+    private ProgressDialog progressDlg;
+    private Handler progressDlgHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG) {
+                if (progressDlg != null)
+                    progressDlg.dismiss();
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS){
+                if (progressDlg != null){
+                    progressDlg.setMessage(msg.obj != null ? msg.obj.toString() : InstantValue.NULLSTRING);
+                }
+            }
         }
     };
 
@@ -166,6 +184,7 @@ public class PostOrderDialog {
             return;
         }
         final Desk choosedDesk = choosedDeskIcon.getDesk();
+        startProgressDialog("", "start posting data ... ");
         //check confirm code and desk status
         new Thread(){
             @Override
@@ -173,11 +192,14 @@ public class PostOrderDialog {
                 if (mainActivity.getConfigsMap() == null || mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE) == null){
                     handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG, "confirm code is null"));
                 } else if (mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(txtCode.getText().toString())){
+
                     String deskstatus = httpOperator.checkDeskStatus(choosedDesk.getName());
                     if (InstantValue.CHECKDESK4MAKEORDER_OCCUPIED.equals(deskstatus)){
+                        progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                         handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ASKTOADDDISHINORDER, choosedDesk.getId()));
                     } else if (InstantValue.CHECKDESK4MAKEORDER_AVAILABLE.equals(deskstatus)){
                         makeNewOrder(choosedDesk.getId());
+                        progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                     } else {
                         handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG, deskstatus));
                     }
@@ -232,11 +254,13 @@ public class PostOrderDialog {
                         }
 
                         if (os != null){
+                            startProgressDialog("", "start posting data ... ");
                             final String oss = os.toString();
                             new Thread(){
                                 @Override
                                 public void run() {
                                     HttpResult<Integer> result = httpOperator.addDishToOrder(deskid,oss);
+                                    progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                                     if (result.success){
                                         handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ADDDISHSUCCESS));
                                     } else {
@@ -345,6 +369,10 @@ public class PostOrderDialog {
         public Desk getDesk() {
             return desk;
         }
+    }
+
+    public void startProgressDialog(String title, String message){
+        progressDlg = ProgressDialog.show(mainActivity, title, message);
     }
 
     class DeskClickListener implements View.OnClickListener{
