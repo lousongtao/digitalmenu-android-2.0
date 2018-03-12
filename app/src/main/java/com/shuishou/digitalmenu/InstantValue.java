@@ -10,6 +10,7 @@ public final class InstantValue {
     public static final String NULLSTRING = "";
     public static final String SPACESTRING = " ";
     public static final String SLLASHSTRING = " ";
+    public static final String ENTERSTRING = "\n";
 
     public static final String FORMAT_DOUBLE = "%.2f";
 

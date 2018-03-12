@@ -285,12 +285,12 @@ public class PostOrderDialog {
             StringBuffer sbReq = new StringBuffer();
             if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
                 for ( DishConfig config: cd.getDishConfigList()) {
-                    sbReq.append(config.getFirstLanguageName() + (config.getPrice() == 0 ? "" : InstantValue.DOLLAR + config.getPrice()) + InstantValue.SPACESTRING);
+                    sbReq.append(config.getFirstLanguageName() + (config.getPrice() == 0 ? "" : InstantValue.DOLLAR + config.getPrice()) + InstantValue.ENTERSTRING);
                 }
             }
             if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
                 for (Flavor f: cd.getFlavorList()){
-                    sbReq.append(f.getFirstLanguageName()+ InstantValue.SPACESTRING);
+                    sbReq.append(f.getFirstLanguageName()+ InstantValue.ENTERSTRING);
                 }
             }
             jo.put("additionalRequirements", sbReq.toString());
