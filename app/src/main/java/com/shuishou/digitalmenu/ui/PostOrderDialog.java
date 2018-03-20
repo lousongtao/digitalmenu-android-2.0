@@ -133,7 +133,11 @@ public class PostOrderDialog {
         });
         dlg.setCancelable(false);
         dlg.setCanceledOnTouchOutside(false);
-
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams param = window.getAttributes();
+        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        param.y = 0;
+        window.setAttributes(param);
     }
 
     public void showDialog(HttpOperator httpOperator, ArrayList<ChoosedDish> choosedFoodList){
@@ -272,6 +276,8 @@ public class PostOrderDialog {
                         }
                     }
                 }).create();
+        askDialog.setCancelable(false);
+        askDialog.setCanceledOnTouchOutside(false);
         askDialog.show();
     }
 

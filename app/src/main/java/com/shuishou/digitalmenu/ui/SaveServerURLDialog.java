@@ -3,8 +3,11 @@ package com.shuishou.digitalmenu.ui;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -58,6 +61,11 @@ class SaveServerURLDialog {
         });
         dlg.setCancelable(false);
         dlg.setCanceledOnTouchOutside(false);
+        Window window = dlg.getWindow();
+        WindowManager.LayoutParams param = window.getAttributes();
+        param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
+        param.y = 0;
+        window.setAttributes(param);
     }
 
     private void loadServerURL(){
