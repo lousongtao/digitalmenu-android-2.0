@@ -443,12 +443,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void buildMenu(){
         category1s = dbOperator.queryAllMenu();
-        Collections.sort(category1s, new Comparator<Category1>() {
-            @Override
-            public int compare(Category1 category1, Category1 t1) {
-                return category1.getSequence() - t1.getSequence();
+        if (category1s != null){
+            Collections.sort(category1s, new Comparator<Category1>() {
+                @Override
+                public int compare(Category1 category1, Category1 t1) {
+                    return category1.getSequence() - t1.getSequence();
+                }
+            });
+            for (int i = 0; i < category1s.size(); i++) {
+                ArrayList<Category2> c2s = category1s.get(i).getCategory2s();
+                if (c2s != null){
+                    Collections.sort(c2s, new Comparator<Category2>() {
+                        @Override
+                        public int compare(Category2 o1, Category2 o2) {
+                            return o1.getSequence() - o2.getSequence();
+                        }
+                    });
+                    for (int j = 0; j< c2s.size(); j++){
+                        if (c2s.get(j).getDishes() != null){
+                            Collections.sort(c2s.get(j).getDishes(), new Comparator<Dish>() {
+                                @Override
+                                public int compare(Dish o1, Dish o2) {
+                                    return o1.getSequence() - o2.getSequence();
+                                }
+                            });
+                        }
+                    }
+                }
             }
-        });
+        }
+
+
         initialDishCellComponents();
 
         CategoryTabAdapter categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
@@ -564,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     })
                     .create().show();
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOQUIT){
-            String msg = (getLanguage() == LANGUAGE_SECONDLANGUAGE) ? dish.getChoosePopInfo().getFirstLanguageName() : dish.getChoosePopInfo().getSecondLanguageName();
+            String msg = (getLanguage() == LANGUAGE_FIRSTLANGUAGE) ? dish.getChoosePopInfo().getFirstLanguageName() : dish.getChoosePopInfo().getSecondLanguageName();
             new AlertDialog.Builder(this)
                     .setIcon(R.drawable.info)
                     .setTitle("Infomation")
@@ -804,11 +829,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbOperator.deleteAllData(Category2.class);
         dbOperator.deleteAllData(Category1.class);
         // synchronize and persist
+        httpOperator.loadLogoPictureFromServer();
         httpOperator.loadDeskData();
         httpOperator.loadFlavorData();
         httpOperator.loadMenuVersionData();
         httpOperator.loadMenuData();
-        httpOperator.loadLogoPictureFromServer();
+
     }
 
     @Override
