@@ -193,21 +193,22 @@ public class PostOrderDialog {
             Toast.makeText(mainActivity, "Please select the desk before post this order!", Toast.LENGTH_SHORT).show();
             return;
         }
+        JSONArray os = null;
+        try {
+            os = generateOrderJson();
+        } catch (JSONException e) {
+            handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
+                    "There are error to build JSON Object, please restart APP!"));
+            progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
+            return;
+        }
+        final String jsons = os.toString();
         final Desk choosedDesk = choosedDeskIcon.getDesk();
-//        startProgressDialog("", "start posting data ... ");
+        startProgressDialog("", "start posting data ... ");
         new Thread(){
             @Override
             public void run() {
-                JSONArray os = null;
-                try {
-                    os = generateOrderJson();
-                } catch (JSONException e) {
-                    handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
-                            "There are error to build JSON Object, please restart APP!"));
-                    progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
-                    return;
-                }
-                HttpResult<Integer> result = httpOperator.makeOrder(txtCode.getText().toString(), os.toString(), choosedDesk.getId(),
+                HttpResult<Integer> result = httpOperator.makeOrder(txtCode.getText().toString(), jsons, choosedDesk.getId(),
                         Integer.parseInt(txtCustomerAmount.getText().toString()), txtComments.getText().toString());
                 progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                 if (result.success){
@@ -218,9 +219,6 @@ public class PostOrderDialog {
                 }
             }
         }.start();
-
-
-
     }
 
     private void addDishToOrder(){
@@ -249,19 +247,20 @@ public class PostOrderDialog {
             Toast.makeText(mainActivity, "There are error to build JSON Object, please !", Toast.LENGTH_SHORT).show();
             return;
         }
-//        startProgressDialog("", "start posting data ... ");
+        JSONArray os = null;
+        try {
+            os = generateOrderJson();
+        } catch (JSONException e) {
+            Toast.makeText(mainActivity, "There are error to build JSON Object, please !", Toast.LENGTH_SHORT).show();
+            progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
+            return;
+        }
+        final String jsons = os.toString();
+        startProgressDialog("", "start posting data ... ");
         new Thread() {
             @Override
             public void run() {
-                JSONArray os = null;
-                try {
-                    os = generateOrderJson();
-                } catch (JSONException e) {
-                    Toast.makeText(mainActivity, "There are error to build JSON Object, please !", Toast.LENGTH_SHORT).show();
-                    progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
-                    return;
-                }
-                HttpResult<Integer> result = httpOperator.addDishToOrder(choosedDesk.getId(), os.toString());
+                HttpResult<Integer> result = httpOperator.addDishToOrder(choosedDesk.getId(), jsons);
                 progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                 if (result.success) {
                     handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ADDDISHSUCCESS));
@@ -269,7 +268,6 @@ public class PostOrderDialog {
                     handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
                             "Something wrong happened while add dishes! \n\nError message : " + result.result));
                 }
-                progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
             }
         }.start();
     }
@@ -372,6 +370,16 @@ public class PostOrderDialog {
 
     public void startProgressDialog(String title, String message){
         progressDlg = ProgressDialog.show(mainActivity, title, message);
+        //启动progress dialog后, 同时启动一个线程来关闭该process dialog, 以防系统未正常结束, 导致此progress dialog长时间卡主. 设定时间为5秒
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                if (progressDlg != null)
+                    progressDlg.dismiss();
+            }
+        };
+        Handler progressDlgCanceller = new Handler();
+        progressDlgCanceller.postDelayed(r, 5000);
     }
 
     class ButtonListener implements View.OnClickListener{
