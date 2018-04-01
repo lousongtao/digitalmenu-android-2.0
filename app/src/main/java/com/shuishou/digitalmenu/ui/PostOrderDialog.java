@@ -199,7 +199,6 @@ public class PostOrderDialog {
         } catch (JSONException e) {
             handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ERRORDIALOG,
                     "There are error to build JSON Object, please restart APP!"));
-            progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
             return;
         }
         final String jsons = os.toString();
@@ -252,7 +251,6 @@ public class PostOrderDialog {
             os = generateOrderJson();
         } catch (JSONException e) {
             Toast.makeText(mainActivity, "There are error to build JSON Object, please !", Toast.LENGTH_SHORT).show();
-            progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
             return;
         }
         final String jsons = os.toString();
@@ -370,7 +368,7 @@ public class PostOrderDialog {
 
     public void startProgressDialog(String title, String message){
         progressDlg = ProgressDialog.show(mainActivity, title, message);
-        //启动progress dialog后, 同时启动一个线程来关闭该process dialog, 以防系统未正常结束, 导致此progress dialog长时间卡主. 设定时间为5秒
+        //启动progress dialog后, 同时启动一个线程来关闭该process dialog, 以防系统未正常结束, 导致此progress dialog长时间卡主. 设定时间为15秒(超过request的timeout时间)
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -379,7 +377,7 @@ public class PostOrderDialog {
             }
         };
         Handler progressDlgCanceller = new Handler();
-        progressDlgCanceller.postDelayed(r, 5000);
+        progressDlgCanceller.postDelayed(r, 15000);
     }
 
     class ButtonListener implements View.OnClickListener{
