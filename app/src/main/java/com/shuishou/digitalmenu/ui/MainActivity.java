@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -551,11 +552,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Thus we check the dish's CHOOSEMODE property to decide if we need to do other operation before adding into list
      * the different conditions are:
      *
-     * 1. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_DEFAULT, the dish does not need to do special, then add it into choosed list directly
+     * 1. check if DishConfig existing, if true, popup the DishConfig dialog.
      *
-     * 2. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_SUBITEM, the dish needs to choose some items before adding,
-     *      popup a dialog and to list the opinions to comstomer, if the customer gives up to choose subitems, then cancel the adding operation;
-     *      ONLY adding into list after customer click the dialog's CONFIRM button(do some validatation if needed)
+     * 2. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_DEFAULT, the dish does not need to do special, then add it into choosed list directly
      *
      * 3. CHOOSEMODE == InstantValue.DISH_CHOOSEMODE_POPINFOCHOOSE, popup a message to tell some information before adding the list
      *
@@ -568,13 +567,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "This dish is sold out now.", Toast.LENGTH_LONG).show();
             return;
         }
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : start a new choose ");
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : onDishChoosed : dish.ConfigGroups = "+ (dish.getConfigGroups() == null ? null : dish.getConfigGroups()));
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : onDishChoosed : dish.ChooseMode = "+ dish.getChooseMode());
         if (dish.getConfigGroups() != null && !dish.getConfigGroups().isEmpty()){
             new DishConfigDialogBuilder(this).showConfigDialog(dish);
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_DEFAULT){
             addDishInChoosedList(dish, null);
-        } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_SUBITEM){
-            ChooseDishSubitemDialog dlg = new ChooseDishSubitemDialog(this, dish);
-            dlg.showDialog();
         } else if (dish.getChooseMode() == InstantValue.DISH_CHOOSEMODE_POPINFOCHOOSE){
             String msg = (getLanguage() == LANGUAGE_FIRSTLANGUAGE) ? dish.getChoosePopInfo().getFirstLanguageName() : dish.getChoosePopInfo().getSecondLanguageName();
             new AlertDialog.Builder(this)
@@ -620,6 +619,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void addDishInChoosedList(Dish dish, ArrayList<DishConfig> configs) {
         ChoosedDish choosedDish = null;
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : dish.isAutoMergeWhileChoose = "+ dish.isAutoMergeWhileChoose());
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : choosedDishList.size = "+ choosedDishList.size());
         if (dish.isAutoMergeWhileChoose()){
             //first check if the dish is exist in the list already
             for (ChoosedDish cf : choosedDishList) {
@@ -628,13 +629,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 }
             }
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : find choosedDish = "+ (choosedDish != null));
             if (choosedDish != null) {
                 choosedDish.setAmount(choosedDish.getAmount() + 1);
             } else {
                 choosedDish = new ChoosedDish(dish);
                 choosedDishList.add(choosedDish);
             }
-
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : redo choosedDishList.size = "+ choosedDishList.size());
         } else {
             choosedDish = new ChoosedDish(dish);
             choosedDishList.add(choosedDish);
@@ -642,8 +644,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (configs != null && !configs.isEmpty()) {
             choosedDish.setDishConfigList(configs);
         }
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do choosedDishAdapter.notifyDataSetChanged");
         choosedDishAdapter.notifyDataSetChanged();
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do calculateDishPrice");
         calculateDishPrice();
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do refreshChooseAmountOnDishCell");
         refreshChooseAmountOnDishCell(dish);
     }
 
@@ -706,6 +711,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (cf.getDish().getId() == dish.getId())
                 amount += cf.getAmount();
         }
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do DishCellComponent.changeAmount to " + amount);
         fc.changeAmount(amount);
     }
 
@@ -715,6 +721,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             totalPrice += cf.getAmount() * cf.getPrice();
         }
 //        double gst = totalPrice / 11;
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : calculateDishPrice : get the totalPrice is " + totalPrice);
         tvChoosedItems.setText(String.valueOf(choosedDishList.size()));
         tvChoosedPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, totalPrice));
     }

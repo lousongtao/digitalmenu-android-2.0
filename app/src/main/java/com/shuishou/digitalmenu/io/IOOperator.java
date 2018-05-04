@@ -167,7 +167,10 @@ public class IOOperator {
                     out.close();
                     //delete log files
                     for(File file : files){
-                        file.delete();
+                        //delte the file, if the name include "digitalmenu", it does not to be deleted, this is a long time log file.
+                        if (file.getName().indexOf(InstantValue.ERRORLOGFILENAME) < 0) {
+                            file.delete();
+                        }
                     }
 
                 } catch(Exception e) {

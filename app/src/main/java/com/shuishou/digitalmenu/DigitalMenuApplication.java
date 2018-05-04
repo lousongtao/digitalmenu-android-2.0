@@ -21,7 +21,7 @@ public class DigitalMenuApplication extends Application {
         File dir = new File(InstantValue.ERRORLOGPATH);
         if (!dir.exists())
             dir.mkdir();
-        fileHandler.setFullFilePathPattern(InstantValue.ERRORLOGPATH + "/my_log.%g.%u.log");
+        fileHandler.setFullFilePathPattern(InstantValue.ERRORLOGPATH + "/" + InstantValue.ERRORLOGFILENAME + ".%g.%u.log");
 
         LoggerConfiguration.configuration().addHandlerToRootLogger(fileHandler);
         CrashHandler handler = CrashHandler.getInstance();

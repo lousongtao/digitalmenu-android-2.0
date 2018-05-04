@@ -1,10 +1,14 @@
 package com.shuishou.digitalmenu;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 /**
  * Created by Administrator on 2016/12/22.
  */
 
 public final class InstantValue {
+    public static final DateFormat DFYMDHMS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     public static final String DOLLAR = "$";
     public static final String DOLLARSPACE = "$ ";
     public static final String NULLSTRING = "";
@@ -29,7 +33,7 @@ public final class InstantValue {
     public static final int DESKHEIGHT_IN_POSTORDERDIALOG = 70;
 
     public static final byte DISH_CHOOSEMODE_DEFAULT = 1;
-    public static final byte DISH_CHOOSEMODE_SUBITEM = 2;
+//    public static final byte DISH_CHOOSEMODE_SUBITEM = 2;
     public static final byte DISH_CHOOSEMODE_POPINFOCHOOSE = 3;
     public static final byte DISH_CHOOSEMODE_POPINFOQUIT = 4;
 
@@ -48,6 +52,7 @@ public final class InstantValue {
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
     public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
+    public static final String ERRORLOGFILENAME = "digitalmenu_log";
     public static final String LOGO_PATH = "/data/data/com.shuishou.digitalmenu/logo_path/";
 
     public static final String CONFIGS_CONFIRMCODE = "CONFIRMCODE";
