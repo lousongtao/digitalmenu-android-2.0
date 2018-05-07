@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.bean.DishConfig;
@@ -19,15 +20,19 @@ import com.shuishou.digitalmenu.ui.MainActivity;
 import com.shuishou.digitalmenu.ui.components.BorderView;
 import com.shuishou.digitalmenu.utils.CommonTool;
 
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * Created by Administrator on 17/02/2018.
  */
 
 public class DishConfigDialogBuilder {
+    public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(DishConfigDialogBuilder.class.getSimpleName());
     private MainActivity mainActivity;
     private AlertDialog dialog;
     private ArrayList<DishConfigGroupIFC> groupViewList = new ArrayList<>();
@@ -84,12 +89,20 @@ public class DishConfigDialogBuilder {
                 .create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onShow(DialogInterface dialog) {
+            public void onShow(final DialogInterface dialog) {
                 //add listener for YES button
                 ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         onFinish(dish);
+                    }
+                });
+                ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : Cancel to choose favorites");
+                        dialog.dismiss();
                     }
                 });
             }
@@ -115,6 +128,7 @@ public class DishConfigDialogBuilder {
                 return;
             choosedConfigs.addAll(cview.getChoosedData());
         }
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : do choose favorites");
         mainActivity.addDishInChoosedList(dish, choosedConfigs);
         dialog.dismiss();
     }

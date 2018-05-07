@@ -567,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(MainActivity.this, "This dish is sold out now.", Toast.LENGTH_LONG).show();
             return;
         }
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : start a new choose ");
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : start a new choose, dish : " + dish.getFirstLanguageName());
         LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : onDishChoosed : dish.ConfigGroups = "+ (dish.getConfigGroups() == null ? null : dish.getConfigGroups()));
         LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : onDishChoosed : dish.ChooseMode = "+ dish.getChooseMode());
         if (dish.getConfigGroups() != null && !dish.getConfigGroups().isEmpty()){
@@ -619,8 +619,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void addDishInChoosedList(Dish dish, ArrayList<DishConfig> configs) {
         ChoosedDish choosedDish = null;
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : dish.isAutoMergeWhileChoose = "+ dish.isAutoMergeWhileChoose());
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : choosedDishList.size = "+ choosedDishList.size());
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : dish.isAutoMergeWhileChoose = "+ dish.isAutoMergeWhileChoose());
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : choosedDishList.size = "+ choosedDishList.size());
         if (dish.isAutoMergeWhileChoose()){
             //first check if the dish is exist in the list already
             for (ChoosedDish cf : choosedDishList) {
@@ -629,14 +629,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 }
             }
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : find choosedDish = "+ (choosedDish != null));
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : find choosedDish = "+ (choosedDish != null));
             if (choosedDish != null) {
                 choosedDish.setAmount(choosedDish.getAmount() + 1);
             } else {
                 choosedDish = new ChoosedDish(dish);
                 choosedDishList.add(choosedDish);
             }
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : redo choosedDishList.size = "+ choosedDishList.size());
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : redo choosedDishList.size = "+ choosedDishList.size());
         } else {
             choosedDish = new ChoosedDish(dish);
             choosedDishList.add(choosedDish);
@@ -644,11 +644,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (configs != null && !configs.isEmpty()) {
             choosedDish.setDishConfigList(configs);
         }
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do choosedDishAdapter.notifyDataSetChanged");
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : do choosedDishAdapter.notifyDataSetChanged");
         choosedDishAdapter.notifyDataSetChanged();
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do calculateDishPrice");
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : do calculateDishPrice");
         calculateDishPrice();
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do refreshChooseAmountOnDishCell");
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList("+dish.getFirstLanguageName()+") : do refreshChooseAmountOnDishCell");
         refreshChooseAmountOnDishCell(dish);
     }
 
@@ -711,7 +711,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (cf.getDish().getId() == dish.getId())
                 amount += cf.getAmount();
         }
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : addDishInChoosedList : do DishCellComponent.changeAmount to " + amount);
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : refreshChooseAmountOnDishCell("+dish.getFirstLanguageName()+") : do DishCellComponent.changeAmount to " + amount);
         fc.changeAmount(amount);
     }
 
@@ -727,6 +727,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void plusDish(int position) {
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : plusDish("+choosedDishList.get(position).getDish().getFirstLanguageName()+")");
         choosedDishList.get(position).setAmount(choosedDishList.get(position).getAmount() + 1);
         //show choosed icon
         refreshChooseAmountOnDishCell(choosedDishList.get(position).getDish());
@@ -739,6 +740,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return; //点击太快可以导致同时触发多次事件, 前面的事件把列表清空后, 后面的就触发OutofBounds异常
         }
         Dish dish = choosedDishList.get(position).getDish();
+        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : minusDish("+dish.getFirstLanguageName()+")");
         int oldAmount = choosedDishList.get(position).getAmount();
 
         if (oldAmount == 1) {
