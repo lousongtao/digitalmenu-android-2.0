@@ -59,17 +59,19 @@ public class DishConfigDialogBuilder {
         for (int i = 0; i < groups.size(); i++) {
             DishConfigGroup group = groups.get(i);
             if (group.getRequiredQuantity() == 1){
-                BorderView bv = new ChooseOneConfigView(mainActivity, group, listener);
-                contentview.addView(bv);
-                groupViewList.add((DishConfigGroupIFC) bv);
-            } else if (group.getRequiredQuantity() > 1){
-                BorderView bv = new ChooseMoreConfigView(mainActivity, group, listener, this);
+                BorderView bv = new ChooseOnlyOneConfigView(mainActivity, group, listener);
                 contentview.addView(bv);
                 groupViewList.add((DishConfigGroupIFC) bv);
             } else {
-                BorderView bv = new ChooseAnyConfigView(mainActivity, group, listener);
-                contentview.addView(bv);
-                groupViewList.add((DishConfigGroupIFC) bv);
+                if (group.isAllowDuplicate()){
+                    BorderView bv = new ChooseDuplicatableConfigView(mainActivity, group, listener, this);
+                    contentview.addView(bv);
+                    groupViewList.add((DishConfigGroupIFC) bv);
+                } else {
+                    BorderView bv = new ChooseNonDuplicatableConfigView(mainActivity, group, listener);
+                    contentview.addView(bv);
+                    groupViewList.add((DishConfigGroupIFC) bv);
+                }
             }
         }
         ScrollView scrollView = new ScrollView(mainActivity);

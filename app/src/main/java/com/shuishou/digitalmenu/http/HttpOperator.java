@@ -17,6 +17,7 @@ import com.shuishou.digitalmenu.bean.HttpResult;
 import com.shuishou.digitalmenu.bean.Indent;
 import com.shuishou.digitalmenu.bean.MenuVersion;
 import com.shuishou.digitalmenu.bean.MenuVersionInfo;
+import com.shuishou.digitalmenu.bean.UserData;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.ui.MainActivity;
 import com.shuishou.digitalmenu.utils.CommonTool;
@@ -58,6 +59,7 @@ public class HttpOperator {
     private static final int WHAT_VALUE_QUERYDESK = 4;
     private static final int WHAT_VALUE_QUERYMENUVERSION = 5;
     private static final int WHAT_VALUE_QUERYCONFIGSMAP = 6;
+    private static final int WHAT_VALUE_QUERYWAITER = 7;
 
     private Gson gson = new Gson();
 
@@ -83,6 +85,9 @@ public class HttpOperator {
                     break;
                 case WHAT_VALUE_QUERYFLAVOR:
                     doResponseQueryFlavor(response);
+                    break;
+                case WHAT_VALUE_QUERYWAITER:
+                    doResponseQueryWaiter(response);
                     break;
                 default:
             }
@@ -138,6 +143,22 @@ public class HttpOperator {
         }else {
             Log.e(logTag, "doResponseQueryMenu: get FALSE for query confirm code");
             MainActivity.LOG.error("doResponseQueryMenu: get FALSE for query confirm code");
+        }
+    }
+
+    private void doResponseQueryWaiter(Response<JSONObject> response){
+        if (response.getException() != null){
+            Log.e(logTag, "doResponseQueryWaiter: " + response.getException().getMessage() );
+            MainActivity.LOG.error("doResponseQueryWaiter: " + response.getException().getMessage());
+            sendErrorMessageToToast("Http:doResponseQueryWaiter: " + response.getException().getMessage());
+            return;
+        }
+        HttpResult<ArrayList<UserData>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<UserData>>>(){}.getType());
+        if (result.success){
+            mainActivity.setWaiters(result.data);
+        } else {
+            Log.e(logTag, "doResponseQueryWaiter: get FALSE ");
+            MainActivity.LOG.error("doResponseQueryWaiter: get FALSE ");
         }
     }
 
@@ -239,6 +260,14 @@ public class HttpOperator {
                 "start loading flavor data ..."));
         Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/queryflavor");
         requestQueue.add(WHAT_VALUE_QUERYFLAVOR, deskRequest, responseListener);
+    }
+
+    //load waiters
+    public void loadWaiterData(){
+        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_STARTLOADDATA,
+                "start loading waiter data ..."));
+        Request<JSONObject> deskRequest = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/account/queryaccount");
+        requestQueue.add(WHAT_VALUE_QUERYWAITER, deskRequest, responseListener);
     }
 
     //load menu

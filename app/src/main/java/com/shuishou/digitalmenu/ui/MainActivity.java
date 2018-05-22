@@ -41,6 +41,7 @@ import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.DishConfigGroup;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.MenuVersion;
+import com.shuishou.digitalmenu.bean.UserData;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.io.IOOperator;
@@ -86,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ArrayList<Desk> desks;
     private ArrayList<Flavor> flavors;
+    private ArrayList<UserData> waiters;
     private RecyclerChoosedDishAdapter choosedDishAdapter;
     private ArrayList<ChoosedDish> choosedDishList= new ArrayList<>();
     private ArrayList<Category1> category1s = new ArrayList<>(); // = TestData.makeCategory1();
@@ -212,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //read local database to memory
         desks = dbOperator.queryDesks();
         flavors = dbOperator.queryFlavors();
+        httpOperator.loadWaiterData();
 
         dlgPostOrder = PostOrderDialog.getInstance(this);
         dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
@@ -256,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             leftMargin = 7;
         if (category1s != null){
             TableRow.LayoutParams trlp = new TableRow.LayoutParams();
-            trlp.topMargin = 7;
+            trlp.topMargin = 15;
             trlp.leftMargin = (int)(leftMargin * displayMetrics.density);
 //            trlp.width = InstantValue.DISPLAY_DISH_WIDTH;
 //            trlp.height = InstantValue.DISPLAY_DISH_HEIGHT;
@@ -933,6 +936,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (rbSecondLanguage.isChecked())
              return LANGUAGE_SECONDLANGUAGE;
         else return LANGUAGE_FIRSTLANGUAGE;
+    }
+
+    public ArrayList<UserData> getWaiters() {
+        return waiters;
+    }
+
+    public void setWaiters(ArrayList<UserData> waiters) {
+        this.waiters = waiters;
     }
 
     public void setMenu(ArrayList<Category1> category1s){

@@ -21,11 +21,11 @@ import java.util.ArrayList;
  * Created by Administrator on 18/02/2018.
  */
 
-public class ChooseOneConfigView extends BorderView implements DishConfigGroupIFC{
+public class ChooseOnlyOneConfigView extends BorderView implements DishConfigGroupIFC{
     private final static int ROW_COMPONENT_AMOUNT = 4;//每行显示的控件数目
     private DishConfigGroup group;
     private ArrayList<RadioButton> components = new ArrayList<>();
-    public ChooseOneConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener){
+    public ChooseOnlyOneConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener){
         super(mainActivity);
         this.group = group;
         if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){

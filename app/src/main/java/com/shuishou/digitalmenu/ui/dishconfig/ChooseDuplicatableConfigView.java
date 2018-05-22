@@ -20,11 +20,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * 需要选择多个配置项, 且可以重复选择的
+ * 需要选择o个或多个配置项, 且可以重复选择的
  * Created by Administrator on 18/02/2018.
  */
 
-public class ChooseMoreConfigView extends BorderView implements DishConfigGroupIFC {
+public class ChooseDuplicatableConfigView extends BorderView implements DishConfigGroupIFC {
     private final static int ROW_COMPONENT_AMOUNT = 4;//每行显示的控件数目
     public final static String SHOWFIELD = "name";
     public final static String ENTITY = "entity";
@@ -32,7 +32,7 @@ public class ChooseMoreConfigView extends BorderView implements DishConfigGroupI
     private ArrayList<HashMap<String, Object>> choosedConfigs = new ArrayList<>();
     private SimpleAdapter adapter;
     private DishConfigDialogBuilder builder;
-    public ChooseMoreConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener, DishConfigDialogBuilder builder){
+    public ChooseDuplicatableConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener, DishConfigDialogBuilder builder){
         super(mainActivity);
         this.group = group;
         this.builder = builder;
@@ -107,6 +107,8 @@ public class ChooseMoreConfigView extends BorderView implements DishConfigGroupI
 
     @Override
     public boolean checkData() {
+        if (group.getRequiredQuantity() == 0)
+            return true;
         if (choosedConfigs.size() != group.getRequiredQuantity()){
             String groupName = group.getFirstLanguageName();
             if (mainActivity.getLanguage() == MainActivity.LANGUAGE_SECONDLANGUAGE)

@@ -16,16 +16,16 @@ import com.shuishou.digitalmenu.ui.components.BorderView;
 import java.util.ArrayList;
 
 /**
- * 需要选择0个或者一个以上配置项, 且不允许重复的情况
+ * 需要选择0个或者多个配置项, 且不允许重复的情况
  * Created by Administrator on 18/02/2018.
  */
 
-public class ChooseAnyConfigView extends BorderView implements DishConfigGroupIFC {
+public class ChooseNonDuplicatableConfigView extends BorderView implements DishConfigGroupIFC {
     private final static int ROW_COMPONENT_AMOUNT = 4;//每行显示的控件数目
     private DishConfigGroup group;
     private ArrayList<CheckBox> components = new ArrayList<>();
 
-    public ChooseAnyConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener){
+    public ChooseNonDuplicatableConfigView(MainActivity mainActivity, DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener){
         super(mainActivity);
         this.group = group;
         if (mainActivity.getLanguage() == MainActivity.LANGUAGE_FIRSTLANGUAGE){
@@ -80,7 +80,11 @@ public class ChooseAnyConfigView extends BorderView implements DishConfigGroupIF
 
     @Override
     public boolean checkData() {
-        return true;
+        if (group.getRequiredQuantity() == 0)
+            return true;
+        else {
+            return getChoosedData().size() == group.getRequiredQuantity();
+        }
     }
 
     @Override

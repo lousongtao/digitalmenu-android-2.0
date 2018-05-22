@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shuishou.digitalmenu.InstantValue;
@@ -26,6 +27,7 @@ import com.shuishou.digitalmenu.bean.Desk;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.bean.HttpResult;
+import com.shuishou.digitalmenu.bean.UserData;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 import com.shuishou.digitalmenu.utils.CommonTool;
@@ -46,6 +48,7 @@ public class PostOrderDialog {
     private EditText txtCode;
     private EditText txtCustomerAmount;
     private EditText txtComments;
+    private TextView txtWaiter;
     private TableLayout deskAreaLayout;
     private ArrayList<ChoosedDish> choosedFoodList;
     private HttpOperator httpOperator;
@@ -111,6 +114,14 @@ public class PostOrderDialog {
         deskAreaLayout = (TableLayout)view.findViewById(R.id.postorder_deskarea);
         txtCustomerAmount = (EditText) view.findViewById(R.id.txt_customeramount);
         txtComments = (EditText) view.findViewById(R.id.txtComments);
+        txtWaiter = (TextView) view.findViewById(R.id.txtWaiter);
+        //set first waiter as the default value
+        if (txtWaiter.getText() == null || txtWaiter.getText().length() == 0){
+            if (mainActivity.getWaiters() != null && !mainActivity.getWaiters().isEmpty())
+                setWaiter(mainActivity.getWaiters().get(0));
+            else
+                txtWaiter.setText("Waiter");
+        }
         initDeskData(mainActivity.getDesks());
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, AlertDialog.THEME_HOLO_LIGHT);
 //        builder.setTitle("Confirm");
@@ -134,6 +145,12 @@ public class PostOrderDialog {
                 ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(buttonListener);
                 ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(buttonListener);
                 ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(buttonListener);
+            }
+        });
+        txtWaiter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WaiterChooseDialog.getInstance(mainActivity).showDialog();
             }
         });
         dlg.setCancelable(false);
@@ -277,6 +294,7 @@ public class PostOrderDialog {
             jo.put("id", cd.getDish().getId());
             jo.put("amount", cd.getAmount());
             jo.put("dishPrice", cd.getDish().getPrice() + cd.getAdjustPrice());
+            jo.put("operator", txtWaiter.getText());
             StringBuffer sbReq = new StringBuffer();
             if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
                 for ( DishConfig config: cd.getDishConfigList()) {
@@ -324,6 +342,9 @@ public class PostOrderDialog {
         }
     }
 
+    public void setWaiter(UserData user){
+        txtWaiter.setText(user.getUserName());
+    }
     public void dismiss(){
         dlg.dismiss();
     }

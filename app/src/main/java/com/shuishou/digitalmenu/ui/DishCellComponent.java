@@ -45,7 +45,7 @@ class DishCellComponent{
         imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
         imgDishPicture.setTag(dish);
         imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance(mainActivity));
-        ImageButton chooseButton = (ImageButton) foodCellView.findViewById(R.id.chooseBtn);
+        ImageView chooseButton = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
         chooseButton.setTag(dish);
         chooseButton.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
 

@@ -54,6 +54,13 @@
             android:ems="10"
             android:inputType="textPersonName" />
 
+        <TextView
+            android:id="@+id/txtWaiter"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="780dp"
+            android:text="Waiter"
+            android:textSize="18sp" />
     </FrameLayout>
 
     <TableLayout
