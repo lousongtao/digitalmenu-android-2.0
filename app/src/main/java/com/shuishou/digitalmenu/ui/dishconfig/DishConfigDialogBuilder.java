@@ -103,7 +103,6 @@ public class DishConfigDialogBuilder {
                 ((AlertDialog)dialog).getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : Cancel to choose favorites");
                         dialog.dismiss();
                     }
                 });
@@ -130,7 +129,6 @@ public class DishConfigDialogBuilder {
                 return;
             choosedConfigs.addAll(cview.getChoosedData());
         }
-        LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : do choose favorites");
         mainActivity.addDishInChoosedList(dish, choosedConfigs);
         dialog.dismiss();
     }

@@ -72,7 +72,6 @@ public class DownloadDishImageListener implements DownloadListener {
         //change progress dialog text
         handler.sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS,
                 strLoading + (totalFileAmount - left) + strSlash + totalFileAmount + strPic));
-        Log.d("lousongtao", "onFinish: left = " + left + ", what = " + what);
         //while all download finish, start to build menu
         if (left == 0){
             handler.sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH, "start to rebuild menu"));

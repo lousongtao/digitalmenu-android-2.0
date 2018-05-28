@@ -11,34 +11,13 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <LinearLayout
+
+
+        <com.shuishou.digitalmenu.ui.CategoryTabListView
+            android:id="@+id/categorytab_listview"
             android:layout_width="180dp"
             android:layout_height="match_parent"
-            android:background="@color/color_CategoryTabArea"
-            android:orientation="vertical">
-
-            <com.shuishou.digitalmenu.ui.CategoryTabListView
-                android:id="@+id/categorytab_listview"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <LinearLayout
-                android:id="@+id/leftBottomPanel"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:gravity="center"
-                android:orientation="horizontal">
-
-                <ImageButton
-                    android:id="@+id/btnLookforDish"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/lookfor"
-                    android:text="Look For" />
-            </LinearLayout>
-        </LinearLayout>
-
+            android:background="@color/color_CategoryTabArea" />
         <FrameLayout
             android:id="@+id/dishdisplayarea_layout"
             android:layout_width="0dp"
@@ -51,7 +30,7 @@
         <LinearLayout
             android:layout_width="260dp"
             android:layout_height="match_parent"
-            android:background="@color/color_OrangeTheme_ChoosedFoodBackgroundArea"
+
             android:orientation="vertical">
 
 
@@ -109,21 +88,29 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/list_choosedfood"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    />
+                    android:layout_height="match_parent" />
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/rightBottomPanel"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
+                android:background="@color/color_OrganeTheme_TrolleyBackgrand"
                 android:orientation="vertical">
+
+                <ImageButton
+                    android:id="@+id/btnLookforDish"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginLeft="46dp"
+                    android:background="@drawable/lookfor"
+                    android:text="Look For" />
 
                 <FrameLayout
                     android:id="@+id/checkoutButton"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:layout_marginLeft="100dp"
+                    android:layout_marginLeft="140dp"
                     android:background="@drawable/circle">
 
                 </FrameLayout>
@@ -132,7 +119,7 @@
                     android:id="@+id/imageView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="114dp"
+                    android:layout_marginLeft="154dp"
                     android:layout_marginTop="13dp"
                     android:contentDescription="Trolley"
                     app:srcCompat="@drawable/trolley21" />
@@ -141,7 +128,7 @@
                     android:id="@+id/tvChoosedFoodItems"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="150dp"
+                    android:layout_marginLeft="185dp"
                     android:background="@drawable/small_red_circle"
                     android:text="0"
                     android:textColor="@color/colorWhite"
@@ -153,7 +140,7 @@
                     android:id="@+id/tvChoosedFoodPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="150dp"
+                    android:layout_marginLeft="185dp"
                     android:layout_marginTop="35dp"
                     android:background="@drawable/small_red_circle"
                     android:text="$0"
@@ -201,6 +188,14 @@
             android:layout_height="80dp"
             android:paddingTop="20dp"
             android:text="@string/drawmenu_exit"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/drawermenu_test"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingTop="20dp"
+            android:text="Test"
             android:textSize="30sp" />
     </LinearLayout>
 

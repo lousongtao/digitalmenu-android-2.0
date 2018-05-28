@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="password" />
+
+    <EditText
+        android:id="@+id/txtPassword"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="80dp"
+        android:ems="10" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="250dp"
+        android:layout_marginTop="10dp"
+        android:text="DishId" />
+
+    <EditText
+        android:id="@+id/txtDishId"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="300dp"
+        android:ems="10"
+        android:inputType="textPersonName" />
+
+    <Button
+        android:id="@+id/btnTest1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:text="Test1" />
+
+    <Button
+        android:id="@+id/btnTest2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="50dp"
+        android:text="Test2" />
+
+    <Button
+        android:id="@+id/btnTest3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="200dp"
+        android:layout_marginTop="50dp"
+        android:text="Test3" />
+
+    <Button
+        android:id="@+id/btnTest4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="300dp"
+        android:layout_marginTop="50dp"
+        android:text="Test4" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="972dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:text="Test1: add dish; Test2: change trolly price; Test3: add dish chosen quantity; Test4: compare component id; Test5: rebuild fragment" />
+
+    <EditText
+        android:id="@+id/txtInfo"
+        android:layout_width="969dp"
+        android:layout_height="447dp"
+        android:layout_marginTop="130dp"
+        android:ems="50"
+        android:inputType="none"
+        android:textAlignment="viewStart" />
+</FrameLayout>

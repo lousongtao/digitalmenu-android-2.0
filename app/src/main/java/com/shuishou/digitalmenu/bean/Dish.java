@@ -62,12 +62,6 @@ public class Dish implements Serializable{
     @Mapping(Relation.OneToOne)
     private DishChoosePopinfo choosePopInfo;
 
-    @Mapping(Relation.OneToMany)
-    private ArrayList<DishChooseSubitem> chooseSubItems = new ArrayList<>();
-
-    @Column("subitem_amount")
-    private int subitemAmount = 0;
-
     @Column("automerge_whilechoose")
     private boolean autoMergeWhileChoose = true;
 
@@ -255,22 +249,6 @@ public class Dish implements Serializable{
         this.choosePopInfo = choosePopInfo;
     }
 
-    public ArrayList<DishChooseSubitem> getChooseSubItems() {
-        return chooseSubItems;
-    }
-
-    public void setChooseSubItems(ArrayList<DishChooseSubitem> chooseSubItems) {
-        this.chooseSubItems = chooseSubItems;
-    }
-
-    public int getSubitemAmount() {
-        return subitemAmount;
-    }
-
-    public void setSubitemAmount(int subitemAmount) {
-        this.subitemAmount = subitemAmount;
-    }
-
     public boolean isAutoMergeWhileChoose() {
         return autoMergeWhileChoose;
     }
@@ -287,6 +265,27 @@ public class Dish implements Serializable{
         this.allowFlavor = allowFlavor;
     }
 
+    public void copyFrom(Dish fromDish){
+        setNew(fromDish.isNew);
+        setPrice(fromDish.getPrice());
+        setOriginPrice(fromDish.getOriginPrice());
+        setSoldOut(fromDish.isSoldOut());
+        setPromotion(fromDish.isPromotion());
+        setAbbreviation(fromDish.getAbbreviation());
+        setAllowFlavor(fromDish.isAllowFlavor());
+        setAutoMergeWhileChoose(fromDish.isAutoMergeWhileChoose());
+        setChooseMode(fromDish.getChooseMode());
+        setDescription_1stlang(fromDish.getDescription_1stlang());
+        setDescription_2ndlang(fromDish.getDescription_2ndlang());
+        setSecondLanguageName(fromDish.getSecondLanguageName());
+        setFirstLanguageName(fromDish.getFirstLanguageName());
+        setPictureName(fromDish.getPictureName());
+        setHotLevel(fromDish.getHotLevel());
+        setSpecial(fromDish.isSpecial());
+        setSequence(fromDish.getSequence());
+        setPurchaseType(fromDish.getPurchaseType());
+
+    }
     @Override
     public String toString() {
         return "Dish{" +

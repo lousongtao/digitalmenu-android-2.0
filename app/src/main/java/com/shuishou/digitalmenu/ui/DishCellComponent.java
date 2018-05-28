@@ -33,12 +33,15 @@ class DishCellComponent{
     private TextView tvOldPrice;
     private LinearLayout foodcellPriceLayout;
     private TextView foodPriceText;
+    private DishNameTextView foodNameText;
+    private ImageView imgHotLevel;
     private MainActivity mainActivity;
     public DishCellComponent(final MainActivity mainActivity, Dish _dish){
         this.mainActivity = mainActivity;
         this.dish = _dish;
         foodCellView = LayoutInflater.from(mainActivity).inflate(R.layout.dishcell_layout, null);
-        DishNameTextView foodNameText = (DishNameTextView) foodCellView.findViewById(R.id.foodNameText);
+        foodCellView.setTag(dish);//view 根据dish对象作为tag来识别,
+        foodNameText = (DishNameTextView) foodCellView.findViewById(R.id.foodNameText);
         chooseButtonLayout = (FrameLayout) foodCellView.findViewById(R.id.chooseButtonLayout);
         foodPriceText = (TextView) foodCellView.findViewById(R.id.foodPriceText);
         foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
@@ -58,14 +61,14 @@ class DishCellComponent{
             setInPromotionVisibility(true);
         }
         if (dish.getHotLevel() > 0){
-            ImageView img = new ImageView(mainActivity);
+            imgHotLevel = new ImageView(mainActivity);
             if (dish.getHotLevel() == 1)
-                img.setBackgroundResource(R.drawable.chili1);
+                imgHotLevel.setBackgroundResource(R.drawable.chili1);
             else if (dish.getHotLevel() == 2)
-                img.setBackgroundResource(R.drawable.chili2);
+                imgHotLevel.setBackgroundResource(R.drawable.chili2);
             else if (dish.getHotLevel() == 3)
-                img.setBackgroundResource(R.drawable.chili3);
-            foodcellPriceLayout.addView(img);
+                imgHotLevel.setBackgroundResource(R.drawable.chili3);
+            foodcellPriceLayout.addView(imgHotLevel);
         }
         if (dish.isSoldOut()){
             setSoldOutVisibility(dish.isSoldOut());
@@ -78,6 +81,35 @@ class DishCellComponent{
 
     public void setDish(Dish dish){
         this.dish = dish;
+    }
+
+    /**
+     * 重置dish对象, 修改属性显示
+     * @param dish
+     */
+    public void resetDishObject(Dish dish){
+        this.dish = dish;
+        foodCellView.setTag(dish);
+        setInPromotionVisibility(dish.isPromotion());
+        setSoldOutVisibility(dish.isSoldOut());
+        foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
+        foodNameText.setTxtSecondLanguageName(dish.getSecondLanguageName());
+        foodPriceText.setText(InstantValue.DOLLARSPACE + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, dish.getPrice()));
+        foodNameText.show(mainActivity.getLanguage());
+        if (dish.getHotLevel() > 0){
+            imgHotLevel = new ImageView(mainActivity);
+            if (dish.getHotLevel() == 1)
+                imgHotLevel.setBackgroundResource(R.drawable.chili1);
+            else if (dish.getHotLevel() == 2)
+                imgHotLevel.setBackgroundResource(R.drawable.chili2);
+            else if (dish.getHotLevel() == 3)
+                imgHotLevel.setBackgroundResource(R.drawable.chili3);
+            foodcellPriceLayout.addView(imgHotLevel);
+        } else {
+            if (imgHotLevel != null){
+                foodcellPriceLayout.removeView(imgHotLevel);
+            }
+        }
     }
 
     public View getDishCellView() {
@@ -97,7 +129,8 @@ class DishCellComponent{
             tvOldPrice.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
             foodPriceText.setTextColor(mainActivity.getResources().getColor(R.color.red));
         } else {
-            tvOldPrice.setVisibility(View.INVISIBLE);
+            if (tvOldPrice != null)
+                tvOldPrice.setVisibility(View.INVISIBLE);
             foodPriceText.setTextColor(mainActivity.getResources().getColor(R.color.color_OrangeTheme_ChoosedFoodFont));
         }
     }

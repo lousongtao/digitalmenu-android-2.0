@@ -12,6 +12,7 @@
     <color name="colorHalfTransparent">#e00000</color>
     <color name="color_CategoryTabArea">#141414</color>
     <color name="color_OrangeTheme_ChoosedFoodBackgroundArea">#f3efd4</color>
+    <color name="color_OrganeTheme_TrolleyBackgrand">#f5eec0</color>
     <color name="color_OrangeTheme_ChoosedFoodFont">#777376</color>
     <color name="color_OrangeTheme_FoodDisplayArea">#F2F2F2</color>
     <color name="color_OrangeTheme_Category1Font">#edbd11</color>
