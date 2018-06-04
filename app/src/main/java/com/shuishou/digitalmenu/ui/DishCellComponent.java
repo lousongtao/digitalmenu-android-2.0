@@ -35,6 +35,7 @@ class DishCellComponent{
     private TextView foodPriceText;
     private DishNameTextView foodNameText;
     private ImageView imgHotLevel;
+    private ImageView imgAddDish;
     private MainActivity mainActivity;
     public DishCellComponent(final MainActivity mainActivity, Dish _dish){
         this.mainActivity = mainActivity;
@@ -48,9 +49,9 @@ class DishCellComponent{
         imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
         imgDishPicture.setTag(dish);
         imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance(mainActivity));
-        ImageView chooseButton = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
-        chooseButton.setTag(dish);
-        chooseButton.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
+        imgAddDish = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
+        imgAddDish.setTag(dish);
+        imgAddDish.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
 
         foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
         foodNameText.setTxtSecondLanguageName(dish.getSecondLanguageName());
@@ -90,6 +91,7 @@ class DishCellComponent{
     public void resetDishObject(Dish dish){
         this.dish = dish;
         foodCellView.setTag(dish);
+        imgAddDish.setTag(dish);
         setInPromotionVisibility(dish.isPromotion());
         setSoldOutVisibility(dish.isSoldOut());
         foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
