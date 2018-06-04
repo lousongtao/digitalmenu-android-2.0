@@ -505,6 +505,10 @@ public class HttpOperator {
         if (dishIdList.isEmpty())
             return true;
         ArrayList<Dish> dishes = queryDishById(dishIdList);
+        if (dishes == null){
+            sendErrorMessageToToast("find unrecognized dishes by id in  "+ dishIdList +", please refresh data on this device.");
+            return false;
+        }
         DBOperator dbOpr = mainActivity.getDbOperator();
         for (int i = 0; i < dishes.size(); i++) {
             Dish dish = dishes.get(i);
@@ -618,7 +622,7 @@ public class HttpOperator {
      * @return
      */
     private boolean synchronizeDishesPicture(ArrayList<Integer> dishIdList){
-        if (dishIdList.isEmpty())
+        if (dishIdList == null || dishIdList.isEmpty())
             return true;
         DownloadListener listener = new DownloadListener(){
             public void onDownloadError(int what, Exception exception) {}
