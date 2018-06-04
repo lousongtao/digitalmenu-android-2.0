@@ -34,7 +34,7 @@ public class RefreshMenuTimer extends Timer {
     public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH_PICTURE = 4;
     public static final int REFRESHMENUHANDLER_MSGWHAT_REFRESHDISHCONFIG = 5;
     public static final int REFRESHMENUHANDLER_MSGWHAT_REPLACE_PICTURE = 6; //replace picture
-    private int refreshMenuInterval = 10 * 1000;
+    private int refreshMenuInterval = 60 * 1000;
 
     private Handler refreshMenuHandler;
     private MainActivity mainActivity;
