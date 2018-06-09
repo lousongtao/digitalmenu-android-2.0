@@ -20,6 +20,7 @@ import com.shuishou.digitalmenu.bean.MenuVersionInfo;
 import com.shuishou.digitalmenu.bean.UserData;
 import com.shuishou.digitalmenu.db.DBOperator;
 import com.shuishou.digitalmenu.ui.MainActivity;
+import com.shuishou.digitalmenu.ui.RefreshMenuTimer;
 import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.FileBinary;
 import com.yanzhenjie.nohttp.Headers;
@@ -42,6 +43,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Administrator on 2017/6/9.
@@ -123,6 +126,14 @@ public class HttpOperator {
         @Override
         public void onFinish(int what) {
         }
+    };
+
+    private DownloadListener downloadListener = new DownloadListener(){
+        public void onDownloadError(int what, Exception exception) {}
+        public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {}
+        public void onProgress(int what, int progress, long fileCount, long speed) {}
+        public void onFinish(int what, String filePath) {}
+        public void onCancel(int what) {}
     };
 
     private RequestQueue requestQueue = NoHttp.newRequestQueue();
@@ -411,16 +422,17 @@ public class HttpOperator {
      * check the menu version difference between client and server
      * 目前的同步数据包括, dish的基本属性修改, 含soldout/promotion; dish的增加; dish的删除; DishConfig的soldout
      * 实现逻辑:
-     * 1. DishConfig分为一组, 同步服务端数据, 比较soldout的值, 然后更新本地数据库中对应的DishConfig对象
-     * 2. dish分为 '增加', '删除', '修改' 三个组;
-     *    同步各组中的数据;
-     *    在MainActivity中, 对不同组的dish进行相应的操作.
-     *    这里有逻辑缺陷, 如果一个dish先做了修改, 又做了删除, 在同步时, '修改'组中存在该dishid, 但是服务端是无法返回该dish的数据.
-     *    同理, 其他的操作也有可能导致不一致性. 所以我们这里只简化考虑, 使用非空判断避免空指针异常, 不进行复杂的逻辑检查.
+     * dish 不可以分组处理, 因为操作员的处理方式各种各样, 有可能先增加后修改, 也可能先修改后删除, 分组后同一dish在不同组中处理先后不一样
+     * 就会导致空指针异常等不可预知错误.
+     * 所以dish的变化要根据MenuVersion的循序逐个处理.
+     * 为了按循序处理MenuVersion, 本方法内, 把DishConfig也按循序处理.
+     *
+     * 处理逻辑:
+     * 得到一个MenuVersion对象, 判断是dish还是DishConfig.
+     * 然后再根据增删改进行不同处理
      * @param localVersion
-     * @return if no menu change, return null; otherwise return a map including changed dishes and dishconfigs
      */
-    public HashMap<String, ArrayList<Integer>> checkMenuVersion(int localVersion){
+    public void checkMenuVersion(RefreshMenuTimer timer, int localVersion){
         Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/checkmenuversion", RequestMethod.POST);
         request.add("versionId", localVersion);
         Response<JSONObject> response = NoHttp.startRequestSync(request);
@@ -428,146 +440,141 @@ public class HttpOperator {
             Log.e(logTag, "chechMenuVersion: There are Exception to checkmenuversion\n"+ response.getException().getMessage() );//TODO:
             MainActivity.LOG.error("chechMenuVersion: There are Exception to checkmenuversion\n"+ response.getException().getMessage() );
             sendErrorMessageToToast("Http:chechMenuVersion: " + response.getException().getMessage());
-            return null;
+            return;
         }
         HttpResult<ArrayList<MenuVersionInfo>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<MenuVersionInfo>>>(){}.getType());
         if (result.success){
-            if (result.data == null)
-                return null;
-            DBOperator dbOpr = mainActivity.getDbOperator();
-            //collect all change into a set to avoid the duplicate dishid
-            Set<Integer> dishIdSet_update = new HashSet<>();
-            Set<Integer> dishIdSet_insert = new HashSet<>();
-            Set<Integer> dishIdSet_delete = new HashSet<>();
-            Set<Integer> dishIdSet_changePicture = new HashSet<>();
-            Set<Integer> dishConfigIdSet = new HashSet<>();
-            int maxVersion = 0;//get the biggest version number in this update
+            if (result.data == null || result.data.isEmpty())
+                return;
+            //sort
+            Collections.sort(result.data, new Comparator<MenuVersionInfo>(){
+                @Override
+                public int compare(MenuVersionInfo o1, MenuVersionInfo o2) {
+                    return o1.id - o2.id;
+                }
+            });
+            //按循序处理每个MenuVersion, 每处理成功一个, 就把本地库中的MenuVersion更新; 中间出错了, 就停止后续的更新
             for (int i = 0; i < result.data.size(); i++) {
                 MenuVersionInfo mvi = result.data.get(i);
                 if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHCONFIGSOLDOUT){
-                    dishConfigIdSet.add(mvi.objectId);
+                    if (synchronizeDishConfig(mvi.objectId)){
+                        persistMenuVersion(mvi.id);
+                        timer.getRefreshMenuHandler().sendMessage(CommonTool.buildMessage(RefreshMenuTimer.REFRESHMENUHANDLER_MSGWHAT_REFRESHDISHCONFIG, mvi.objectId));
+                    } else {
+                        break;
+                    }
                 } else if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHSOLDOUT
                         || mvi.type == InstantValue.MENUCHANGE_TYPE_DISHUPDATE
-                        || mvi.type == InstantValue.MENUCHANGE_TYPE_CHANGEPROMOTION
-                        || mvi.type == InstantValue.MENUCHANGE_TYPE_DISHPICTURE) {
-                    dishIdSet_update.add(mvi.objectId);
+                        || mvi.type == InstantValue.MENUCHANGE_TYPE_CHANGEPROMOTION) {
+                    if (synchronizeDishesUpdate(mvi.objectId)){
+                        persistMenuVersion(mvi.id);
+                        timer.getRefreshMenuHandler().sendMessage(CommonTool.buildMessage(RefreshMenuTimer.REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH_UPDATE, mvi.objectId));
+                    } else {
+                        break;
+                    }
                 } else if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHADD){
-                    dishIdSet_insert.add(mvi.objectId);
+                    if (synchronizeDishesInsert(mvi.objectId)){
+                        persistMenuVersion(mvi.id);
+                        timer.getRefreshMenuHandler().sendMessage(CommonTool.buildMessage(RefreshMenuTimer.REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH_INSERT, mvi.objectId));
+                    } else {
+                        break;
+                    }
                 } else if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHDELETE){
-                    dishIdSet_delete.add(mvi.objectId);
+                    if (synchronizeDishesDelete(mvi.objectId)){
+                        persistMenuVersion(mvi.id);
+                        timer.getRefreshMenuHandler().sendMessage(CommonTool.buildMessage(RefreshMenuTimer.REFRESHMENUHANDLER_MSGWHAT_REFRESHDISH_DELETE, mvi.objectId));
+                    } else {
+                        break;
+                    }
+                } else if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHPICTURE){
+                    //同步图片需要先同步基本属性, 因为图片的文件名可能更改了
+                    if (synchronizeDishesUpdate(mvi.objectId) && synchronizeDishesPicture(mvi.objectId)){
+                        persistMenuVersion(mvi.id);
+                        timer.doRefreshDishPicture(mvi.objectId);
+                    } else {
+                        break;
+                    }
                 }
-                if (mvi.type == InstantValue.MENUCHANGE_TYPE_DISHPICTURE){
-                    dishIdSet_changePicture.add(mvi.objectId);
-                }
-                if (mvi.id > maxVersion)
-                    maxVersion = mvi.id;
             }
-            //reload info about dishes in dishIdSet
-            ArrayList<Integer> dishIdListUpdate = new ArrayList<>(dishIdSet_update);
-            ArrayList<Integer> dishIdListDelete = new ArrayList<>(dishIdSet_delete);
-            ArrayList<Integer> dishIdListInsert = new ArrayList<>(dishIdSet_insert);
-            ArrayList<Integer> dishConfigIdList = new ArrayList<>(dishConfigIdSet);
-            ArrayList<Integer> dishIdListPicture = new ArrayList<>(dishIdSet_changePicture);
-            boolean bSyncDishesUpdated = synchronizeDishesUpdate(dishIdListUpdate);
-            boolean bSyncDishesInsert = synchronizeDishesInsert(dishIdListInsert);
-            boolean bSyncDishesDelete = synchronizeDishesDelete(dishIdListDelete);
-            boolean bSyncDishesPicture = synchronizeDishesPicture(dishIdListPicture);//图片替换要在最后处理, 因为dish上记录的picturename有可能会变掉
-            boolean bSyncDishConfigs = synchronizeDishConfig(dishConfigIdList);
-            //only persist the maxVersion while all the sync functions done successfully
-            if (bSyncDishesUpdated & bSyncDishesInsert & bSyncDishesDelete & bSyncDishesPicture & bSyncDishConfigs){
-                dbOpr.deleteAllData(MenuVersion.class);
-                MenuVersion mv = new MenuVersion(1, maxVersion);
-                dbOpr.saveObjectByCascade(mv);
-                HashMap<String, ArrayList<Integer>> map = new HashMap<>();
-                map.put(DISHCHANGE_INSERT, dishIdListInsert);
-                map.put(DISHCHANGE_UPDATE, dishIdListUpdate);
-                map.put(DISHCHANGE_DELETE, dishIdListDelete);
-//                map.put(DISHCHANGE_PICTURE, dishIdListPicture);//TODO: 20180609前端不再处理更改图片的请求
-                map.put(DISHCONFIGCHANGE, dishConfigIdList);
-                return map;
-            }
+
         } else {
             Log.e(logTag, "get false from server while Check Menu Version");
             MainActivity.LOG.error("get false from server while Check Menu Version");
             sendErrorMessageToToast("get false from server while Check Menu Version");
         }
-        return null;
+    }
+
+    private void persistMenuVersion(int version){
+        DBOperator dbOpr = mainActivity.getDbOperator();
+        dbOpr.deleteAllData(MenuVersion.class);
+        MenuVersion mv = new MenuVersion(1, version);
+        dbOpr.saveObjectByCascade(mv);
     }
 
     /**
      * this function is used for those dishes which properties changed, including change promption,
      * change price, change name, change soldout, change sequence, etc
      * load dishes data from server by the id list; then cover the local db data using the server data
-     * @param dishIdList
+     * @param
      * @return false while exception occur.
      */
-    private boolean synchronizeDishesUpdate(ArrayList<Integer> dishIdList){
-        if (dishIdList.isEmpty())
-            return true;
-        ArrayList<Dish> dishes = queryDishById(dishIdList);
-        if (dishes == null){
-            sendErrorMessageToToast("find unrecognized dishes by id in  "+ dishIdList +", please refresh data on this device.");
+    private boolean synchronizeDishesUpdate(int dishId){
+        Dish dish = queryDishById(dishId);
+        if (dish == null){
+            sendErrorMessageToToast("cannot load dishes by id = "+ dishId +" from server, please refresh data on this device.");
             return false;
         }
         DBOperator dbOpr = mainActivity.getDbOperator();
-        for (int i = 0; i < dishes.size(); i++) {
-            Dish dish = dishes.get(i);
-            Dish dbDish = dbOpr.queryDishById(dish.getId());
-            if (dbDish == null){
-                sendErrorMessageToToast("find unrecognized dish '"+dish.getFirstLanguageName()+"', please refresh data on this device.");
-                return false;
-            }
-            dbDish.copyFrom(dish);
-            dbOpr.updateObject(dbDish);
+        Dish dbDish = dbOpr.queryDishById(dish.getId());
+        if (dbDish == null){
+            sendErrorMessageToToast("find unrecognized dish '"+dish.getFirstLanguageName()+"', please refresh data on this device.");
+            return false;
         }
+        dbDish.copyFrom(dish);
+        dbOpr.updateObject(dbDish);
         return true;
     }
 
     /**
      * 对于新增的dish, 同步到本地时需要查询全部的menu树. 因为服务端的dish对parent设置了gsonIgnore, 所以无法得到
      * 父对象数据. 只能拿全部的树结构向下查找对应id的dish
-     * @param dishIdList
+     * @param
      * @return 如果dishIdList == null , 返回true; 否则, 在成功保存dish数据后, 返回true
      */
-    private boolean synchronizeDishesInsert(ArrayList<Integer> dishIdList){
-        if (dishIdList.isEmpty())
-            return true;
-
+    private boolean synchronizeDishesInsert(int dishId){
         Request<JSONObject> reqMenu = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querymenu", RequestMethod.GET);
         Response<JSONObject> respDish = NoHttp.startRequestSync(reqMenu);
         if (respDish.getException() != null){
-            Log.e(logTag, "get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
             return false;
         }
         HttpResult<ArrayList<Category1>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Category1>>>(){}.getType());
         if (!result.success){
-            Log.e(logTag, "get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get Exception while call menu/querymenu for refresh added dish by id in "+ dishIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querymenu for refresh added dish, Exception is "+ respDish.getException());
             return false;
         }
         DBOperator dbOpr = mainActivity.getDbOperator();
         ArrayList<Category1> category1s = result.data;
-        for (int id : dishIdList) {
-            boolean finddish = false;
-            for ( int i = 0; i < category1s.size() && !finddish; i++) {
-                ArrayList<Category2> c2s = category1s.get(i).getCategory2s();
-                if (c2s != null){
-                    for (int j = 0; j < c2s.size() && !finddish; j++) {
-                        ArrayList<Dish> dishes = c2s.get(j).getDishes();
-                        if (dishes != null){
-                            for (Dish dish : dishes){
-                                if (dish.getId()==id){
-                                    //此时要把dish对象跟mainActivity中持有的menu树绑定, 而不是绑定当前的category2对象, 否则DB在操作时,会导致数据库中的category2与category1解除关系
-                                    finddish = true;
-                                    Category2 c2 = findCategory2(mainActivity.getMenu(), c2s.get(j).getId());
-                                    dish.setCategory2(c2);
-                                    c2.getDishes().add(dish);
-                                    dbOpr.saveObjectByCascade(dish);
-                                    break;
-                                }
+        boolean finddish = false;
+        for ( int i = 0; i < category1s.size() && !finddish; i++) {
+            ArrayList<Category2> c2s = category1s.get(i).getCategory2s();
+            if (c2s != null){
+                for (int j = 0; j < c2s.size() && !finddish; j++) {
+                    ArrayList<Dish> dishes = c2s.get(j).getDishes();
+                    if (dishes != null){
+                        for (Dish dish : dishes){
+                            if (dish.getId()==dishId){
+                                //此时要把dish对象跟mainActivity中持有的menu树绑定, 而不是绑定当前的category2对象, 否则DB在操作时,会导致数据库中的category2与category1解除关系
+                                finddish = true;
+                                Category2 c2 = findCategory2(mainActivity.getMenu(), c2s.get(j).getId());
+                                dish.setCategory2(c2);
+                                c2.getDishes().add(dish);
+                                dbOpr.saveObjectByCascade(dish);
+                                break;
                             }
                         }
                     }
@@ -599,88 +606,67 @@ public class HttpOperator {
 
     /**
      * 对于删除的dish, 从本地删除
-     * @param dishIdList
+     * @param dishId
      * @return 如果dishIDList== null, 返回true, 否则, 在成功删除本地dish后, 返回true
      */
-    private boolean synchronizeDishesDelete(ArrayList<Integer> dishIdList){
-        if (dishIdList.isEmpty())
-            return true;
+    private boolean synchronizeDishesDelete(int dishId){
         DBOperator dbOpr = mainActivity.getDbOperator();
-        for (int i = 0; i < dishIdList.size(); i++) {
-            Dish dbDish = dbOpr.queryDishById(dishIdList.get(i));
-            if (dbDish != null){
-                dbDish.setCategory2(null);
-                dbDish.setConfigGroups(null);
-                dbOpr.deleteObject(dbDish);
-            }
+        Dish dbDish = dbOpr.queryDishById(dishId);
+        if (dbDish != null){
+            dbDish.setCategory2(null);//需要解除父关联, 否则删除后, 上级目录会同时删除
+            dbDish.setConfigGroups(null);
+            dbOpr.deleteObject(dbDish);
         }
         return true;
     }
 
     /**
      * 下载图片有改动的dish, 此方法为异步下载, 所以前端无法做到同步刷新, 只有在下次启动APP的时候会体现新图片
-     * @param dishIdList
+     * @param
      * @return
      */
-    private boolean synchronizeDishesPicture(ArrayList<Integer> dishIdList){
-        //TODO: 改变图片前端不处理, 影响太大
+    private boolean synchronizeDishesPicture(int dishId){
+        DownloadQueue queue = NoHttp.newDownloadQueue();
+        DBOperator dbOpr = mainActivity.getDbOperator();
+        String temps1 = "/../";
+        String temps2 = "/";
+        Dish dbDish = dbOpr.queryDishById(dishId);
+        if (dbDish != null){
+            String filename = dbDish.getPictureName();
+            String urlbig = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+ temps2 + filename;
+            DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
+            queue.add(0, requestbig, downloadListener);
+
+            String urlsmall = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+ temps2 + filename;
+            DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
+            queue.add(0, requestsmall, downloadListener);
+
+            String urlorigin = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_ORIGIN + temps2 + filename;
+            DownloadRequest requestorigin = NoHttp.createDownloadRequest(urlorigin, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN, filename, true, true);
+            queue.add(0, requestorigin, downloadListener);
+        }
         return true;
-//        if (dishIdList == null || dishIdList.isEmpty())
-//            return true;
-//        DownloadListener listener = new DownloadListener(){
-//            public void onDownloadError(int what, Exception exception) {}
-//            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {}
-//            public void onProgress(int what, int progress, long fileCount, long speed) {}
-//            public void onFinish(int what, String filePath) {}
-//            public void onCancel(int what) {}
-//        };
-//        DownloadQueue queue = NoHttp.newDownloadQueue();
-//        DBOperator dbOpr = mainActivity.getDbOperator();
-//        String temps1 = "/../";
-//        String temps2 = "/";
-//        for (int i = 0; i < dishIdList.size(); i++) {
-//            Dish dbDish = dbOpr.queryDishById(dishIdList.get(i));
-//            if (dbDish != null){
-//                String filename = dbDish.getPictureName();
-//                String urlbig = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+ temps2 + filename;
-//                DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
-//                queue.add(0, requestbig, listener);
-//
-//                String urlsmall = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+ temps2 + filename;
-//                DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
-//                queue.add(0, requestsmall, listener);
-//
-//                String urlorigin = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_ORIGIN + temps2 + filename;
-//                DownloadRequest requestorigin = NoHttp.createDownloadRequest(urlorigin, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN, filename, true, true);
-//                queue.add(0, requestorigin, listener);
-//            }
-//        }
-//        return true;
     }
 
-    private ArrayList<Dish> queryDishById(ArrayList<Integer> dishIdList){
-        ArrayList<Dish> dishes = null;
-        if (dishIdList == null || dishIdList.isEmpty()){
-            return dishes;
-        }
-        String sIds = dishIdList.toString().replace("[","").replace("]","").replace(" ","");
+    private Dish queryDishById(int dishId){
+        String sIds = String.valueOf(dishId);
         Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishbyidlist", RequestMethod.POST);
         reqDish.add("dishIdList", sIds);
         Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
         if (respDish.getException() != null){
-            Log.e(logTag, "get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get Exception while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get Exception while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
             return null;
         }
         HttpResult<ArrayList<Dish>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<Dish>>>(){}.getType());
         if (!result.success){
-            Log.e(logTag, "get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get false value while call menu/querydishbyidlist for dishidlist = "+ dishIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get false value while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get false value while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get false value while call menu/querydishbyidlist for dishid = "+ dishId+", Exception is "+ respDish.getException());
             return null;
         }
-        return result.data;
+        return result.data.get(0);
     }
 
 
@@ -688,42 +674,37 @@ public class HttpOperator {
     /**
      * load dishes data from server by the id list;
      * compare the SOLDOUT and PROMOTION value with the local data, if different, modify local data
-     * @param dishConfigIdList
+     * @param
      * @return false while exception occur.
      */
-    private boolean synchronizeDishConfig(ArrayList<Integer> dishConfigIdList){
-        if (dishConfigIdList.isEmpty())
-            return true;
-        String sIds = dishConfigIdList.toString().replace("[","").replace("]","").replace(" ","");
+    private boolean synchronizeDishConfig(int dishConfigId){
+        String sIds = String.valueOf(dishConfigId);
         Request<JSONObject> reqDish = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/menu/querydishconfigbyidlist", RequestMethod.POST);
         reqDish.add("dishConfigIdList", sIds);
         Response<JSONObject> respDish = NoHttp.startRequestSync(reqDish);
         if (respDish.getException() != null){
-            Log.e(logTag, "get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get Exception while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get Exception while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get Exception while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get Exception while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
             return false;
         }
-        HttpResult<ArrayList<DishConfig>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<DishConfig>>>(){}.getType());
+        HttpResult<DishConfig> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<DishConfig>>(){}.getType());
         if (!result.success){
-            Log.e(logTag, "get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
-            MainActivity.LOG.error("get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
-            sendErrorMessageToToast("get false value while call menu/querydishconfigbyidlist for dishConfigIdList = "+ dishConfigIdList+", Exception is "+ respDish.getException());
+            Log.e(logTag, "get false value while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
+            MainActivity.LOG.error("get false value while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
+            sendErrorMessageToToast("get false value while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
             return false;
         }
-        ArrayList<DishConfig> dishConfigs = result.data;
         DBOperator dbOpr = mainActivity.getDbOperator();
-        for (int i = 0; i < dishConfigs.size(); i++) {
-            DishConfig dishConfig = dishConfigs.get(i);
-            DishConfig dbDishConfig = (DishConfig) dbOpr.queryObjectById(dishConfig.getId(), DishConfig.class);
-            if (dbDishConfig == null){
-                sendErrorMessageToToast("find unrecognized dishConfig '"+dishConfig.getFirstLanguageName()+"', please refresh data on this device.");
-                return false;
-            }
-            if (dishConfig.isSoldOut() != dbDishConfig.isSoldOut()) {
-                dbDishConfig.setSoldOut(dishConfig.isSoldOut());
-                dbOpr.updateObject(dbDishConfig);
-            }
+        DishConfig dishConfig = result.data;
+        DishConfig dbDishConfig = (DishConfig) dbOpr.queryObjectById(dishConfig.getId(), DishConfig.class);
+        if (dbDishConfig == null){
+            sendErrorMessageToToast("find unrecognized dishConfig '"+dishConfig.getFirstLanguageName()+"', please refresh data on this device.");
+            return false;
+        }
+        if (dishConfig.isSoldOut() != dbDishConfig.isSoldOut()) {
+            dbDishConfig.setSoldOut(dishConfig.isSoldOut());
+            dbOpr.updateObject(dbDishConfig);
         }
         return true;
     }
