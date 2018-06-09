@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.ui.dishconfig;
 
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
+import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.DishConfigGroup;
 import com.shuishou.digitalmenu.ui.MainActivity;
@@ -46,6 +48,9 @@ public class ChooseNonDuplicatableConfigView extends BorderView implements DishC
         TableLayout view = new TableLayout(mainActivity);
         ArrayList<DishConfig> configs = group.getDishConfigs();
         TableRow tableRow = null;
+        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
+        trlp.topMargin = 5;
+        trlp.rightMargin = 20;
         for (int i = 0; i < configs.size(); i++) {
             DishConfig config = configs.get(i);
 
@@ -71,7 +76,7 @@ public class ChooseNonDuplicatableConfigView extends BorderView implements DishC
                 txt += " -$" + config.getPrice();
             tb.setText(txt);
             tb.setOnClickListener(listener);
-            tableRow.addView(tb);
+            tableRow.addView(tb, trlp);
             components.add(tb);
         }
         view.setTag(group);//put group into view for data validation at last
@@ -106,5 +111,16 @@ public class ChooseNonDuplicatableConfigView extends BorderView implements DishC
     @Override
     public void onConfigComponentClick(DishConfig config){
 
+    }
+
+    @Override
+    public void refreshColor() {
+        for (CheckBox cb : components) {
+            if (cb.isChecked()){
+                cb.setBackgroundColor(Color.GREEN);
+            } else {
+                cb.setBackgroundColor(Color.WHITE);
+            }
+        }
     }
 }

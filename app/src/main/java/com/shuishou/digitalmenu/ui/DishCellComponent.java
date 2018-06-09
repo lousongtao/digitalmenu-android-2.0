@@ -41,39 +41,17 @@ class DishCellComponent{
         this.mainActivity = mainActivity;
         this.dish = _dish;
         foodCellView = LayoutInflater.from(mainActivity).inflate(R.layout.dishcell_layout, null);
-        foodCellView.setTag(dish);//view 根据dish对象作为tag来识别,
         foodNameText = (DishNameTextView) foodCellView.findViewById(R.id.foodNameText);
         chooseButtonLayout = (FrameLayout) foodCellView.findViewById(R.id.chooseButtonLayout);
         foodPriceText = (TextView) foodCellView.findViewById(R.id.foodPriceText);
         foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
         imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
-        imgDishPicture.setTag(dish);
         imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance(mainActivity));
         imgAddDish = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
-        imgAddDish.setTag(dish);
         imgAddDish.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
+        imgHotLevel = (ImageView) foodCellView.findViewById(R.id.imgHotLevel);
 
-        foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
-        foodNameText.setTxtSecondLanguageName(dish.getSecondLanguageName());
-        foodPriceText.setText(InstantValue.DOLLARSPACE + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, dish.getPrice()));
-        foodNameText.show(mainActivity.getLanguage());
-
-        if (dish.isPromotion()){
-            setInPromotionVisibility(true);
-        }
-        if (dish.getHotLevel() > 0){
-            imgHotLevel = new ImageView(mainActivity);
-            if (dish.getHotLevel() == 1)
-                imgHotLevel.setBackgroundResource(R.drawable.chili1);
-            else if (dish.getHotLevel() == 2)
-                imgHotLevel.setBackgroundResource(R.drawable.chili2);
-            else if (dish.getHotLevel() == 3)
-                imgHotLevel.setBackgroundResource(R.drawable.chili3);
-            foodcellPriceLayout.addView(imgHotLevel);
-        }
-        if (dish.isSoldOut()){
-            setSoldOutVisibility(dish.isSoldOut());
-        }
+        resetDishObject(dish);
     }
 
     public Dish getDish() {
@@ -92,26 +70,23 @@ class DishCellComponent{
         this.dish = dish;
         foodCellView.setTag(dish);
         imgAddDish.setTag(dish);
+        imgDishPicture.setTag(dish);
         setInPromotionVisibility(dish.isPromotion());
         setSoldOutVisibility(dish.isSoldOut());
         foodNameText.setTxtFirstLanguageName(dish.getFirstLanguageName());
         foodNameText.setTxtSecondLanguageName(dish.getSecondLanguageName());
         foodPriceText.setText(InstantValue.DOLLARSPACE + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, dish.getPrice()));
         foodNameText.show(mainActivity.getLanguage());
-        if (dish.getHotLevel() > 0){
-            imgHotLevel = new ImageView(mainActivity);
-            if (dish.getHotLevel() == 1)
-                imgHotLevel.setBackgroundResource(R.drawable.chili1);
-            else if (dish.getHotLevel() == 2)
-                imgHotLevel.setBackgroundResource(R.drawable.chili2);
-            else if (dish.getHotLevel() == 3)
-                imgHotLevel.setBackgroundResource(R.drawable.chili3);
-            foodcellPriceLayout.addView(imgHotLevel);
-        } else {
-            if (imgHotLevel != null){
-                foodcellPriceLayout.removeView(imgHotLevel);
-            }
-        }
+        if (dish.getHotLevel() == 0)
+            imgHotLevel.setVisibility(View.INVISIBLE);
+        else
+            imgHotLevel.setVisibility(View.VISIBLE);
+        if (dish.getHotLevel() == 1)
+            imgHotLevel.setBackgroundResource(R.drawable.chili1);
+        else if (dish.getHotLevel() == 2)
+            imgHotLevel.setBackgroundResource(R.drawable.chili2);
+        else if (dish.getHotLevel() == 3)
+            imgHotLevel.setBackgroundResource(R.drawable.chili3);
     }
 
     public View getDishCellView() {

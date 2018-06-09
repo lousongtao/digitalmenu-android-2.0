@@ -60,7 +60,10 @@
                     android:gravity="bottom"
                     android:textColor="@color/color_OrangeTheme_ChoosedFoodFont"
                     android:textSize="18sp" />
-
+                <ImageView
+                    android:id="@+id/imgHotLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
         </LinearLayout>

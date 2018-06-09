@@ -482,7 +482,7 @@ public class HttpOperator {
                 map.put(DISHCHANGE_INSERT, dishIdListInsert);
                 map.put(DISHCHANGE_UPDATE, dishIdListUpdate);
                 map.put(DISHCHANGE_DELETE, dishIdListDelete);
-                map.put(DISHCHANGE_PICTURE, dishIdListPicture);
+//                map.put(DISHCHANGE_PICTURE, dishIdListPicture);//TODO: 20180609前端不再处理更改图片的请求
                 map.put(DISHCONFIGCHANGE, dishConfigIdList);
                 return map;
             }
@@ -609,6 +609,7 @@ public class HttpOperator {
         for (int i = 0; i < dishIdList.size(); i++) {
             Dish dbDish = dbOpr.queryDishById(dishIdList.get(i));
             if (dbDish != null){
+                dbDish.setCategory2(null);
                 dbDish.setConfigGroups(null);
                 dbOpr.deleteObject(dbDish);
             }
@@ -622,37 +623,39 @@ public class HttpOperator {
      * @return
      */
     private boolean synchronizeDishesPicture(ArrayList<Integer> dishIdList){
-        if (dishIdList == null || dishIdList.isEmpty())
-            return true;
-        DownloadListener listener = new DownloadListener(){
-            public void onDownloadError(int what, Exception exception) {}
-            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {}
-            public void onProgress(int what, int progress, long fileCount, long speed) {}
-            public void onFinish(int what, String filePath) {}
-            public void onCancel(int what) {}
-        };
-        DownloadQueue queue = NoHttp.newDownloadQueue();
-        DBOperator dbOpr = mainActivity.getDbOperator();
-        String temps1 = "/../";
-        String temps2 = "/";
-        for (int i = 0; i < dishIdList.size(); i++) {
-            Dish dbDish = dbOpr.queryDishById(dishIdList.get(i));
-            if (dbDish != null){
-                String filename = dbDish.getPictureName();
-                String urlbig = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+ temps2 + filename;
-                DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
-                queue.add(0, requestbig, listener);
-
-                String urlsmall = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+ temps2 + filename;
-                DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
-                queue.add(0, requestsmall, listener);
-
-                String urlorigin = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_ORIGIN + temps2 + filename;
-                DownloadRequest requestorigin = NoHttp.createDownloadRequest(urlorigin, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN, filename, true, true);
-                queue.add(0, requestorigin, listener);
-            }
-        }
+        //TODO: 改变图片前端不处理, 影响太大
         return true;
+//        if (dishIdList == null || dishIdList.isEmpty())
+//            return true;
+//        DownloadListener listener = new DownloadListener(){
+//            public void onDownloadError(int what, Exception exception) {}
+//            public void onStart(int what, boolean isResume, long rangeSize, Headers responseHeaders, long allCount) {}
+//            public void onProgress(int what, int progress, long fileCount, long speed) {}
+//            public void onFinish(int what, String filePath) {}
+//            public void onCancel(int what) {}
+//        };
+//        DownloadQueue queue = NoHttp.newDownloadQueue();
+//        DBOperator dbOpr = mainActivity.getDbOperator();
+//        String temps1 = "/../";
+//        String temps2 = "/";
+//        for (int i = 0; i < dishIdList.size(); i++) {
+//            Dish dbDish = dbOpr.queryDishById(dishIdList.get(i));
+//            if (dbDish != null){
+//                String filename = dbDish.getPictureName();
+//                String urlbig = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_BIG+ temps2 + filename;
+//                DownloadRequest requestbig = NoHttp.createDownloadRequest(urlbig, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG, filename, true, true);
+//                queue.add(0, requestbig, listener);
+//
+//                String urlsmall = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_SMALL+ temps2 + filename;
+//                DownloadRequest requestsmall = NoHttp.createDownloadRequest(urlsmall, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_SMALL, filename, true, true);
+//                queue.add(0, requestsmall, listener);
+//
+//                String urlorigin = InstantValue.URL_TOMCAT + temps1 + InstantValue.SERVER_CATALOG_DISH_PICTURE_ORIGIN + temps2 + filename;
+//                DownloadRequest requestorigin = NoHttp.createDownloadRequest(urlorigin, RequestMethod.GET, InstantValue.LOCAL_CATALOG_DISH_PICTURE_ORIGIN, filename, true, true);
+//                queue.add(0, requestorigin, listener);
+//            }
+//        }
+//        return true;
     }
 
     private ArrayList<Dish> queryDishById(ArrayList<Integer> dishIdList){

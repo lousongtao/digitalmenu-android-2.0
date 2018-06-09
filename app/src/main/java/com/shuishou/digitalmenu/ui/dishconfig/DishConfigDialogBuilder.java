@@ -1,13 +1,16 @@
 package com.shuishou.digitalmenu.ui.dishconfig;
 
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -177,6 +180,7 @@ public class DishConfigDialogBuilder {
                 DishConfigGroupIFC cview = getParentView(v);
                 if (cview != null){
                     cview.onConfigComponentClick((DishConfig)v.getTag());
+                    cview.refreshColor();
                 }
 
                 onChooseChange();

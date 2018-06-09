@@ -148,4 +148,9 @@ public class ChooseDuplicatableConfigView extends BorderView implements DishConf
         choosedConfigs.add(map);
         adapter.notifyDataSetChanged();
     }
+
+    @Override
+    public void refreshColor() {
+        //nothing to do
+    }
 }

@@ -23,4 +23,6 @@ public interface DishConfigGroupIFC {
      * do extra operation while click the config item
      */
     public void onConfigComponentClick(DishConfig config);
+
+    public void refreshColor();
 }

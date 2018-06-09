@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.ui.dishconfig;
 
+import android.graphics.Color;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.Toast;
 
+import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.DishConfigGroup;
 import com.shuishou.digitalmenu.ui.MainActivity;
@@ -49,6 +51,9 @@ public class ChooseOnlyOneConfigView extends BorderView implements DishConfigGro
 //        view.setOrientation(LinearLayout.HORIZONTAL);
         ArrayList<DishConfig> configs = group.getDishConfigs();
         TableRow tableRow = null;
+        TableRow.LayoutParams trlp = new TableRow.LayoutParams();
+        trlp.topMargin = 5;
+        trlp.rightMargin = 20;
         boolean checkFirst = false;//对第一个控件进行选中, 由于soldout参数的存在, 不可以使用i=0作为第一个控件的判断方法
         for (int i = 0; i < configs.size(); i++) {
             DishConfig config = configs.get(i);
@@ -74,11 +79,12 @@ public class ChooseOnlyOneConfigView extends BorderView implements DishConfigGro
                 txt += " -$" + config.getPrice();
             rb.setText(txt);
             rb.setOnClickListener(listener);
-            tableRow.addView(rb);
+            tableRow.addView(rb, trlp);
             components.add(rb);
             //always set first item as selected, 要把RadioButton先加入RadioGroup之后才能设置checked, 否则不会跟其他的button切换状态
             if (!checkFirst) {
                 rb.setChecked(true);
+                rb.setBackgroundColor(Color.GREEN);
                 checkFirst = true;
             }
         }
@@ -123,6 +129,16 @@ public class ChooseOnlyOneConfigView extends BorderView implements DishConfigGro
     public void onConfigComponentClick(DishConfig config){
         for (RadioButton rb : components){
             rb.setChecked(rb.getTag() == config);
+        }
+    }
+
+    @Override
+    public void refreshColor() {
+        for (RadioButton rb : components){
+            if (rb.isChecked())
+                rb.setBackgroundColor(Color.GREEN);
+            else
+                rb.setBackgroundColor(Color.WHITE);
         }
     }
 }
