@@ -141,4 +141,8 @@ class DishCellComponent{
         }
     }
 
+    public void setListener(){
+        imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance());
+        imgAddDish.setOnClickListener(ChooseDishListener.getInstance());
+    }
 }

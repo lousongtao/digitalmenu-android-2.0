@@ -22,6 +22,16 @@ public class ClickDishPictureListener implements View.OnClickListener {
         }
         return instance;
     }
+
+    public static ClickDishPictureListener getInstance(){
+        return instance;
+    }
+
+    public static void rebuildInstance(MainActivity mainActivity){
+        instance = new ClickDishPictureListener(mainActivity);
+    }
+
+
     @Override
     public void onClick(View v) {
         if (v.getTag() != null && v.getTag().getClass().getName().equals(Dish.class.getName())){

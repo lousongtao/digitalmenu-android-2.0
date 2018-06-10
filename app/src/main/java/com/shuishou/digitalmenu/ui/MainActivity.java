@@ -791,6 +791,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onKeyDown(keyCode, event);
     }
 
+    @Override
+    /**
+     * 客户现场经常发现点菜不能加入到右侧列表的现象; 初步推测, 是原有的listener对象绑定了老的MainActivity对象.
+     * 尝试一下每次resume时, 重构这些listener并将其与控件绑定
+     */
+    protected void onResume() {
+        super.onResume();
+        ChooseDishListener.rebuildInstance(this);
+        ClickDishPictureListener.rebuildInstance(this);
+        for (int i = 0; i < mapDishCellComponents.size(); i++) {
+            int key = mapDishCellComponents.keyAt(i);
+            DishCellComponent cell = mapDishCellComponents.get(key);
+            cell.setListener();
+        }
+    }
+
     //屏蔽recent task 按键, some pad devices are different with the virtual device, such as Sumsung Tab E
     @Override
     protected void onPause() {
