@@ -571,10 +571,12 @@ public class HttpOperator {
                                 //此时要把dish对象跟mainActivity中持有的menu树绑定, 而不是绑定当前的category2对象, 否则DB在操作时,会导致数据库中的category2与category1解除关系
                                 finddish = true;
                                 Category2 c2 = findCategory2(mainActivity.getMenu(), c2s.get(j).getId());
-                                dish.setCategory2(c2);
-                                c2.getDishes().add(dish);
-                                dbOpr.saveObjectByCascade(dish);
-                                break;
+                                if (c2 != null) {
+                                    dish.setCategory2(c2);
+                                    c2.getDishes().add(dish);
+                                    dbOpr.saveObjectByCascade(dish);
+                                    break;
+                                }
                             }
                         }
                     }

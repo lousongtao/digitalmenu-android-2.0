@@ -29,8 +29,8 @@ public final class InstantValue {
     public static final int DISPLAY_DISH_WIDTH = 250;
     public static final int DISPLAY_DISH_HEIGHT = 300;
 
-    public static final int DESKWIDTH_IN_POSTORDERDIALOG = 70;
-    public static final int DESKHEIGHT_IN_POSTORDERDIALOG = 70;
+    public static final int DESKWIDTH_IN_POSTORDERDIALOG = 110;
+    public static final int DESKHEIGHT_IN_POSTORDERDIALOG = 110;
 
     public static final byte DISH_CHOOSEMODE_DEFAULT = 1;
 //    public static final byte DISH_CHOOSEMODE_SUBITEM = 2;
