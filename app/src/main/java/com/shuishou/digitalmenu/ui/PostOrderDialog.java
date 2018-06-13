@@ -298,7 +298,7 @@ public class PostOrderDialog {
             StringBuffer sbReq = new StringBuffer();
             if (cd.getDishConfigList() != null && !cd.getDishConfigList().isEmpty()){
                 for ( DishConfig config: cd.getDishConfigList()) {
-                    sbReq.append(config.getFirstLanguageName() + (config.getPrice() == 0 ? "" : InstantValue.DOLLAR + config.getPrice()) + InstantValue.ENTERSTRING);
+                    sbReq.append(config.getFirstLanguageName() + InstantValue.ENTERSTRING);
                 }
             }
             if (cd.getFlavorList() != null && !cd.getFlavorList().isEmpty()){
