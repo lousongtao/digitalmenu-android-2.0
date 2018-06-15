@@ -31,6 +31,9 @@ public class ClickDishPictureListener implements View.OnClickListener {
         instance = new ClickDishPictureListener(mainActivity);
     }
 
+    public static void release(){
+        instance = null;
+    }
 
     @Override
     public void onClick(View v) {

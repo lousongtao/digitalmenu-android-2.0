@@ -30,6 +30,10 @@ public class ChooseDishListener implements View.OnClickListener {
     public static void rebuildInstance(MainActivity mainActivity){
         instance = new ChooseDishListener(mainActivity);
     }
+
+    public static void release(){
+        instance = null;
+    }
     @Override
     public void onClick(View v) {
         if (v.getTag() != null && v.getTag().getClass().getName().equals(Dish.class.getName())){
