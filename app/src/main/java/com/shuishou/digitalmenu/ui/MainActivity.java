@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private RadioButton rbSecondLanguage;
     private TextView tvChoosedItems;
     private TextView tvChoosedPrice;
-//    private View leftBottomPanel;
     private View rightUpPanel;
     private View rightBottomPanel;
     private RecyclerView lvChoosedDish;
@@ -172,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView tvTest = (TextView) findViewById(R.id.drawermenu_test);
         listViewCategorys = (CategoryTabListView) findViewById(R.id.categorytab_listview);
         ImageButton btnLookfor = (ImageButton)findViewById(R.id.btnLookforDish);
-//        leftBottomPanel = findViewById(R.id.leftBottomPanel);
         rightUpPanel = findViewById(R.id.rightUpPanel);
         rightBottomPanel = findViewById(R.id.rightBottomPanel);
 
@@ -213,22 +211,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         flavors = dbOperator.queryFlavors();
         httpOperator.loadWaiterData();
 
-        dlgPostOrder = PostOrderDialog.getInstance(this);
-        dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
-        dlgDishDetail = DishDetailDialog.getInstance(this);
-
         buildMenu();
-        //start timer
-        refreshMenuTimer = new RefreshMenuTimer(this);
+
         loadLogoFile();
     }
 
     //每次启动APP, 先检查是否有本地logo图片, 如果没有, 需要通过Refresh Data操作来同步logo
     private void loadLogoFile(){
-//        Drawable d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOGO_PATH + "leftbottom.jpg");
-//        if (d != null){
-//            leftBottomPanel.setBackground(d);
-//        }
         Drawable d = IOOperator.getDishImageDrawable(this.getResources(), InstantValue.LOGO_PATH + "rightup.jpg");
         if (d != null){
             rightUpPanel.setBackground(d);
@@ -798,6 +787,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     protected void onResume() {
         super.onResume();
+        if (dlgPostOrder == null)
+            dlgPostOrder = PostOrderDialog.getInstance(this);
+        else if (dlgPostOrder.getMainActivity() != this){
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for PostOrderDialog");
+            dlgPostOrder = PostOrderDialog.rebuildInstance(this);
+        }
+        if (dlgChooseFlavor == null)
+            dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
+        else if (dlgChooseFlavor.getMainActivity() != this) {
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChooseFlavorDialog");
+            dlgChooseFlavor = ChooseFlavorDialog.rebuildInstance(this);
+        }
+        if (dlgDishDetail == null)
+            dlgDishDetail = DishDetailDialog.getInstance(this);
+        else if (dlgDishDetail.getMainActivity() != this) {
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for DishDetailDialog");
+            dlgDishDetail = DishDetailDialog.rebuildInstance(this);
+        }
+        //start timer
+        if (refreshMenuTimer == null)
+            refreshMenuTimer = new RefreshMenuTimer(this);
+        else if (refreshMenuTimer.getMainActivity() != this){
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for RefreshMenuTimer");
+            refreshMenuTimer.cancel();
+            refreshMenuTimer = new RefreshMenuTimer(this);
+        }
+
         ChooseDishListener.rebuildInstance(this);
         ClickDishPictureListener.rebuildInstance(this);
         for (int i = 0; i < mapDishCellComponents.size(); i++) {

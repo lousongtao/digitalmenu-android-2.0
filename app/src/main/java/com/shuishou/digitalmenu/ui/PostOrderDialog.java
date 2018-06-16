@@ -318,8 +318,9 @@ public class PostOrderDialog {
         trlp.setMargins(margin, margin ,0 ,0);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         mainActivity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int rowamount = (int) Math.floor((displayMetrics.widthPixels - 200) / InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
-//        int rowamount = (int) Math.floor(mainActivity.getWindow().getAttributes().width / InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
+        int rowamount = 15;//每行显示15个桌子, 根据不同的分辨率, 计算deskicon的尺寸
+        int deskiconlength = (int) Math.floor((displayMetrics.widthPixels - 200) / rowamount);
+//        int rowamount = (int) Math.floor((displayMetrics.widthPixels - 200) / InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
         TableRow tr = null;
         for (int i = 0; i < desks.size(); i++) {
             if (i % rowamount == 0){
@@ -327,6 +328,8 @@ public class PostOrderDialog {
                 deskAreaLayout.addView(tr);
             }
             DeskIcon di = new DeskIcon(mainActivity, desks.get(i));
+            di.setWidth(deskiconlength);
+            di.setHeight(deskiconlength);
             deskIconList.add(di);
             tr.addView(di, trlp);
         }
@@ -363,8 +366,8 @@ public class PostOrderDialog {
             setTextColor(Color.BLACK);
             setBackgroundColor(Color.LTGRAY);
             setText(desk.getName());
-            setHeight(InstantValue.DESKHEIGHT_IN_POSTORDERDIALOG);
-            setWidth(InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
+//            setHeight(InstantValue.DESKHEIGHT_IN_POSTORDERDIALOG);
+//            setWidth(InstantValue.DESKWIDTH_IN_POSTORDERDIALOG);
             setOnClickListener(deskClickListener);
             setEllipsize(TextUtils.TruncateAt.END);
         }
@@ -399,6 +402,21 @@ public class PostOrderDialog {
         };
         Handler progressDlgCanceller = new Handler();
         progressDlgCanceller.postDelayed(r, 15000);
+    }
+
+    public MainActivity getMainActivity(){
+        return mainActivity;
+    }
+
+    /**
+     * 客户现场发现, 在下单后, 没有把已选择的菜单清空, 怀疑跟点菜点不中的bug一样, 是由于MainActivity对象更改导致的;
+     * 在判断MainActivity实例不一致后, 要重新build一个PostOrderDialog实例.
+     * @param mainActivity
+     * @return
+     */
+    public static PostOrderDialog rebuildInstance(MainActivity mainActivity){
+        instance = new PostOrderDialog(mainActivity);
+        return instance;
     }
 
     class ButtonListener implements View.OnClickListener{

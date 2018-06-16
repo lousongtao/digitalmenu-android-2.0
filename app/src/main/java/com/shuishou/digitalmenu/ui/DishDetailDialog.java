@@ -128,6 +128,21 @@ public class DishDetailDialog {
         chooseButton.setTag(dish);
         dlg.show();
     }
+
+    public MainActivity getMainActivity(){
+        return mainActivity;
+    }
+
+    /**
+     * 客户现场发现, 在下单后, 没有把已选择的菜单清空, 怀疑跟点菜点不中的bug一样, 是由于MainActivity对象更改导致的;
+     * 在判断MainActivity实例不一致后, 要重新build一个DishDetailDialog实例.
+     * @param mainActivity
+     * @return
+     */
+    public static DishDetailDialog rebuildInstance(MainActivity mainActivity){
+        instance = new DishDetailDialog(mainActivity);
+        return instance;
+    }
 }
 
 

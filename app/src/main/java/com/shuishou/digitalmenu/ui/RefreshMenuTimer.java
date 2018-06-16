@@ -102,6 +102,9 @@ public class RefreshMenuTimer extends Timer {
      */
     private void doRefreshDishInsert(int dishId){
         Dish dish = mainActivity.getDbOperator().queryDishById(dishId);
+        if (dish == null){
+            return;
+        }
         Category2 category2 = dish.getCategory2();
 
         if (category2 == null)
@@ -187,5 +190,9 @@ public class RefreshMenuTimer extends Timer {
 
     public Handler getRefreshMenuHandler(){
         return refreshMenuHandler;
+    }
+
+    public MainActivity getMainActivity(){
+        return mainActivity;
     }
 }
