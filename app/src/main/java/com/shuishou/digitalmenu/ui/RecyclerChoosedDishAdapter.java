@@ -128,4 +128,8 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         }
         return sb.toString();
     }
+
+    public MainActivity getMainActivity(){
+        return mainActivity;
+    }
 }

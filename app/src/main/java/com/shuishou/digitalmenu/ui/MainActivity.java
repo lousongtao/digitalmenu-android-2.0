@@ -814,6 +814,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             refreshMenuTimer = new RefreshMenuTimer(this);
         }
 
+        if (choosedDishAdapter != null && choosedDishAdapter.getMainActivity() != this) {
+            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChoosedDishAdapter");
+            choosedDishAdapter = new RecyclerChoosedDishAdapter(this, R.layout.choosedfood_item, choosedDishList);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+            lvChoosedDish.setLayoutManager(layoutManager);
+            lvChoosedDish.setAdapter(choosedDishAdapter);
+        }
+
+
         ChooseDishListener.rebuildInstance(this);
         ClickDishPictureListener.rebuildInstance(this);
         for (int i = 0; i < mapDishCellComponents.size(); i++) {
