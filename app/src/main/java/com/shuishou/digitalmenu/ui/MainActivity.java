@@ -528,6 +528,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void plusDish(int position) {
+        if (position >= choosedDishList.size()){
+            return;//sometimes here report IndexOutOfboundsException
+        }
         choosedDishList.get(position).setAmount(choosedDishList.get(position).getAmount() + 1);
         //show choosed icon
         refreshChooseAmountOnDishCell(choosedDishList.get(position).getDish());
@@ -555,6 +558,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void flavorDish(int position){
+        if (position >= choosedDishList.size()){
+            return;//sometimes here report IndexOutOfBoundsException
+        }
         ChoosedDish cd = choosedDishList.get(position);
         dlgChooseFlavor.initValue(cd);
         dlgChooseFlavor.showDialog();
