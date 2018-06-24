@@ -43,6 +43,7 @@ public final class InstantValue {
     public static final String FORMAT_DOUBLE_2DECIMAL = "%.2f";
 
     public static String URL_TOMCAT = null;
+    public static final String SERVER_CATEGORY_UPGRADEAPK = "upgradeApk";
     public static final String SERVER_CATALOG_DISH_PICTURE_BIG = "dishimage_big";
     public static final String SERVER_CATALOG_DISH_PICTURE_SMALL = "dishimage_small";
     public static final String SERVER_CATALOG_DISH_PICTURE_ORIGIN = "dishimage_origin";
@@ -50,6 +51,7 @@ public final class InstantValue {
     public static final String LOCAL_CATALOG_DISH_PICTURE_BIG = "/data/data/com.shuishou.digitalmenu/dishimage_big/";
     public static final String LOCAL_CATALOG_DISH_PICTURE_SMALL = "/data/data/com.shuishou.digitalmenu/dishimage_small/";
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";
+    public static final String LOCAL_CATEGORY_UPGRADEAPK = "/data/data/com.shuishou.digitalmenu/upgradeApk/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
     public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String ERRORLOGFILENAME = "digitalmenu_log";

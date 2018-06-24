@@ -59,7 +59,7 @@ public class RefreshMenuTimer extends Timer {
                     Dish dish = mainActivity.getDbOperator().queryDishById(dishId);
                     DishCellComponent fc = mainActivity.getMapDishCellComponents().get(dishId);
                     Drawable d = IOOperator.getDishImageDrawable(mainActivity.getResources(), InstantValue.LOCAL_CATALOG_DISH_PICTURE_BIG + dish.getPictureName());
-                    if (d != null)
+                    if (fc != null && d != null)
                         fc.setPicture(d);
                 }
             }

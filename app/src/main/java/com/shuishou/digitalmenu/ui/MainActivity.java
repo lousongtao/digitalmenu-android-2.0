@@ -48,6 +48,7 @@ import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.io.IOOperator;
 import com.shuishou.digitalmenu.ui.components.ChangeLanguageTextView;
 import com.shuishou.digitalmenu.ui.dishconfig.DishConfigDialogBuilder;
+import com.shuishou.digitalmenu.ui.upgradeapp.UpgradeAppDialog;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 import com.shuishou.digitalmenu.utils.CommonTool;
 import com.yanzhenjie.nohttp.Logger;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String TAG_RBFIRSTLANGUAGE = "rbFirstLanguage";
     private String TAG_RBSECONDLANGUAGE = "rbSecondLanguage";
     private String TAG_BTNORDER = "btnorder";
+    private String TAG_UPGRADEAPP = "upgradeapp";
     private CategoryTabListView listViewCategorys;
     private RadioButton rbFirstLanguage;
     private RadioButton rbSecondLanguage;
@@ -168,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView tvServerURL = (TextView)findViewById(R.id.drawermenu_serverurl);
         TextView tvUploadErrorLog = (TextView)findViewById(R.id.drawermenu_uploaderrorlog);
         TextView tvExit = (TextView)findViewById(R.id.drawermenu_exit);
+        TextView tvUpgradeAPP = (TextView) findViewById(R.id.drawermenu_upgradeapp);
         TextView tvTest = (TextView) findViewById(R.id.drawermenu_test);
         listViewCategorys = (CategoryTabListView) findViewById(R.id.categorytab_listview);
         ImageButton btnLookfor = (ImageButton)findViewById(R.id.btnLookforDish);
@@ -176,19 +179,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tvUploadErrorLog.setTag(TAG_UPLOADERRORLOG);
         tvExit.setTag(TAG_EXITSYSTEM);
-        tvTest.setTag("test");
+        tvUpgradeAPP.setTag(TAG_UPGRADEAPP);
         btnLookfor.setTag(TAG_LOOKFOR);
         tvRefreshData.setTag(TAG_REFRESHDATA);
         tvServerURL.setTag(TAG_SERVERURL);
+        tvTest.setTag("test");
         rbFirstLanguage.setTag(TAG_RBFIRSTLANGUAGE);
         rbSecondLanguage.setTag(TAG_RBSECONDLANGUAGE);
         btnOrder.setTag(TAG_BTNORDER);
         tvUploadErrorLog.setOnClickListener(this);
-        tvTest.setOnClickListener(this);
+        tvUpgradeAPP.setOnClickListener(this);
         tvExit.setOnClickListener(this);
         btnLookfor.setOnClickListener(this);
         tvRefreshData.setOnClickListener(this);
         tvServerURL.setOnClickListener(this);
+        tvTest.setOnClickListener(this);
         rbFirstLanguage.setOnClickListener(this);
         rbSecondLanguage.setOnClickListener(this);
         btnOrder.setOnClickListener(this);
@@ -675,6 +680,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dlg.showDialog();
         } else if ("test".equals(v.getTag())){
             TestDialog dlg = new TestDialog(this);
+            dlg.showDialog();
+        } else if (TAG_UPGRADEAPP.equals(v.getTag())){
+            UpgradeAppDialog dlg = new UpgradeAppDialog(this);
             dlg.showDialog();
         }
     }

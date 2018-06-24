@@ -1,10 +1,5 @@
 <resources>
     <string name="app_name">Menu</string>
     <string name="english_version">English</string>
-    <string name="choosed_food_label_en">ORDERS</string>
-    <string name="choosed_food_label_cn">订单</string>
-    <string name="drawmenu_serverurl">SET SERVER URL</string>
-    <string name="drawmenu_refreshdata">REFRESH DATA</string>
-    <string name="drawmenu_uploaderrorlog">UPLOAD ERROR LOG</string>
-    <string name="drawmenu_exit">EXIT</string>
+
 </resources>

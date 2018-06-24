@@ -57,7 +57,8 @@ public class ChooseDuplicatableConfigView extends BorderView implements DishConf
         TextView tvInfo = (TextView)view.findViewById(R.id.txtInfoChoosed);
         tvInfo.setText("Delete item by clicking. Need " + group.getRequiredQuantity());
         ArrayList<DishConfig> configs = group.getDishConfigs();
-
+        if (configs == null)
+            return view;
         TableRow tableRow = null;
         TableRow.LayoutParams trlp = new TableRow.LayoutParams();
         trlp.topMargin = 10;

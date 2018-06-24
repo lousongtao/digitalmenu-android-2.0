@@ -47,6 +47,8 @@ public class ChooseNonDuplicatableConfigView extends BorderView implements DishC
     private View buildView(DishConfigGroup group, DishConfigDialogBuilder.ConfigClickListener listener){
         TableLayout view = new TableLayout(mainActivity);
         ArrayList<DishConfig> configs = group.getDishConfigs();
+        if (configs == null)
+            return view;
         TableRow tableRow = null;
         TableRow.LayoutParams trlp = new TableRow.LayoutParams();
         trlp.topMargin = 5;

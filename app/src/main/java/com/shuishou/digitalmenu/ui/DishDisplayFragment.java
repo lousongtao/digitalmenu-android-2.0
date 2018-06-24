@@ -100,12 +100,12 @@ public class DishDisplayFragment extends Fragment {
     }
 
     public void removeDishCell(Dish dish){
-        DishCellComponent fc = mainActivity.getMapDishCellComponents().get(dish.getId());
         for (int i = 0; i < contentLayout.getChildCount(); i++){
             TableRow tr = (TableRow) contentLayout.getChildAt(i);
             for (int j = 0; j < tr.getChildCount(); j++) {
                 View v = tr.getChildAt(j);
-                if (v.getTag() == dish){
+                if (v.getTag() instanceof Dish
+                        && ((Dish)v.getTag()).getId() == dish.getId()){
                     tr.removeView(v);
                     return;
                 }

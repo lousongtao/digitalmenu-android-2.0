@@ -419,6 +419,29 @@ public class HttpOperator {
     }
 
     /**
+     * 得到服务端可用的apk文件列表
+     * @return
+     */
+    public ArrayList<String> getUpgradeApkFiles(){
+        Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/common/checkupgradeapk", RequestMethod.GET);
+        Response<JSONObject> response = NoHttp.startRequestSync(request);
+        if (response.getException() != null){
+            Log.e(logTag, "chechMenuVersion: There are Exception to getUpgradeApkFiles\n"+ response.getException().getMessage() );
+            MainActivity.LOG.error("chechMenuVersion: There are Exception to getUpgradeApkFiles\n"+ response.getException().getMessage() );
+            sendErrorMessageToToast("Http:getUpgradeApkFiles: " + response.getException().getMessage());
+            return null;
+        }
+        HttpResult<ArrayList<String>> result = gson.fromJson(response.get().toString(), new TypeToken<HttpResult<ArrayList<String>>>(){}.getType());
+        if (result.success){
+            return result.data;
+        } else {
+            Log.e(logTag, "get false from server while Check upgrade apk");
+            MainActivity.LOG.error("get false from server while Check upgrade apk");
+            sendErrorMessageToToast("get false from server while Check upgrade apk");
+            return null;
+        }
+    }
+    /**
      * check the menu version difference between client and server
      * 目前的同步数据包括, dish的基本属性修改, 含soldout/promotion; dish的增加; dish的删除; DishConfig的soldout
      * 实现逻辑:
@@ -573,6 +596,9 @@ public class HttpOperator {
                                 Category2 c2 = findCategory2(mainActivity.getMenu(), c2s.get(j).getId());
                                 if (c2 != null) {
                                     dish.setCategory2(c2);
+                                    if (c2.getDishes() == null){
+                                        c2.setDishes(new ArrayList<Dish>());
+                                    }
                                     c2.getDishes().add(dish);
                                     dbOpr.saveObjectByCascade(dish);
                                     break;
@@ -690,7 +716,7 @@ public class HttpOperator {
             sendErrorMessageToToast("get Exception while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
             return false;
         }
-        HttpResult<DishConfig> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<DishConfig>>(){}.getType());
+        HttpResult<ArrayList<DishConfig>> result = gson.fromJson(respDish.get().toString(), new TypeToken<HttpResult<ArrayList<DishConfig>>>(){}.getType());
         if (!result.success){
             Log.e(logTag, "get false value while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
             MainActivity.LOG.error("get false value while call menu/querydishconfigbyidlist for dishConfigId = "+ dishConfigId+", Exception is "+ respDish.getException());
@@ -698,15 +724,18 @@ public class HttpOperator {
             return false;
         }
         DBOperator dbOpr = mainActivity.getDbOperator();
-        DishConfig dishConfig = result.data;
-        DishConfig dbDishConfig = (DishConfig) dbOpr.queryObjectById(dishConfig.getId(), DishConfig.class);
-        if (dbDishConfig == null){
-            sendErrorMessageToToast("find unrecognized dishConfig '"+dishConfig.getFirstLanguageName()+"', please refresh data on this device.");
-            return false;
-        }
-        if (dishConfig.isSoldOut() != dbDishConfig.isSoldOut()) {
-            dbDishConfig.setSoldOut(dishConfig.isSoldOut());
-            dbOpr.updateObject(dbDishConfig);
+        ArrayList<DishConfig> dishConfigs = result.data;
+        for (int i = 0; i < dishConfigs.size(); i++) {
+            DishConfig dishConfig = dishConfigs.get(i);
+            DishConfig dbDishConfig = (DishConfig) dbOpr.queryObjectById(dishConfig.getId(), DishConfig.class);
+            if (dbDishConfig == null){
+                sendErrorMessageToToast("find unrecognized dishConfig '"+dishConfig.getFirstLanguageName()+"', please refresh data on this device.");
+                return false; //only one record in this loop, so here return false directly.
+            }
+            if (dishConfig.isSoldOut() != dbDishConfig.isSoldOut()) {
+                dbDishConfig.setSoldOut(dishConfig.isSoldOut());
+                dbOpr.updateObject(dbDishConfig);
+            }
         }
         return true;
     }

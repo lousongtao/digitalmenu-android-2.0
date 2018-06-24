@@ -1,6 +1,9 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.shuishou.digitalmenu.BuildConfig;
+import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
@@ -18,6 +23,7 @@ import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -175,10 +181,23 @@ public class TestDialog implements View.OnClickListener {
         }
         return false;
     }
+
+    private void doInstall(){
+        File file = new File("/data/data/com.shuishou.digitalmenu/files/digitalmenu.apk");
+        Uri uri = FileProvider.getUriForFile(mainActivity, "com.shuishou.digitalmenu.fileprovider", file);
+        Intent intent = new Intent();
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setAction("android.intent.action.VIEW");
+        intent.addCategory("android.intent.category.DEFAULT");
+
+        intent.setDataAndType(uri, "application/vnd.android.package-archive");
+        mainActivity.startActivity(intent);
+    }
     @Override
     public void onClick(View v) {
         if (v == btnTest1){
-            addDishToList();
+//            addDishToList();
+            doInstall();
         } else if (v == btnTest2){
             changeTrolleyPrice();
         } else if (v == btnTest3){

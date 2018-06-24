@@ -164,7 +164,7 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:layout_marginTop="20dp"
-            android:text="@string/drawmenu_serverurl"
+            android:text="SET SERVER URL"
             android:textSize="30sp" />
 
         <TextView
@@ -172,22 +172,28 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="20dp"
-            android:text="@string/drawmenu_refreshdata"
+            android:text="REFRESH DATA"
             android:textSize="30sp" />
         <TextView
             android:id="@+id/drawermenu_uploaderrorlog"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="20dp"
-            android:text="@string/drawmenu_uploaderrorlog"
+            android:text="UPLOAD ERROR LOG"
             android:textSize="30sp" />
-
+        <TextView
+            android:id="@+id/drawermenu_upgradeapp"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingTop="20dp"
+            android:text="UPGRADE APP"
+            android:textSize="30sp" />
         <TextView
             android:id="@+id/drawermenu_exit"
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="20dp"
-            android:text="@string/drawmenu_exit"
+            android:text="EXIT"
             android:textSize="30sp" />
 
         <TextView
@@ -195,8 +201,9 @@
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingTop="20dp"
-            android:text="Test"
+            android:text="TEST"
             android:textSize="30sp" />
+
     </LinearLayout>
 
 

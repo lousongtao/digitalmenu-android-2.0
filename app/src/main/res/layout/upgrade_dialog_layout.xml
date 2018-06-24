@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirmation Code"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/txtConfirmCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="160dp"
+            android:inputType="number"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/txtCurrentVersion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Current Version : "
+        android:textSize="18sp" />
+
+    <TableLayout
+        android:id="@+id/versionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    </TableLayout>
+</LinearLayout>
