@@ -839,6 +839,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         ChooseDishListener.rebuildInstance(this);
         ClickDishPictureListener.rebuildInstance(this);
+        ChoosedFoodClickListener.rebuildInstance(this);
+
         for (int i = 0; i < mapDishCellComponents.size(); i++) {
             int key = mapDishCellComponents.keyAt(i);
             DishCellComponent cell = mapDishCellComponents.get(key);
