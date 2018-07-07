@@ -38,4 +38,8 @@ public class ChoosedFoodClickListener implements View.OnClickListener{
             mainActivity.flavorDish((int)v.getTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION));
         }
     }
+
+    public static void rebuildInstance(MainActivity mainActivity){
+        instance = new ChoosedFoodClickListener(mainActivity);
+    }
 }
