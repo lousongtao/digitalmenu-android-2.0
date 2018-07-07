@@ -202,7 +202,8 @@
             android:layout_height="80dp"
             android:paddingTop="20dp"
             android:text="TEST"
-            android:textSize="30sp" />
+            android:textSize="30sp"
+            android:visibility="invisible" />
 
     </LinearLayout>
 

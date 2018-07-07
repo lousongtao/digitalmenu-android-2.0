@@ -10,31 +10,34 @@
 
         <TextView
             android:id="@+id/textView3"
-            android:layout_width="wrap_content"
+            android:layout_width="180dp"
             android:layout_height="wrap_content"
             android:text="Confirmation Code"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/txtConfirmCode"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:text="333"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/txtCurrentVersion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="160dp"
-            android:inputType="number"
+            android:layout_marginLeft="50dp"
+            android:layout_weight="1"
+            android:text="Current Version : "
             android:textSize="18sp" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/txtCurrentVersion"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Current Version : "
-        android:textSize="18sp" />
 
     <TableLayout
         android:id="@+id/versionLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="100dp">
 
     </TableLayout>
 </LinearLayout>

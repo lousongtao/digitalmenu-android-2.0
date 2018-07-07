@@ -1,17 +1,21 @@
-package com.shuishou.digitalmenu.ui.upgradeapp;
+package com.shuishou.digitalmenu.ui;
 
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.content.FileProvider;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +37,12 @@ import com.yanzhenjie.nohttp.RequestMethod;
 import com.yanzhenjie.nohttp.download.DownloadQueue;
 import com.yanzhenjie.nohttp.download.DownloadRequest;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -49,11 +59,22 @@ public class UpgradeAppDialog{
     private ArrayList<String> versions = new ArrayList<>();
     private RadioButtonListener listener = new RadioButtonListener();
     private AlertDialog dlg;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS = 1;
+    public static final int PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG = 2;
     public static final int PROGRESSDLGHANDLER_MSGWHAT_FINISHQUERY = 0;
+    private ProgressDialog progressDlg;
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            dealHandlerMessage(msg);
+            if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_FINISHQUERY) {
+                listAvailableApk();
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS){
+                progressDlg = ProgressDialog.show(mainActivity, "Loading", "downloading apk, please wait...");
+            } else if (msg.what == PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG){
+                if (progressDlg != null){
+                    progressDlg.dismiss();
+                }
+            }
             super.handleMessage(msg);
         }
     };
@@ -63,7 +84,7 @@ public class UpgradeAppDialog{
         initData();
     }
 
-    private void dealHandlerMessage(Message msg){
+    private void listAvailableApk(){
         int margin = 5;
         TableRow.LayoutParams trlp = new TableRow.LayoutParams();
         trlp.setMargins(margin, margin ,0 ,0);
@@ -162,12 +183,57 @@ public class UpgradeAppDialog{
             return;
         }
 
-        mainActivity.getProgressDlgHandler().sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_DOWNFINISH, "dowloading apk"));
-        DownloadApkListener listener = new DownloadApkListener(mainActivity);
-        DownloadQueue queue = NoHttp.newDownloadQueue();
-        String url = InstantValue.URL_TOMCAT + "/../" + InstantValue.SERVER_CATEGORY_UPGRADEAPK + "/" + selectedVersion;
-        DownloadRequest requestbig = NoHttp.createDownloadRequest(url, RequestMethod.GET, InstantValue.LOCAL_CATEGORY_UPGRADEAPK, "digitalmenu.apk", true, true);
-        queue.add(0, requestbig, listener);
+        handler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS));
+        final String filename = selectedVersion;
+        new Thread(){
+            @Override
+            public void run() {
+                try {
+                    //download
+                    URL url = new URL(InstantValue.URL_TOMCAT + "/../" + InstantValue.SERVER_CATEGORY_UPGRADEAPK + "/" + filename);
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setConnectTimeout(5000);
+                    conn.setRequestMethod("GET");
+                    int code = conn.getResponseCode();
+                    if ( code == 200 ) {
+                        InputStream is = conn.getInputStream();
+                        File file = new File(InstantValue.LOCAL_CATEGORY_UPGRADEAPK+filename);
+                        FileOutputStream fos = new FileOutputStream(file);
+                        byte[] buffer = new byte[1024];
+                        int len = 0;
+                        while ( (len = is.read(buffer)) != -1 ) {
+                            fos.write(buffer, 0, len);
+                        }
+                        fos.flush();
+                        fos.close();
+                        is.close();
+
+                        handler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
+                        //install
+                        Intent intent = new Intent();
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        intent.setAction("android.intent.action.VIEW");
+                        intent.addCategory("android.intent.category.DEFAULT");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            Uri uri = FileProvider.getUriForFile(mainActivity, "com.shuishou.digitalmenu.fileprovider", file);
+                            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+                        } else {
+
+                            try {
+                                Runtime.getRuntime().exec("chmod 777 " + file.getCanonicalPath());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            Uri uri = Uri.fromFile(file);
+                            intent.setDataAndType(uri, "application/vnd.android.package-archive");
+                        }
+                        mainActivity.startActivity(intent);
+                    }
+                } catch (Exception e) {
+                    MainActivity.LOG.error("Upgrade Error", e);
+                }
+            }
+        }.start();
     }
 
     public void showDialog(){
