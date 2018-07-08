@@ -232,6 +232,7 @@ public class UpgradeAppDialog{
                 } catch (Exception e) {
                     MainActivity.LOG.error("Upgrade Error", e);
                 }
+                handler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG));
             }
         }.start();
     }
