@@ -51,14 +51,8 @@ public final class InstantValue {
     public static final String LOCAL_CATALOG_DISH_PICTURE_BIG = "/data/data/com.shuishou.digitalmenu/dishimage_big/";
     public static final String LOCAL_CATALOG_DISH_PICTURE_SMALL = "/data/data/com.shuishou.digitalmenu/dishimage_small/";
     public static final String LOCAL_CATALOG_ERRORLOG = "/data/data/com.shuishou.digitalmenu/errorlog/";
-    /**
-     * 测试中发现, 只有使用sdcard目录存储apk才能实现APP内部更新.
-     * 1. 安装app需要先将apk拷贝到设备上, 然后运行安装; 不能直接使用Android studio运行到设备上, 因为as使用的是debug key,
-     *    这样在升级安装时, 由于签名不同, 会导致无法升级. (这一步也许可以找到解决的办法, 但是目前不知道怎么实现)
-     * 2. app内部目录, /data/data/com.shuishou.digitalmenu/.. 这些目录在设备上无法访问, 故无法把apk文件放置进去
-     * 3. 安卓模拟器不能使用sdcard目录, 会报告permission deny的错误. 只有实体设备才有这个目录
-     */
-    public static final String LOCAL_CATEGORY_UPGRADEAPK = "/sdcard/";
+
+    public static final String LOCAL_CATEGORY_UPGRADEAPK = "/data/user/0/com.shuishou.digitalmenu/files/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
     public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String ERRORLOGFILENAME = "digitalmenu_log";

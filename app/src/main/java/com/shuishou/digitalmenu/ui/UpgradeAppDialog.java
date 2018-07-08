@@ -197,7 +197,11 @@ public class UpgradeAppDialog{
                     int code = conn.getResponseCode();
                     if ( code == 200 ) {
                         InputStream is = conn.getInputStream();
-                        File file = new File(InstantValue.LOCAL_CATEGORY_UPGRADEAPK+filename);
+                        File file = new File(InstantValue.LOCAL_CATEGORY_UPGRADEAPK);
+                        if (!file.exists()){
+                            file.mkdir();
+                        }
+                        file = new File(InstantValue.LOCAL_CATEGORY_UPGRADEAPK + filename);
                         FileOutputStream fos = new FileOutputStream(file);
                         byte[] buffer = new byte[1024];
                         int len = 0;
