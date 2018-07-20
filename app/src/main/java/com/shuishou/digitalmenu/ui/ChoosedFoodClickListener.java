@@ -16,17 +16,17 @@ public class ChoosedFoodClickListener implements View.OnClickListener{
     public static final String IMAGEBUTTON_TAG_KEY_ACTION_MINUS = "minus";
     public static final String IMAGEBUTTON_TAG_KEY_ACTION_FLAVOR = "flavor";
 
-    private static ChoosedFoodClickListener instance;
+//    private static ChoosedFoodClickListener instance;
     private MainActivity mainActivity;
-    private ChoosedFoodClickListener(MainActivity mainActivity){
+    public ChoosedFoodClickListener(MainActivity mainActivity){
         this.mainActivity = mainActivity;
     }
 
-    public static ChoosedFoodClickListener getInstance(MainActivity mainActivity){
-        if (instance == null)
-            instance = new ChoosedFoodClickListener(mainActivity);
-        return instance;
-    }
+//    public static ChoosedFoodClickListener getInstance(MainActivity mainActivity){
+//        if (instance == null)
+//            instance = new ChoosedFoodClickListener(mainActivity);
+//        return instance;
+//    }
 
     @Override
     public void onClick(View v) {
@@ -39,7 +39,7 @@ public class ChoosedFoodClickListener implements View.OnClickListener{
         }
     }
 
-    public static void rebuildInstance(MainActivity mainActivity){
-        instance = new ChoosedFoodClickListener(mainActivity);
-    }
+//    public static void rebuildInstance(MainActivity mainActivity){
+//        instance = new ChoosedFoodClickListener(mainActivity);
+//    }
 }

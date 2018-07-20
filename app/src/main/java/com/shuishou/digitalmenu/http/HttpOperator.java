@@ -237,7 +237,7 @@ public class HttpOperator {
             });
             mainActivity.setDesk(result.data);
             mainActivity.persistDesk();
-            mainActivity.getPostOrderDialog().initDeskData(result.data);
+//            mainActivity.getPostOrderDialog().initDeskData(result.data);
         } else {
             Log.e(logTag, "doResponseQueryDesk: get FALSE for query desk");
             MainActivity.LOG.error("doResponseQueryDesk: get FALSE for query desk");

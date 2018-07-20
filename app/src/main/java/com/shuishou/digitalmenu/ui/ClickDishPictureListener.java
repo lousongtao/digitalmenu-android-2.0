@@ -10,30 +10,30 @@ import com.shuishou.digitalmenu.bean.Dish;
  */
 
 public class ClickDishPictureListener implements View.OnClickListener {
-    private static ClickDishPictureListener instance;
+//    private static ClickDishPictureListener instance;
     private MainActivity mainActivity;
-    private ClickDishPictureListener(MainActivity mainActivity){
+    public ClickDishPictureListener(MainActivity mainActivity){
         this.mainActivity = mainActivity;
     }
 
-    public static ClickDishPictureListener getInstance(MainActivity mainActivity){
-        if(instance == null){
-            instance = new ClickDishPictureListener(mainActivity);
-        }
-        return instance;
-    }
-
-    public static ClickDishPictureListener getInstance(){
-        return instance;
-    }
-
-    public static void rebuildInstance(MainActivity mainActivity){
-        instance = new ClickDishPictureListener(mainActivity);
-    }
-
-    public static void release(){
-        instance = null;
-    }
+//    public static ClickDishPictureListener getInstance(MainActivity mainActivity){
+//        if(instance == null){
+//            instance = new ClickDishPictureListener(mainActivity);
+//        }
+//        return instance;
+//    }
+//
+//    public static ClickDishPictureListener getInstance(){
+//        return instance;
+//    }
+//
+//    public static void rebuildInstance(MainActivity mainActivity){
+//        instance = new ClickDishPictureListener(mainActivity);
+//    }
+//
+//    public static void release(){
+//        instance = null;
+//    }
 
     @Override
     public void onClick(View v) {

@@ -18,20 +18,22 @@ import com.shuishou.digitalmenu.bean.UserData;
 public class WaiterChooseDialog {
     private AlertDialog dlg;
     private MainActivity mainActivity;
+    private PostOrderDialog postOrderDialog;
 
     private ListView lvWaiter;
-    private static WaiterChooseDialog instance;
+//    private static WaiterChooseDialog instance;
 
-    public WaiterChooseDialog(MainActivity mainActivity){
+    public WaiterChooseDialog(MainActivity mainActivity, PostOrderDialog postOrderDialog){
         this.mainActivity = mainActivity;
+        this.postOrderDialog = postOrderDialog;
         initUI();
     }
-    public static WaiterChooseDialog getInstance(MainActivity mainActivity){
-        if (instance == null){
-            instance = new WaiterChooseDialog(mainActivity);
-        }
-        return instance;
-    }
+//    public static WaiterChooseDialog getInstance(MainActivity mainActivity){
+//        if (instance == null){
+//            instance = new WaiterChooseDialog(mainActivity);
+//        }
+//        return instance;
+//    }
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.waiterlist_layout, null);
@@ -46,7 +48,7 @@ public class WaiterChooseDialog {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 UserData user = mainActivity.getWaiters().get(position);
-                mainActivity.getPostOrderDialog().setWaiter(user);
+                postOrderDialog.setWaiter(user);
                 dlg.dismiss();
             }
         });

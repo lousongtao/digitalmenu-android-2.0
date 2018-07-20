@@ -86,9 +86,10 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         holder.plusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
         holder.minusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
         holder.flavorImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
-        holder.plusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
-        holder.minusImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
-        holder.flavorImage.setOnClickListener(ChoosedFoodClickListener.getInstance(mainActivity));
+        ChoosedFoodClickListener listener = new ChoosedFoodClickListener(mainActivity);
+        holder.plusImage.setOnClickListener(listener);
+        holder.minusImage.setOnClickListener(listener);
+        holder.flavorImage.setOnClickListener(listener);
         holder.flavorImage.setVisibility(cd.getDish().isAllowFlavor() ? View.VISIBLE : View.GONE);
 //        //如果dish不可以自动合并, 隐藏掉加号
 //        holder.plusImage.setVisibility(cd.getDish().isAutoMergeWhileChoose() ? View.VISIBLE : View.INVISIBLE);

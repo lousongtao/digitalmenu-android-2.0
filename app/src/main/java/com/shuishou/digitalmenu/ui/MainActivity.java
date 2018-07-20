@@ -87,9 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private HttpOperator httpOperator;
     private DBOperator dbOperator;
 
-    private PostOrderDialog dlgPostOrder;
-    private ChooseFlavorDialog dlgChooseFlavor;
-    private DishDetailDialog dlgDishDetail;
+//    private PostOrderDialog dlgPostOrder;
+//    private ChooseFlavorDialog dlgChooseFlavor;
+//    private DishDetailDialog dlgDishDetail;
 
     private RefreshMenuTimer refreshMenuTimer;
 
@@ -263,14 +263,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public PostOrderDialog getPostOrderDialog(){
-        return dlgPostOrder;
-    }
+//    public PostOrderDialog getPostOrderDialog(){
+//        return dlgPostOrder;
+//    }
 
     private void onStartOrder(){
         if (choosedDishList == null || choosedDishList.isEmpty())
             return;
-        dlgPostOrder.clearup();
+        PostOrderDialog dlgPostOrder = new PostOrderDialog(this);
         dlgPostOrder.showDialog(httpOperator, choosedDishList);
     }
 
@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        adapter.clear();
         tvChoosedItems.setText("0");
         tvChoosedPrice.setText("$0");
-        dlgPostOrder.dismiss();
+//        dlgPostOrder.dismiss();
         int fcCount = mapDishCellComponents.size();
         for (int i = 0; i< fcCount; i++){
             DishCellComponent fc = mapDishCellComponents.valueAt(i);
@@ -558,6 +558,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;//sometimes here report IndexOutOfBoundsException
         }
         ChoosedDish cd = choosedDishList.get(position);
+        ChooseFlavorDialog dlgChooseFlavor = new ChooseFlavorDialog(this);
         dlgChooseFlavor.initValue(cd);
         dlgChooseFlavor.showDialog();
     }
@@ -570,6 +571,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             }
         }
+        DishDetailDialog dlgDishDetail = new DishDetailDialog(this);
         dlgDishDetail.showDialog(getLanguage(), dish, choosedAmount);
     }
     public void notifyChoosedDishFlavorChanged(){
@@ -785,59 +787,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
+//
     /**
      * 客户现场经常发现点菜不能加入到右侧列表的现象; 初步推测, 是原有的listener对象绑定了老的MainActivity对象.
      * 尝试一下每次resume时, 重构这些listener并将其与控件绑定
      */
-    protected void onResume() {
-        super.onResume();
-        if (dlgPostOrder == null)
-            dlgPostOrder = PostOrderDialog.getInstance(this);
-        else if (dlgPostOrder.getMainActivity() != this){
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for PostOrderDialog");
-            dlgPostOrder = PostOrderDialog.rebuildInstance(this);
-        }
-        if (dlgChooseFlavor == null)
-            dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
-        else if (dlgChooseFlavor.getMainActivity() != this) {
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChooseFlavorDialog");
-            dlgChooseFlavor = ChooseFlavorDialog.rebuildInstance(this);
-        }
-        if (dlgDishDetail == null)
-            dlgDishDetail = DishDetailDialog.getInstance(this);
-        else if (dlgDishDetail.getMainActivity() != this) {
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for DishDetailDialog");
-            dlgDishDetail = DishDetailDialog.rebuildInstance(this);
-        }
-        //start timer
-        if (refreshMenuTimer == null)
-            refreshMenuTimer = new RefreshMenuTimer(this);
-        else if (refreshMenuTimer.getMainActivity() != this){
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for RefreshMenuTimer");
-            refreshMenuTimer.cancel();
-            refreshMenuTimer = new RefreshMenuTimer(this);
-        }
-
-        if (choosedDishAdapter != null && choosedDishAdapter.getMainActivity() != this) {
-            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChoosedDishAdapter");
-            choosedDishAdapter = new RecyclerChoosedDishAdapter(this, R.layout.choosedfood_item, choosedDishList);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-            lvChoosedDish.setLayoutManager(layoutManager);
-            lvChoosedDish.setAdapter(choosedDishAdapter);
-        }
-
-
-        ChooseDishListener.rebuildInstance(this);
-        ClickDishPictureListener.rebuildInstance(this);
-        ChoosedFoodClickListener.rebuildInstance(this);
-
-        for (int i = 0; i < mapDishCellComponents.size(); i++) {
-            int key = mapDishCellComponents.keyAt(i);
-            DishCellComponent cell = mapDishCellComponents.get(key);
-            cell.setListener();
-        }
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        if (dlgPostOrder == null)
+//            dlgPostOrder = PostOrderDialog.getInstance(this);
+//        else if (dlgPostOrder.getMainActivity() != this){
+//            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for PostOrderDialog");
+//            dlgPostOrder = PostOrderDialog.rebuildInstance(this);
+//        }
+//        if (dlgChooseFlavor == null)
+//            dlgChooseFlavor = ChooseFlavorDialog.getInstance(this);
+//        else if (dlgChooseFlavor.getMainActivity() != this) {
+//            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChooseFlavorDialog");
+//            dlgChooseFlavor = ChooseFlavorDialog.rebuildInstance(this);
+//        }
+//        if (dlgDishDetail == null)
+//            dlgDishDetail = DishDetailDialog.getInstance(this);
+//        else if (dlgDishDetail.getMainActivity() != this) {
+//            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for DishDetailDialog");
+//            dlgDishDetail = DishDetailDialog.rebuildInstance(this);
+//        }
+//        //start timer
+//        if (refreshMenuTimer == null)
+//            refreshMenuTimer = new RefreshMenuTimer(this);
+//        else if (refreshMenuTimer.getMainActivity() != this){
+//            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for RefreshMenuTimer");
+//            refreshMenuTimer.cancel();
+//            refreshMenuTimer = new RefreshMenuTimer(this);
+//        }
+//
+//        if (choosedDishAdapter != null && choosedDishAdapter.getMainActivity() != this) {
+//            LOG.debug(InstantValue.DFYMDHMS.format(new Date()) + " lousongtao test : find different MainActivity object for ChoosedDishAdapter");
+//            choosedDishAdapter = new RecyclerChoosedDishAdapter(this, R.layout.choosedfood_item, choosedDishList);
+//            LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+//            lvChoosedDish.setLayoutManager(layoutManager);
+//            lvChoosedDish.setAdapter(choosedDishAdapter);
+//        }
+//
+//
+//        ChooseDishListener.rebuildInstance(this);
+//        ClickDishPictureListener.rebuildInstance(this);
+//        ChoosedFoodClickListener.rebuildInstance(this);
+//
+//        for (int i = 0; i < mapDishCellComponents.size(); i++) {
+//            int key = mapDishCellComponents.keyAt(i);
+//            DishCellComponent cell = mapDishCellComponents.get(key);
+//            cell.setListener();
+//        }
+//    }
 
     //屏蔽recent task 按键, some pad devices are different with the virtual device, such as Sumsung Tab E
     @Override
@@ -871,8 +874,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
 
         refreshMenuTimer = null;
-        ChooseDishListener.release();
-        ClickDishPictureListener.release();
+//        ChooseDishListener.release();
+//        ClickDishPictureListener.release();
         super.onDestroy();
     }
 }

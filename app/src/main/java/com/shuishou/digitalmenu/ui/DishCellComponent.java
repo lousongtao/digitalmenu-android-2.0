@@ -46,9 +46,9 @@ class DishCellComponent{
         foodPriceText = (TextView) foodCellView.findViewById(R.id.foodPriceText);
         foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
         imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
-        imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance(mainActivity));
+        imgDishPicture.setOnClickListener(new ClickDishPictureListener(mainActivity));
         imgAddDish = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
-        imgAddDish.setOnClickListener(ChooseDishListener.getInstance(mainActivity));
+        imgAddDish.setOnClickListener(new ChooseDishListener(mainActivity));
         imgHotLevel = (ImageView) foodCellView.findViewById(R.id.imgHotLevel);
 
         resetDishObject(dish);
@@ -141,8 +141,8 @@ class DishCellComponent{
         }
     }
 
-    public void setListener(){
-        imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance());
-        imgAddDish.setOnClickListener(ChooseDishListener.getInstance());
-    }
+//    public void setListener(){
+//        imgDishPicture.setOnClickListener(ClickDishPictureListener.getInstance());
+//        imgAddDish.setOnClickListener(ChooseDishListener.getInstance());
+//    }
 }

@@ -31,7 +31,7 @@ import java.util.ArrayList;
  */
 
 public class DishDetailDialog {
-    private static DishDetailDialog instance;
+//    private static DishDetailDialog instance;
     private ImageButton chooseButton;
     private ImageView imgHotLevel;
     private ImageView imgDishPicture;
@@ -43,16 +43,16 @@ public class DishDetailDialog {
     private int choosedAmount;
     private MainActivity mainActivity;
     private AlertDialog dlg;
-    private DishDetailDialog(MainActivity mainActivity){
+    public DishDetailDialog(MainActivity mainActivity){
         this.mainActivity = mainActivity;
         initUI();
     }
 
-    public static DishDetailDialog getInstance(MainActivity mainActivity){
-        if (instance == null)
-            instance = new DishDetailDialog(mainActivity);
-        return instance;
-    }
+//    public static DishDetailDialog getInstance(MainActivity mainActivity){
+//        if (instance == null)
+//            instance = new DishDetailDialog(mainActivity);
+//        return instance;
+//    }
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.dishdetail_layout, null);
@@ -136,13 +136,13 @@ public class DishDetailDialog {
     /**
      * 客户现场发现, 在下单后, 没有把已选择的菜单清空, 怀疑跟点菜点不中的bug一样, 是由于MainActivity对象更改导致的;
      * 在判断MainActivity实例不一致后, 要重新build一个DishDetailDialog实例.
-     * @param mainActivity
+     * @param
      * @return
      */
-    public static DishDetailDialog rebuildInstance(MainActivity mainActivity){
-        instance = new DishDetailDialog(mainActivity);
-        return instance;
-    }
+//    public static DishDetailDialog rebuildInstance(MainActivity mainActivity){
+//        instance = new DishDetailDialog(mainActivity);
+//        return instance;
+//    }
 }
 
 

@@ -34,7 +34,7 @@ import java.util.ArrayList;
  */
 
 public class ChooseFlavorDialog {
-    private static ChooseFlavorDialog instance;
+//    private static ChooseFlavorDialog instance;
     private static final int DISPLAYAMOUNT_PERROW = 10;
     private float fontSize = 15;
     private MainActivity mainActivity;
@@ -47,16 +47,16 @@ public class ChooseFlavorDialog {
     private ChooseFlavorListener chooseFlavorListener = new ChooseFlavorListener();
     private UnchooseFlavorListener unchooseFlavorListener = new UnchooseFlavorListener();
     private AlertDialog dlg;
-    private ChooseFlavorDialog(MainActivity mainActivity){
+    public ChooseFlavorDialog(MainActivity mainActivity){
         this.mainActivity = mainActivity;
         initUI();
     }
 
-    public static ChooseFlavorDialog getInstance(MainActivity mainActivity){
-        if (instance == null)
-            instance = new ChooseFlavorDialog(mainActivity);
-        return instance;
-    }
+//    public static ChooseFlavorDialog getInstance(MainActivity mainActivity){
+//        if (instance == null)
+//            instance = new ChooseFlavorDialog(mainActivity);
+//        return instance;
+//    }
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.chooseflavor_layout, null);
@@ -107,6 +107,7 @@ public class ChooseFlavorDialog {
         param.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         param.y = 0;
         window.setAttributes(param);
+
     }
 
     public void initValue(ChoosedDish choosedDish){
@@ -175,13 +176,13 @@ public class ChooseFlavorDialog {
     /**
      * 客户现场发现, 在下单后, 没有把已选择的菜单清空, 怀疑跟点菜点不中的bug一样, 是由于MainActivity对象更改导致的;
      * 在判断MainActivity实例不一致后, 要重新build一个ChooseflavorDialog实例.
-     * @param mainActivity
+     * @param
      * @return
      */
-    public static ChooseFlavorDialog rebuildInstance(MainActivity mainActivity){
-        instance = new ChooseFlavorDialog(mainActivity);
-        return instance;
-    }
+//    public static ChooseFlavorDialog rebuildInstance(MainActivity mainActivity){
+//        instance = new ChooseFlavorDialog(mainActivity);
+//        return instance;
+//    }
 
     class ChooseFlavorListener implements View.OnClickListener{
 

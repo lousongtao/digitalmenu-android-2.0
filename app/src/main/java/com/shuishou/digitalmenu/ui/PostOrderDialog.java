@@ -44,7 +44,7 @@ import java.util.ArrayList;
  */
 
 public class PostOrderDialog {
-    private static PostOrderDialog instance;
+//    private static PostOrderDialog instance;
     private EditText txtCode;
     private EditText txtCustomerAmount;
     private EditText txtComments;
@@ -98,16 +98,16 @@ public class PostOrderDialog {
         }
     };
 
-    private PostOrderDialog(@NonNull MainActivity mainActivity) {
+    public PostOrderDialog(@NonNull MainActivity mainActivity) {
         this.mainActivity = mainActivity;
         initUI();
     }
 
-    public static PostOrderDialog getInstance(MainActivity mainActivity){
-        if (instance == null)
-            instance = new PostOrderDialog(mainActivity);
-        return instance;
-    }
+//    public static PostOrderDialog getInstance(MainActivity mainActivity){
+//        if (instance == null)
+//            instance = new PostOrderDialog(mainActivity);
+//        return instance;
+//    }
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.postorderdialog_layout, null);
         txtCode = (EditText) view.findViewById(R.id.txt_confirmcode);
@@ -150,7 +150,7 @@ public class PostOrderDialog {
         txtWaiter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WaiterChooseDialog.getInstance(mainActivity).showDialog();
+                new WaiterChooseDialog(mainActivity, PostOrderDialog.this).showDialog();
             }
         });
         dlg.setCancelable(false);
@@ -178,12 +178,14 @@ public class PostOrderDialog {
                 CommonTool.popupWarnDialog(mainActivity, R.drawable.error, "WRONG", msg.obj.toString());
                 break;
             case MESSAGEWHAT_MAKEORDERSUCCESS:
+                this.dismiss();
                 mainActivity.onFinishMakeOrder("SUCCESS", "Finish make order! Order Sequence : " + msg.obj);
                 break;
 //            case MESSAGEWHAT_ASKTOADDDISHINORDER:
 //                addDishToOrderWithAsk(Integer.parseInt(msg.obj.toString()));
 //                break;
             case MESSAGEWHAT_ADDDISHSUCCESS:
+                dismiss();
                 mainActivity.onFinishMakeOrder("SUCCESS", "Add dish successfully");
                 break;
         }
@@ -411,13 +413,13 @@ public class PostOrderDialog {
     /**
      * 客户现场发现, 在下单后, 没有把已选择的菜单清空, 怀疑跟点菜点不中的bug一样, 是由于MainActivity对象更改导致的;
      * 在判断MainActivity实例不一致后, 要重新build一个PostOrderDialog实例.
-     * @param mainActivity
+     * @param
      * @return
      */
-    public static PostOrderDialog rebuildInstance(MainActivity mainActivity){
-        instance = new PostOrderDialog(mainActivity);
-        return instance;
-    }
+//    public static PostOrderDialog rebuildInstance(MainActivity mainActivity){
+//        instance = new PostOrderDialog(mainActivity);
+//        return instance;
+//    }
 
     class ButtonListener implements View.OnClickListener{
 
