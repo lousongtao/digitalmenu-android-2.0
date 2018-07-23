@@ -15,8 +15,8 @@ android {
         applicationId "com.shuishou.digitalmenu"
         minSdkVersion 19
         targetSdkVersion 25
-        versionCode 20180625
-        versionName "20180625"
+        versionCode 20180720
+        versionName "20180720"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
