@@ -1,6 +1,5 @@
 package com.shuishou.digitalmenu.http;
 
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -41,10 +40,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Administrator on 2017/6/9.
@@ -443,10 +438,10 @@ public class HttpOperator {
     }
     /**
      * check the menu version difference between client and server
-     * 目前的同步数据包括, dish的基本属性修改, 含soldout/promotion; dish的增加; dish的删除; DishConfig的soldout
+     * 目前的同步数据包括, Category1, Category2, dish的增删改, 含soldout/promotion; DishConfig的增删改(含soldout), DishConfigGroup的增删改及其从dish移入移出.
+     *
      * 实现逻辑:
-     * dish 不可以分组处理, 因为操作员的处理方式各种各样, 有可能先增加后修改, 也可能先修改后删除, 分组后同一dish在不同组中处理先后不一样
-     * 就会导致空指针异常等不可预知错误.
+     * dish 不可以分组处理, 因为操作员的处理方式各种各样, 有可能先增加后修改, 也可能先修改后删除, 分组后同一dish在不同组中处理先后不一样, 就会导致空指针异常等不可预知错误.
      * 所以dish的变化要根据MenuVersion的循序逐个处理.
      * 为了按循序处理MenuVersion, 本方法内, 把DishConfig也按循序处理.
      *

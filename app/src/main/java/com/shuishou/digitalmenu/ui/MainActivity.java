@@ -210,6 +210,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buildMenu();
 
         loadLogoFile();
+
+        refreshMenuTimer = new RefreshMenuTimer(this);
     }
 
     //每次启动APP, 先检查是否有本地logo图片, 如果没有, 需要通过Refresh Data操作来同步logo
