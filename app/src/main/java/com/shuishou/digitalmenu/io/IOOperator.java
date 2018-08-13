@@ -61,8 +61,7 @@ public class IOOperator {
         BufferedReader in = null;
         try {
             in = new BufferedReader(new FileReader(file));
-            String line = in.readLine();
-            return line;
+            return in.readLine();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -92,8 +91,7 @@ public class IOOperator {
             }
             byte[] data = outputStream.toByteArray();
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            BitmapDrawable d = new BitmapDrawable(res, bitmap);
-            return d;
+            return new BitmapDrawable(res, bitmap);
         } catch (IOException e) {
             Log.e("DishTabBuilder", "Failed to load dish image");
             e.printStackTrace();

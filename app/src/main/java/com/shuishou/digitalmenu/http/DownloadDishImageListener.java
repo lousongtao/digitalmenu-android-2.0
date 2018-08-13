@@ -2,7 +2,6 @@ package com.shuishou.digitalmenu.http;
 
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.shuishou.digitalmenu.R;
@@ -28,10 +27,6 @@ public class DownloadDishImageListener implements DownloadListener {
     private SparseArray<String> filelist = new SparseArray<>();
     private int totalFileAmount ;
 
-    //to avoid generate too many objects, define some string as global variables
-    private String strLoading = "Loading ";
-    private String strSlash =  " / ";
-    private String strPic =  " dish pictures";
     public DownloadDishImageListener(MainActivity mainActivity){
         this.mainActivity = mainActivity;
         this.handler = mainActivity.getProgressDlgHandler();
@@ -70,6 +65,9 @@ public class DownloadDishImageListener implements DownloadListener {
         getThreadSafeArray().remove(what);
         int left = getThreadSafeArray().size();
         //change progress dialog text
+        String strPic = " dish pictures";
+        String strSlash = " / ";
+        String strLoading = "Loading ";
         handler.sendMessage(CommonTool.buildMessage(MainActivity.PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS,
                 strLoading + (totalFileAmount - left) + strSlash + totalFileAmount + strPic));
         //while all download finish, start to build menu

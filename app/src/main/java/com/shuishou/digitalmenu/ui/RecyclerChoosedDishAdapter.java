@@ -63,13 +63,11 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(resourceId, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        final int pos = position;
         ChoosedDish cd = choosedFoods.get(position);
         holder.tvAmount.setText(cd.getAmount()+InstantValue.NULLSTRING);
 
@@ -83,9 +81,9 @@ public class RecyclerChoosedDishAdapter extends RecyclerView.Adapter<RecyclerCho
         holder.tvFoodName.show(mainActivity.getLanguage());
         holder.tvFoodPrice.setText(InstantValue.DOLLAR + String.format(InstantValue.FORMAT_DOUBLE_2DECIMAL, cd.getPrice()));
 
-        holder.plusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
-        holder.minusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
-        holder.flavorImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, pos);
+        holder.plusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, position);
+        holder.minusImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, position);
+        holder.flavorImage.setTag(R.id.CHOOSEDDISHIMAGEBUTTON_TAG_KEY_POSITION, position);
         ChoosedFoodClickListener listener = new ChoosedFoodClickListener(mainActivity);
         holder.plusImage.setOnClickListener(listener);
         holder.minusImage.setOnClickListener(listener);

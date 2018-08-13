@@ -59,13 +59,11 @@ public class DBOperator {
         liteOrm.delete(o);
     }
     public ArrayList<Category1> queryAllMenu(){
-        ArrayList<Category1> c1s = liteOrm.cascade().query(Category1.class);
-        return c1s;
+        return liteOrm.cascade().query(Category1.class);
     }
 
     public Dish queryDishById(int dishId){
-        Dish dish = liteOrm.queryById(dishId, Dish.class);
-        return dish;
+        return liteOrm.queryById(dishId, Dish.class);
     }
 
     public ArrayList<Dish> queryDishByParentId(int category2Id){

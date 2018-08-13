@@ -91,6 +91,13 @@ public class Category1 implements Serializable{
         category2s.add(c2);
     }
 
+    public void copyFrom(Category1 c1){
+        setId(c1.getId());
+        setFirstLanguageName(c1.getFirstLanguageName());
+        setSecondLanguageName(c1.getSecondLanguageName());
+        setSequence(c1.getSequence());
+    }
+
     @Override
     public String toString() {
         return "Category1{" +
@@ -115,8 +122,6 @@ public class Category1 implements Serializable{
         if (getClass() != obj.getClass())
             return false;
         Category1 other = (Category1) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 }

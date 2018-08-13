@@ -1,9 +1,7 @@
 package com.shuishou.digitalmenu.bean;
 
 import java.io.Serializable;
-import java.sql.Blob;
 import java.util.ArrayList;
-import java.util.List;
 
 
 import com.google.gson.annotations.SerializedName;
@@ -116,6 +114,15 @@ public class DishConfigGroup implements Serializable{
 		this.secondLanguageName = secondLanguageName;
 	}
 
+	public void copyFrom(DishConfigGroup group){
+		setId(group.getId());
+		setFirstLanguageName(group.getFirstLanguageName());
+		setSecondLanguageName(group.getSecondLanguageName());
+		setAllowDuplicate(group.isAllowDuplicate());
+		setRequiredQuantity(group.getRequiredQuantity());
+		setSequence(group.getSequence());
+		setUniqueName(group.getUniqueName());
+	}
 	@Override
 	public String toString() {
 		return "DishConfigGroup [firstLanguageName=" + firstLanguageName + ", secondLanguageName=" + secondLanguageName + "]";
@@ -138,9 +145,7 @@ public class DishConfigGroup implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		DishConfigGroup other = (DishConfigGroup) obj;
-		if (id != other.id)
-			return false;
-		return true;
+		return id == other.id;
 	}
 	
 	

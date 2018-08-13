@@ -2,9 +2,7 @@ package com.shuishou.digitalmenu.uibean;
 
 import android.graphics.drawable.Drawable;
 
-import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.bean.Dish;
-import com.shuishou.digitalmenu.bean.DishChooseSubitem;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 

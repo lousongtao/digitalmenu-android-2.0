@@ -103,6 +103,12 @@ public class Category2 implements Serializable{
         dishes.add(dish);
     }
 
+    public void copyFrom(Category2 c2){
+        setId(c2.getId());
+        setFirstLanguageName(c2.getFirstLanguageName());
+        setSecondLanguageName(c2.getSecondLanguageName());
+        setSequence(c2.getSequence());
+    }
     @Override
     public String toString() {
         return "Category2{" +
@@ -127,8 +133,6 @@ public class Category2 implements Serializable{
         if (getClass() != obj.getClass())
             return false;
         Category2 other = (Category2) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 }

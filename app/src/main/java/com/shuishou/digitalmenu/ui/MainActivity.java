@@ -1,5 +1,6 @@
 package com.shuishou.digitalmenu.ui;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -52,7 +53,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String TAG_BTNORDER = "btnorder";
     private String TAG_UPGRADEAPP = "upgradeapp";
     private CategoryTabListView listViewCategorys;
+    private CategoryTabAdapter categoryTabAdapter;
     private RadioButton rbFirstLanguage;
     private RadioButton rbSecondLanguage;
     private TextView tvChoosedItems;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final int PROGRESSDLGHANDLER_MSGWHAT_SHOWPROGRESS = 1;
     public static final int PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG = 0;
     private ProgressDialog progressDlg;
+    @SuppressLint("HandlerLeak")
     private Handler progressDlgHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -125,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
     public static final int TOASTHANDLERWHAT_ERRORMESSAGE = 0;
+    @SuppressLint("HandlerLeak")
     private Handler toastHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -299,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void buildMenu(){
         category1s = dbOperator.queryAllMenu();
+        //do sort firstly
         if (category1s != null){
             Collections.sort(category1s, new Comparator<Category1>() {
                 @Override
@@ -329,10 +333,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-
         initialDishDisplayFragment();
 
-        CategoryTabAdapter categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
+        categoryTabAdapter = new CategoryTabAdapter(MainActivity.this, R.layout.categorytab_listitem_layout, category1s);
         listViewCategorys.setAdapter(categoryTabAdapter);
         listViewCategorys.post(new Runnable() {
             @Override
@@ -511,6 +514,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fc.changeAmount(amount);
     }
 
+    @SuppressLint({"SetTextI18n", "DefaultLocale"})
     private void calculateDishPrice(){
         double totalPrice = 0.0;
         for(ChoosedDish cf : choosedDishList){
@@ -680,6 +684,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             UpgradeAppDialog dlg = new UpgradeAppDialog(this);
             dlg.showDialog();
         }
+    }
+
+    public CategoryTabAdapter getCategoryTabAdapter(){
+        return categoryTabAdapter;
     }
 
     public RecyclerView getListViewChoosedDish(){

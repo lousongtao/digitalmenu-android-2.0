@@ -1,6 +1,5 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +19,7 @@ public class WaiterChooseDialog {
     private MainActivity mainActivity;
     private PostOrderDialog postOrderDialog;
 
-    private ListView lvWaiter;
-//    private static WaiterChooseDialog instance;
+    //    private static WaiterChooseDialog instance;
 
     public WaiterChooseDialog(MainActivity mainActivity, PostOrderDialog postOrderDialog){
         this.mainActivity = mainActivity;
@@ -37,7 +35,7 @@ public class WaiterChooseDialog {
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.waiterlist_layout, null);
-        lvWaiter = (ListView) view.findViewById(R.id.lvWaiter);
+        ListView lvWaiter = (ListView) view.findViewById(R.id.lvWaiter);
         String[] names = new String[mainActivity.getWaiters().size()];
         for (int i = 0; i < mainActivity.getWaiters().size(); i++) {
             names[i] = mainActivity.getWaiters().get(i).getUserName();

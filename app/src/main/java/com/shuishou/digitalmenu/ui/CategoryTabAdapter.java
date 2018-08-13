@@ -1,7 +1,6 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;

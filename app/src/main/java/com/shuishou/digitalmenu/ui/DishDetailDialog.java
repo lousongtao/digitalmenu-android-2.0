@@ -6,25 +6,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Dish;
-import com.shuishou.digitalmenu.bean.DishChooseSubitem;
-import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.io.IOOperator;
 import com.shuishou.digitalmenu.ui.components.DishDetailNameTextView;
-import com.shuishou.digitalmenu.ui.components.DishNameTextView;
-import com.shuishou.digitalmenu.uibean.ChoosedDish;
-
-import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2017/11/4.

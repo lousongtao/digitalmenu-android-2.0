@@ -73,4 +73,20 @@ public final class InstantValue {
     public static final byte MENUCHANGE_TYPE_DISHUPDATE = 4;//修改菜品属性
     public static final byte MENUCHANGE_TYPE_DISHPICTURE = 5;//修改菜品图片
     public static final byte MENUCHANGE_TYPE_DISHDELETE = 6;//delete菜品
+    public static final byte MENUCHANGE_TYPE_CATEGORY1ADD = 7;
+    public static final byte MENUCHANGE_TYPE_CATEGORY1UPDATE = 8;
+    public static final byte MENUCHANGE_TYPE_CATEGORY1DELETE = 9;
+    public static final byte MENUCHANGE_TYPE_CATEGORY2ADD = 10;
+    public static final byte MENUCHANGE_TYPE_CATEGORY2UPDATE = 11;
+    public static final byte MENUCHANGE_TYPE_CATEGORY2DELETE = 12;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGGROUPADD = 13;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGGROUPUPDATE = 14;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGGROUPDELETE = 15;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGADD = 16;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGUPDATE = 17;
+    public static final byte MENUCHANGE_TYPE_DISHCONFIGDELETE = 18;
+    public static final byte MENUCHANGE_TYPE_DISHMOVEINCONFIGGROUP = 19;
+    public static final byte MENUCHANGE_TYPE_DISHMOVEOUTCONFIGGROUP = 20;
+
+    public static final int REFRESHMENUINTERVAL= 60; //the interval for refresh the menu data
 }

@@ -13,7 +13,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 
 import com.shuishou.digitalmenu.InstantValue;
-import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Dish;
 import com.shuishou.digitalmenu.io.IOOperator;
@@ -53,6 +52,7 @@ public class DishDisplayFragment extends Fragment {
         trlp.leftMargin = leftMargin;
         ArrayList<Dish> dishes = category2.getDishes();
         contentLayout = new TableLayout(mainActivity);
+        sv.addView(contentLayout);
         if (dishes != null) {
             TableRow tr = null;
             for (int i = 0; i < dishes.size(); i++) {
@@ -70,7 +70,7 @@ public class DishDisplayFragment extends Fragment {
                 }
                 mainActivity.getMapDishCellComponents().put(dish.getId(), fc);
             }
-            sv.addView(contentLayout);
+            
 
         }
         view = sv;

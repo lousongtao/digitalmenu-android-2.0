@@ -1,31 +1,23 @@
 package com.shuishou.digitalmenu.ui;
 
-import android.content.DialogInterface;
-import android.content.IntentFilter;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
-import com.shuishou.digitalmenu.bean.DishChooseSubitem;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.Flavor;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -40,7 +32,6 @@ public class ChooseFlavorDialog {
     private MainActivity mainActivity;
     private ChoosedDish choosedDish;
     private LinearLayout frameChoosedFlavor;
-    private TableLayout frameAllFlavor;
     private EditText txtOtherFlavor;
     private TextView txtDishSubitem;
     private Button btnConfirmFlavor;
@@ -60,7 +51,7 @@ public class ChooseFlavorDialog {
 
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.chooseflavor_layout, null);
-        frameAllFlavor = (TableLayout)view.findViewById(R.id.frame_flavors);
+        TableLayout frameAllFlavor = (TableLayout) view.findViewById(R.id.frame_flavors);
         frameChoosedFlavor = (LinearLayout)view.findViewById(R.id.frame_choosedflavor);
         txtDishSubitem = (TextView) view.findViewById(R.id.txtDishSubitem);
         txtOtherFlavor = (EditText)view.findViewById(R.id.txtOtherFlavor);

@@ -310,8 +310,6 @@ public class Dish implements Serializable{
         if (getClass() != obj.getClass())
             return false;
         Dish other = (Dish) obj;
-        if (id != other.id)
-            return false;
-        return true;
+        return id == other.id;
     }
 }

@@ -14,13 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.shuishou.digitalmenu.BuildConfig;
-import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.Category1;
 import com.shuishou.digitalmenu.bean.Category2;
 import com.shuishou.digitalmenu.bean.Dish;
-import com.shuishou.digitalmenu.http.HttpOperator;
 import com.shuishou.digitalmenu.uibean.ChoosedDish;
 
 import java.io.File;

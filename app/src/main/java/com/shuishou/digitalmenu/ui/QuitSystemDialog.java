@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
-import com.shuishou.digitalmenu.utils.CommonTool;
 
 /**
  * Created by Administrator on 2017/7/21.
@@ -29,7 +28,6 @@ class QuitSystemDialog {
     private AlertDialog dlg;
 
     private final static int MESSAGEWHAT_HTTPERROR = 0;
-    private Handler msgHandler = null;
 
     public QuitSystemDialog(@NonNull MainActivity mainActivity) {
         this.mainActivity = mainActivity;
@@ -70,10 +68,10 @@ class QuitSystemDialog {
     }
 
     private void initHandler() {
-        msgHandler = new Handler(){
+        Handler msgHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
-                switch (msg.what){
+                switch (msg.what) {
                     case MESSAGEWHAT_HTTPERROR:
                         Toast.makeText(mainActivity, msg.obj.toString(), Toast.LENGTH_LONG).show();
                         break;

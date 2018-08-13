@@ -3,13 +3,10 @@ package com.shuishou.digitalmenu.ui.dishconfig;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
-import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.bean.DishConfig;
 import com.shuishou.digitalmenu.bean.DishConfigGroup;
 import com.shuishou.digitalmenu.ui.MainActivity;

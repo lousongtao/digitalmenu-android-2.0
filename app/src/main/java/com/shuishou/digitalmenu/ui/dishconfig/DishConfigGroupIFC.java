@@ -15,14 +15,14 @@ public interface DishConfigGroupIFC {
      * 检查数据完整性, 如果不完整, 需要在该方法内弹出错误对话框, 只向外界返回true/false, 外界不再显示错误信息
      * @return
      */
-    public boolean checkData();
-    public ArrayList<DishConfig> getChoosedData();
-    public DishConfigGroup getDishConfigGroup();
+    boolean checkData();
+    ArrayList<DishConfig> getChoosedData();
+    DishConfigGroup getDishConfigGroup();
 
     /**
      * do extra operation while click the config item
      */
-    public void onConfigComponentClick(DishConfig config);
+    void onConfigComponentClick(DishConfig config);
 
-    public void refreshColor();
+    void refreshColor();
 }

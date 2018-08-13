@@ -1,6 +1,5 @@
 package com.shuishou.digitalmenu.ui.components;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;

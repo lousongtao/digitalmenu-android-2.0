@@ -31,7 +31,6 @@ import java.util.ArrayList;
 
 public class QuickSearchDialog {
     private EditText txtSearchCode;
-    private TableLayout resultLayout;
     private ArrayList<View> resultCellList = new ArrayList<>(8);
     private AlertDialog dlg;
 
@@ -48,7 +47,7 @@ public class QuickSearchDialog {
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.quicksearchdialog_layout, null);
         txtSearchCode = (EditText) view.findViewById(R.id.txtSearchCode);
-        resultLayout = (TableLayout)view.findViewById(R.id.resultLayout);
+        TableLayout resultLayout = (TableLayout) view.findViewById(R.id.resultLayout);
 
         //预设8个查询结果, 避免创建太多对象
         resultCellList.add(view.findViewById(R.id.quicksearchresultcell1));

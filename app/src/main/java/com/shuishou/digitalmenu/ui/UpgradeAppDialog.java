@@ -1,20 +1,15 @@
 package com.shuishou.digitalmenu.ui;
 
 import android.app.AlertDialog;
-import android.app.DownloadManager;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.v4.content.FileProvider;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -32,10 +27,6 @@ import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.ui.MainActivity;
 import com.shuishou.digitalmenu.utils.CommonTool;
-import com.yanzhenjie.nohttp.NoHttp;
-import com.yanzhenjie.nohttp.RequestMethod;
-import com.yanzhenjie.nohttp.download.DownloadQueue;
-import com.yanzhenjie.nohttp.download.DownloadRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -165,6 +156,10 @@ public class UpgradeAppDialog{
     private void doUpgrade(){
         if (txtConfirmCode.getText() == null || txtConfirmCode.getText().length() == 0) {
             Toast.makeText(mainActivity, "Please input the Confirmation Code to post this order!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (mainActivity.getConfigsMap() == null){
+            Toast.makeText(mainActivity, "The Confirmation Code is null now!", Toast.LENGTH_SHORT).show();
             return;
         }
         if (!mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE).equals(txtConfirmCode.getText().toString())){

@@ -9,9 +9,6 @@ import android.util.AttributeSet;
  */
 
 public class DishDetailNameTextView extends ChangeLanguageTextView {
-    private int bigfont = 32;
-    private int middlefont = 20;
-    private int smallfont = 15;
     public DishDetailNameTextView(Context context){
         super(context);
     }
@@ -23,12 +20,15 @@ public class DishDetailNameTextView extends ChangeLanguageTextView {
     public void show(byte language){
         super.show(language);
         if (getText().length() < 20) {
+            int bigfont = 32;
             setTextSize(bigfont);
             setMaxLines(1);
         }else if (getText().length() < 80) {
+            int middlefont = 20;
             setTextSize(middlefont);
             setMaxLines(2);
         }else {
+            int smallfont = 15;
             setTextSize(smallfont);
             setMaxLines(2);
         }

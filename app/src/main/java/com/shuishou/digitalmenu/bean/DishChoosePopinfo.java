@@ -81,10 +81,8 @@ public class DishChoosePopinfo implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		DishChoosePopinfo other = (DishChoosePopinfo) obj;
-		if (id != other.id)
-			return false;
-		return true;
-	}
+        return id == other.id;
+    }
 	
 	
 }

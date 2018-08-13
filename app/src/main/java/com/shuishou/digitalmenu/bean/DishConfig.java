@@ -105,6 +105,15 @@ public class DishConfig implements Serializable{
 		this.secondLanguageName = secondLanguageName;
 	}
 
+	public void copyFrom(DishConfig dc){
+		setId(dc.getId());
+		setFirstLanguageName(dc.getFirstLanguageName());
+		setSecondLanguageName(dc.getSecondLanguageName());
+		setPictureName(dc.getPictureName());
+		setPrice(dc.getPrice());
+		setSequence(dc.getSequence());
+		setSoldOut(dc.isSoldOut());
+	}
 	@Override
 	public String toString() {
 		return "DishConfig [firstLanguageName=" + firstLanguageName + ", secondLanguageName=" + secondLanguageName + "]";
@@ -127,9 +136,7 @@ public class DishConfig implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		DishConfig other = (DishConfig) obj;
-		if (id != other.id)
-			return false;
-		return true;
+		return id == other.id;
 	}
 	
 	
