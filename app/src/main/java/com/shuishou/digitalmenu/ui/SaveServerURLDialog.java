@@ -8,12 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.shuishou.digitalmenu.InstantValue;
 import com.shuishou.digitalmenu.R;
 import com.shuishou.digitalmenu.io.IOOperator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/7/21.
@@ -24,6 +28,7 @@ class SaveServerURLDialog {
     private EditText txtConfirmCode;
     private EditText txtServerURL;
     private MainActivity mainActivity;
+    private CheckBox cbShowDishPic;
 
     private AlertDialog dlg;
 
@@ -37,8 +42,9 @@ class SaveServerURLDialog {
 
         txtConfirmCode = (EditText) view.findViewById(R.id.txtConfirmCode);
         txtServerURL = (EditText) view.findViewById(R.id.txtServerURL);
-
+        cbShowDishPic = (CheckBox) view.findViewById(R.id.cbShowDishPic);
         loadServerURL();
+        loadConfigInfo();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
         builder.setTitle("Configure Server URL")
@@ -74,6 +80,15 @@ class SaveServerURLDialog {
             txtServerURL.setText(url);
     }
 
+    private void loadConfigInfo(){
+        Map<String, Object> config = IOOperator.loadConfigInfo(InstantValue.FILE_CONFIGINFO);
+        if (config != null){
+            if(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC) != null){
+                cbShowDishPic.setChecked(Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC).toString()));
+            }
+        }
+    }
+
     private void doSaveURL(){
         final String code = txtConfirmCode.getText().toString();
         if (code == null || code.length() == 0){
@@ -89,6 +104,10 @@ class SaveServerURLDialog {
         if (code.equals("2017")){
             IOOperator.saveServerURL(InstantValue.FILE_SERVERURL, url);
             InstantValue.URL_TOMCAT = url;
+            Map<String, Object> mapConfig = new HashMap<>();
+            mapConfig.put(InstantValue.CONFIGINFO_SHOWDISHPIC, cbShowDishPic.isChecked());
+            IOOperator.saveConfigInfo(InstantValue.FILE_CONFIGINFO, mapConfig);
+            InstantValue.SETTING_SHOWDISHPICTURE = cbShowDishPic.isChecked();
             dlg.dismiss();
             mainActivity.popRestartDialog("Success to configure server URL, Please restart app");
         } else {

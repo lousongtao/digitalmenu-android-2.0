@@ -45,6 +45,9 @@ class DishCellComponent{
         foodcellPriceLayout = (LinearLayout) foodCellView.findViewById(R.id.foodcellprice_layout);
         imgDishPicture = (ImageView)foodCellView.findViewById(R.id.layDishPicture);
         imgDishPicture.setOnClickListener(new ClickDishPictureListener(mainActivity));
+        if (!InstantValue.SETTING_SHOWDISHPICTURE){
+            imgDishPicture.setVisibility(View.GONE);
+        }
         imgAddDish = (ImageView) foodCellView.findViewById(R.id.chooseBtn);
         imgAddDish.setOnClickListener(new ChooseDishListener(mainActivity));
         imgHotLevel = (ImageView) foodCellView.findViewById(R.id.imgHotLevel);

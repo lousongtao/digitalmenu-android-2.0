@@ -26,8 +26,10 @@ public final class InstantValue {
     public static final byte DISH_STATUS_SOLDOUT = 1; //缺货
     public static final byte DISH_STATUS_ONSALE = 2;//促销
 
-    public static final int DISPLAY_DISH_WIDTH = 250;
-    public static final int DISPLAY_DISH_HEIGHT = 300;
+    public static final int DISPLAY_DISH_WIDTH = 250; //dish控件的宽度
+    public static final int DISPLAY_DISH_HEIGHT = 300; //dish控件高度, 含图片
+    public static final int DISPLAY_LEFTCATEGORY_WIDTH = 180; //左侧目录控件宽度
+    public static final int DISPLAY_RIGHTORDER_WIDTH = 260;//右侧的选单控件宽度
 
     public static final int DESKWIDTH_IN_POSTORDERDIALOG = 110;
     public static final int DESKHEIGHT_IN_POSTORDERDIALOG = 110;
@@ -43,6 +45,8 @@ public final class InstantValue {
     public static final String FORMAT_DOUBLE_2DECIMAL = "%.2f";
 
     public static String URL_TOMCAT = null;
+    public static boolean SETTING_SHOWDISHPICTURE = true;
+
     public static final String SERVER_CATEGORY_UPGRADEAPK = "upgradeApk";
     public static final String SERVER_CATALOG_DISH_PICTURE_BIG = "dishimage_big";
     public static final String SERVER_CATALOG_DISH_PICTURE_SMALL = "dishimage_small";
@@ -54,9 +58,12 @@ public final class InstantValue {
 
     public static final String LOCAL_CATEGORY_UPGRADEAPK = "/data/user/0/com.shuishou.digitalmenu/files/";
     public static final String FILE_SERVERURL = "/data/data/com.shuishou.digitalmenu/serverconfig";
+    public static final String FILE_CONFIGINFO = "/data/data/com.shuishou.digitalmenu/configinfo";
     public static final String ERRORLOGPATH = "/data/data/com.shuishou.digitalmenu/errorlog/";
     public static final String ERRORLOGFILENAME = "digitalmenu_log";
     public static final String LOGO_PATH = "/data/data/com.shuishou.digitalmenu/logo_path/";
+
+    public static final String CONFIGINFO_SHOWDISHPIC = "SHOWDISHPIC";
 
     public static final String CONFIGS_CONFIRMCODE = "CONFIRMCODE";
     public static final String CONFIGS_OPENCASHDRAWERCODE = "OPENCASHDRAWERCODE";

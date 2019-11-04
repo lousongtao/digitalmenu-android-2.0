@@ -54,11 +54,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     public static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MainActivity.class.getSimpleName());
     public final static byte LANGUAGE_FIRSTLANGUAGE = 1;
     public final static byte LANGUAGE_SECONDLANGUAGE = 2;
+
     private String TAG_UPLOADERRORLOG = "uploaderrorlog";
     private String TAG_EXITSYSTEM = "exitsystem";
     private String TAG_LOOKFOR = "lookfor";
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String TAG_RBSECONDLANGUAGE = "rbSecondLanguage";
     private String TAG_BTNORDER = "btnorder";
     private String TAG_UPGRADEAPP = "upgradeapp";
+
     private CategoryTabListView listViewCategorys;
     private CategoryTabAdapter categoryTabAdapter;
     private RadioButton rbFirstLanguage;
@@ -198,6 +201,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Logger.setTag("digitalmenu:nohttp");
 
         InstantValue.URL_TOMCAT = IOOperator.loadServerURL(InstantValue.FILE_SERVERURL);
+        loadConfigInfo();
+
         httpOperator = new HttpOperator(this);
         dbOperator = new DBOperator(this);
 
@@ -215,6 +220,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadLogoFile();
 
         refreshMenuTimer = new RefreshMenuTimer(this);
+    }
+
+    private void loadConfigInfo(){
+        Map<String, Object> config = IOOperator.loadConfigInfo(InstantValue.FILE_CONFIGINFO);
+        if (config != null){
+            if(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC) != null){
+                InstantValue.SETTING_SHOWDISHPICTURE = Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC).toString());
+            }
+        }
     }
 
     //每次启动APP, 先检查是否有本地logo图片, 如果没有, 需要通过Refresh Data操作来同步logo
@@ -243,10 +257,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int screenWidth = (int) (displayMetrics.widthPixels / displayMetrics.density);
-        int leftMargin = (screenWidth - 180 -260 - 3 * InstantValue.DISPLAY_DISH_WIDTH) / 4;
+        //屏幕宽度减去左右两侧固定控件的宽度, 除以间隙数目, 得到应该保留的间隙宽度
+        int leftMargin = (screenWidth - InstantValue.DISPLAY_LEFTCATEGORY_WIDTH
+                - InstantValue.DISPLAY_RIGHTORDER_WIDTH - 3 * InstantValue.DISPLAY_DISH_WIDTH)
+                / (DISPLAY_DISH_COLUMN_NUMBER + 1);
         if (leftMargin < 0){
             DISPLAY_DISH_COLUMN_NUMBER = 2; //for small screen, show 2 columns
-        }
+            //recalculate the margin
+            leftMargin = (screenWidth - InstantValue.DISPLAY_LEFTCATEGORY_WIDTH
+                    - InstantValue.DISPLAY_RIGHTORDER_WIDTH - 3 * InstantValue.DISPLAY_DISH_WIDTH)
+                    / (DISPLAY_DISH_COLUMN_NUMBER + 1);
+            if (leftMargin < 0) {
+                DISPLAY_DISH_COLUMN_NUMBER = 1;
+            }
+            }
         if (leftMargin < 7)
             leftMargin = 7;
         if (category1s != null){

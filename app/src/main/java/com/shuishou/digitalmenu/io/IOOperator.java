@@ -30,6 +30,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -54,6 +57,29 @@ public class IOOperator {
             }catch (IOException e) {}
         }
     }
+
+    public static void saveConfigInfo(String fileName, Map<String, Object> mapConfig){
+        FileWriter writer = null;
+        String s = "";
+        Iterator<String> keys = mapConfig.keySet().iterator();
+        while(keys.hasNext()){
+            String key = keys.next();
+            s += key + "=" + mapConfig.get(key)+"\n";
+        }
+        try {
+            writer = new FileWriter(fileName);
+            writer.write(s);
+            writer.close();
+        } catch (IOException e) {
+            Log.e("IOException", "error to save ServerURL +\n"+e.getStackTrace());
+        } finally {
+            try {
+                if (writer != null)
+                    writer.close();
+            }catch (IOException e) {}
+        }
+    }
+
     public static String loadServerURL(String fileName){
         File file = new File(fileName);
         if (!file.exists())
@@ -66,6 +92,33 @@ public class IOOperator {
             e.printStackTrace();
         } catch (IOException e) {
             Log.e("IOException", "error to load ServerURL +\n"+e.getStackTrace());
+        } finally {
+            try {
+                if (in != null)
+                    in.close();
+            }catch (IOException e) {}
+        }
+        return null;
+    }
+
+    public static Map<String, Object> loadConfigInfo(String fileName){
+        File file = new File(fileName);
+        if (!file.exists())
+            return null;
+        BufferedReader in = null;
+        Map<String, Object> config = new HashMap<>();
+        try {
+            in = new BufferedReader(new FileReader(file));
+            String line;
+            while((line = in.readLine()) != null){
+                String[] kv = line.split("=");
+                config.put(kv[0], kv[1]);
+            }
+            return config;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.e("IOException", "error to load config info +\n"+e.getStackTrace());
         } finally {
             try {
                 if (in != null)
