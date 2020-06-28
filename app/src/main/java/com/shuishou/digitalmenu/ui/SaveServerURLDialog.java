@@ -29,6 +29,7 @@ class SaveServerURLDialog {
     private EditText txtServerURL;
     private MainActivity mainActivity;
     private CheckBox cbShowDishPic;
+    private CheckBox cbNeedPwdPostOrder;
 
     private AlertDialog dlg;
 
@@ -43,6 +44,7 @@ class SaveServerURLDialog {
         txtConfirmCode = (EditText) view.findViewById(R.id.txtConfirmCode);
         txtServerURL = (EditText) view.findViewById(R.id.txtServerURL);
         cbShowDishPic = (CheckBox) view.findViewById(R.id.cbShowDishPic);
+        cbNeedPwdPostOrder = (CheckBox) view.findViewById(R.id.cbNeedPwdPostOrder);
         loadServerURL();
         loadConfigInfo();
 
@@ -86,6 +88,9 @@ class SaveServerURLDialog {
             if(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC) != null){
                 cbShowDishPic.setChecked(Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC).toString()));
             }
+            if (config.get(InstantValue.CONFIGINFO_NEEDPWDPOSTINGORDER) != null){
+                cbNeedPwdPostOrder.setChecked(Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_NEEDPWDPOSTINGORDER).toString()));
+            }
         }
     }
 
@@ -106,8 +111,10 @@ class SaveServerURLDialog {
             InstantValue.URL_TOMCAT = url;
             Map<String, Object> mapConfig = new HashMap<>();
             mapConfig.put(InstantValue.CONFIGINFO_SHOWDISHPIC, cbShowDishPic.isChecked());
+            mapConfig.put(InstantValue.CONFIGINFO_NEEDPWDPOSTINGORDER, cbNeedPwdPostOrder.isChecked());
             IOOperator.saveConfigInfo(InstantValue.FILE_CONFIGINFO, mapConfig);
             InstantValue.SETTING_SHOWDISHPICTURE = cbShowDishPic.isChecked();
+            InstantValue.SETTING_NEEDPWDPOSTINGORDER = cbNeedPwdPostOrder.isChecked();
             dlg.dismiss();
             mainActivity.popRestartDialog("Success to configure server URL, Please restart app");
         } else {

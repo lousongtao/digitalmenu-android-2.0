@@ -389,8 +389,9 @@ public class HttpOperator {
         return gson.fromJson(response.get().toString(), new TypeToken<HttpResult<Integer>>(){}.getType());
     }
 
-    public HttpResult<Integer> addDishToOrder(int deskid, String orders){
+    public HttpResult<Integer> addDishToOrder(String code, int deskid, String orders){
         Request<JSONObject> request = NoHttp.createJsonObjectRequest(InstantValue.URL_TOMCAT + "/indent/adddishtoindent", RequestMethod.POST);
+        request.add("confirmCode", code);
         request.add("indents", orders);
         request.add("deskid", deskid);
 

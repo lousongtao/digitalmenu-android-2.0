@@ -14,9 +14,9 @@ android {
     defaultConfig {
         applicationId "com.shuishou.digitalmenu"
         minSdkVersion 19
-        targetSdkVersion 25
-        versionCode 20180720
-        versionName "20180720"
+        targetSdkVersion 26
+        versionCode 20190720
+        versionName "20190720"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -28,6 +28,13 @@ android {
     }
     productFlavors {
     }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+        ignoreWarnings true //false
+    }
+
 }
 
 dependencies {

@@ -46,6 +46,7 @@ public final class InstantValue {
 
     public static String URL_TOMCAT = null;
     public static boolean SETTING_SHOWDISHPICTURE = true;
+    public static boolean SETTING_NEEDPWDPOSTINGORDER = true;
 
     public static final String SERVER_CATEGORY_UPGRADEAPK = "upgradeApk";
     public static final String SERVER_CATALOG_DISH_PICTURE_BIG = "dishimage_big";
@@ -64,6 +65,7 @@ public final class InstantValue {
     public static final String LOGO_PATH = "/data/data/com.shuishou.digitalmenu/logo_path/";
 
     public static final String CONFIGINFO_SHOWDISHPIC = "SHOWDISHPIC";
+    public static final String CONFIGINFO_NEEDPWDPOSTINGORDER = "NEEDPWDPOSTINGORDER";
 
     public static final String CONFIGS_CONFIRMCODE = "CONFIRMCODE";
     public static final String CONFIGS_OPENCASHDRAWERCODE = "OPENCASHDRAWERCODE";

@@ -103,11 +103,6 @@ public class PostOrderDialog {
         initUI();
     }
 
-//    public static PostOrderDialog getInstance(MainActivity mainActivity){
-//        if (instance == null)
-//            instance = new PostOrderDialog(mainActivity);
-//        return instance;
-//    }
     private void initUI(){
         View view = LayoutInflater.from(mainActivity).inflate(R.layout.postorderdialog_layout, null);
         txtCode = (EditText) view.findViewById(R.id.txt_confirmcode);
@@ -122,11 +117,12 @@ public class PostOrderDialog {
             else
                 txtWaiter.setText("Waiter");
         }
+        if (!InstantValue.SETTING_NEEDPWDPOSTINGORDER){
+            txtCode.setText(mainActivity.getConfigsMap().get(InstantValue.CONFIGS_CONFIRMCODE));
+            txtCode.setEnabled(false);
+        }
         initDeskData(mainActivity.getDesks());
         AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity, AlertDialog.THEME_HOLO_LIGHT);
-//        builder.setTitle("Confirm");
-//        builder.setMessage("Please input the CONFIRMATION CODE before post this order!");
-//        builder.setIcon(R.drawable.info);
         //here cannot use listener on the positive button because the dialog will dismiss no matter
         //the input value is valiable or not. I wish the dialog keep while input info is wrong.
         builder.setPositiveButton("Open Table", null);
@@ -277,7 +273,7 @@ public class PostOrderDialog {
         new Thread() {
             @Override
             public void run() {
-                HttpResult<Integer> result = httpOperator.addDishToOrder(choosedDesk.getId(), jsons);
+                HttpResult<Integer> result = httpOperator.addDishToOrder(txtCode.getText().toString(), choosedDesk.getId(), jsons);
                 progressDlgHandler.sendMessage(CommonTool.buildMessage(PROGRESSDLGHANDLER_MSGWHAT_DISMISSDIALOG, null));
                 if (result.success) {
                     handler.sendMessage(CommonTool.buildMessage(MESSAGEWHAT_ADDDISHSUCCESS));

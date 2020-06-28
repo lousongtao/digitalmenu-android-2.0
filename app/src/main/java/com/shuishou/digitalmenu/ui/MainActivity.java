@@ -228,6 +228,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC) != null){
                 InstantValue.SETTING_SHOWDISHPICTURE = Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_SHOWDISHPIC).toString());
             }
+            if (config.get(InstantValue.CONFIGINFO_NEEDPWDPOSTINGORDER) != null){
+                InstantValue.SETTING_NEEDPWDPOSTINGORDER = Boolean.parseBoolean(config.get(InstantValue.CONFIGINFO_NEEDPWDPOSTINGORDER).toString());
+            }
         }
     }
 
@@ -259,18 +262,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int screenWidth = (int) (displayMetrics.widthPixels / displayMetrics.density);
         //屏幕宽度减去左右两侧固定控件的宽度, 除以间隙数目, 得到应该保留的间隙宽度
         int leftMargin = (screenWidth - InstantValue.DISPLAY_LEFTCATEGORY_WIDTH
-                - InstantValue.DISPLAY_RIGHTORDER_WIDTH - 3 * InstantValue.DISPLAY_DISH_WIDTH)
+                - InstantValue.DISPLAY_RIGHTORDER_WIDTH - DISPLAY_DISH_COLUMN_NUMBER * InstantValue.DISPLAY_DISH_WIDTH)
                 / (DISPLAY_DISH_COLUMN_NUMBER + 1);
         if (leftMargin < 0){
             DISPLAY_DISH_COLUMN_NUMBER = 2; //for small screen, show 2 columns
             //recalculate the margin
             leftMargin = (screenWidth - InstantValue.DISPLAY_LEFTCATEGORY_WIDTH
-                    - InstantValue.DISPLAY_RIGHTORDER_WIDTH - 3 * InstantValue.DISPLAY_DISH_WIDTH)
+                    - InstantValue.DISPLAY_RIGHTORDER_WIDTH - DISPLAY_DISH_COLUMN_NUMBER * InstantValue.DISPLAY_DISH_WIDTH)
                     / (DISPLAY_DISH_COLUMN_NUMBER + 1);
             if (leftMargin < 0) {
                 DISPLAY_DISH_COLUMN_NUMBER = 1;
             }
-            }
+        }
         if (leftMargin < 7)
             leftMargin = 7;
         if (category1s != null){
